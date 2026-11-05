@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Elasticity of demand — diagram builder</title>
+  <style>
+    :root {
+      --ink: #0f2a4a;
+      --muted: #4b5d73;
+      --line: #dfe6f3;
+      --paper: #fff;
+      --bg: #f6f8fb;
+      --formula: #eef6ff;
+      --accent: #183a66;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+    }
+    .book { max-width: 860px; margin: 0 auto; padding: 20px 16px 72px; }
+
+    /* Copy from here when embedding in a word cloud */
+    #ped-builder {
+      background: var(--formula, #eef6ff);
+      border: 1px solid var(--line, #dfe6f3);
+      border-radius: 10px;
+      padding: 12px 14px 16px;
+      margin-top: 12px;
+    }
+    #ped-builder h3 { margin: 0 0 4px; font-size: 1.05rem; color: var(--accent, #183a66); }
+    #ped-builder .ped-lead { margin: 0 0 10px; color: var(--muted, #4b5d73); font-size: 0.92rem; }
+    #ped-builder .ped-steps {
+      display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px;
+    }
+    #ped-builder .ped-step {
+      font-size: 0.78rem; font-weight: 700; padding: 4px 8px; border-radius: 999px;
+      background: #fff; border: 1px solid var(--line, #dfe6f3); color: var(--muted, #4b5d73);
+    }
+    #ped-builder .ped-step.on { background: #183a66; color: #fff; border-color: #183a66; }
+    #ped-builder .ped-step.done { background: #dcfce7; color: #166534; border-color: #86efac; }
+    #ped-builder label {
+      display: block; margin: 10px 0 4px; font-size: 0.88rem; font-weight: 700;
+    }
+    #ped-builder .ped-hint { font-weight: 500; color: var(--muted, #4b5d73); }
+    #ped-builder .btn-group { display: flex; flex-wrap: wrap; gap: 6px; }
+    #ped-builder .btn-group button {
+      font-family: inherit; cursor: pointer; border: 1px solid transparent;
+      border-radius: 8px; padding: 7px 10px; font-size: 0.84rem; font-weight: 700;
+    }
+    #ped-builder .btn-group button.chosen {
+      outline: 2px solid #183a66; outline-offset: 1px;
+    }
+    #ped-builder .price-btn { background: #dbeafe; color: #1e3a8a; }
+    #ped-builder .qty-btn { background: #fef9c3; color: #854d0e; }
+    #ped-builder .inc-btn { background: #bbf7d0; color: #14532d; }
+    #ped-builder .dec-btn { background: #fecdd3; color: #9f1239; }
+    #ped-builder .p-insulin { background: #ef4444; color: #fff; }
+    #ped-builder .p-cig { background: #fbbf24; }
+    #ped-builder .p-petrol { background: #38bdf8; }
+    #ped-builder .p-bread { background: #84cc16; }
+    #ped-builder .p-salt { background: #c084fc; color: #fff; }
+    #ped-builder .p-brand { background: #f9a8d4; }
+    #ped-builder .p-phone { background: #2dd4bf; }
+    #ped-builder .p-games { background: #fb923c; }
+    #ped-builder .p-holiday { background: #3b82f6; color: #fff; }
+    #ped-builder .p-cinema { background: #eab308; }
+    #ped-builder .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    #ped-builder .choice-btn, #ped-builder .primary, #ped-builder .secondary, #ped-builder .reset {
+      font-family: inherit; cursor: pointer; border-radius: 8px; padding: 8px 12px;
+      font-size: 0.9rem; font-weight: 700;
+    }
+    #ped-builder .primary { background: #183a66; color: #fff; border: 0; }
+    #ped-builder .primary:disabled { opacity: 0.45; cursor: not-allowed; }
+    #ped-builder .secondary {
+      background: #fff; color: #183a66; border: 1px solid #cfe0ff;
+    }
+    #ped-builder .reset { background: #dc2626; color: #fff; border: 0; }
+    #ped-builder .ped-error { color: #9f1239; min-height: 1.2em; margin: 8px 0 0; font-size: 0.9rem; }
+    #ped-builder .ped-result {
+      margin-top: 12px; background: #fff; border: 1px solid var(--line, #dfe6f3);
+      border-radius: 8px; padding: 10px 12px; font-size: 0.92rem;
+    }
+    #ped-builder .ped-result p { margin: 0 0 8px; }
+    #ped-builder .ped-result p:last-child { margin-bottom: 0; }
+    #ped-builder .ped-fig { margin-top: 12px; }
+    #ped-builder .ped-own-note {
+      margin: 0 0 10px; font-size: 0.92rem; color: var(--ink, #0f2a4a); line-height: 1.45;
+    }
+    #ped-builder .ped-own-note h4 { margin: 0 0 8px; font-size: 0.95rem; color: var(--accent, #183a66); }
+    #ped-builder .ped-own-note p { margin: 0 0 8px; }
+    #ped-builder .ped-own-note p:last-child { margin-bottom: 0; }
+    #ped-builder .ped-fig canvas {
+      display: block; width: 100%; height: auto; background: #fff;
+      border: 1px solid var(--line, #dfe6f3); border-radius: 8px;
+    }
+    #ped-builder .ped-caption { margin: 6px 0 0; font-size: 0.88rem; color: var(--muted, #4b5d73); }
+    #ped-builder .ped-factors {
+      margin-top: 12px; background: #fff; border: 1px solid var(--line, #dfe6f3);
+      border-radius: 8px; padding: 10px 12px; font-size: 0.92rem;
+    }
+    #ped-builder .ped-factors h4 { margin: 0 0 8px; font-size: 0.95rem; color: var(--accent, #183a66); }
+    #ped-builder .ped-factors .ped-table-wrap { overflow-x: auto; }
+    #ped-builder .ped-factors table {
+      width: 100%; border-collapse: collapse; font-size: 0.88rem; background: #fff;
+    }
+    #ped-builder .ped-factors th, #ped-builder .ped-factors td {
+      border: 1px solid var(--line, #dfe6f3); padding: 8px 10px; text-align: left; vertical-align: top;
+    }
+    #ped-builder .ped-factors th { background: #eef6ff; color: var(--accent, #183a66); font-weight: 800; }
+  </style>
+</head>
+<body>
+  <div class="book">
+    <div id="ped-builder">
+      <h3>Price elasticity of demand</h3>
+      <p class="ped-lead">PED = %ΔQ ÷ %ΔP. Choose a product, P₁, Q₁ and a price change. The diagram shows a movement along a downward-sloping demand curve (the good’s own price), not a shift.</p>
+      <div class="ped-steps" id="ped-steps" aria-hidden="true">
+        <span class="ped-step on" data-step="1">1 Product</span>
+        <span class="ped-step" data-step="2">2 Price P₁</span>
+        <span class="ped-step" data-step="3">3 Quantity Q₁</span>
+        <span class="ped-step" data-step="4">4 Price change</span>
+        <span class="ped-step" data-step="5">5 Calculate</span>
+      </div>
+
+      <label>1. Product <span class="ped-hint" id="ped-prod-hint">(each has a typical PED)</span></label>
+      <div class="btn-group" id="ped-productGroup">
+        <button type="button" class="p-insulin" data-eps="-0.05" data-name="Insulin" data-unit="per pack of pens" data-prices="25,40,55" data-q-unit="packs per month" data-qtys="1,2,3">Insulin 0.05</button>
+        <button type="button" class="p-cig" data-eps="-0.30" data-name="Cigarettes" data-unit="per pack of 20" data-prices="14,16,18" data-q-unit="packs per week" data-qtys="3,7,14">Cigarettes 0.30</button>
+        <button type="button" class="p-petrol" data-eps="-0.40" data-name="Petrol" data-unit="per litre" data-prices="1.35,1.45,1.55" data-q-unit="litres per week" data-qtys="20,40,60">Petrol 0.40</button>
+        <button type="button" class="p-bread" data-eps="-0.50" data-name="Bread" data-unit="per loaf" data-prices="1.20,1.50,1.80" data-q-unit="loaves per week" data-qtys="1,2,4">Bread 0.50</button>
+        <button type="button" class="p-salt" data-eps="-0.60" data-name="Salt" data-unit="per 750g pack" data-prices="0.50,0.80,1.20" data-q-unit="packs per year" data-qtys="1,2,3">Salt 0.60</button>
+        <button type="button" class="p-brand" data-eps="-1.00" data-name="Branded clothing" data-unit="per item" data-prices="40,80,120" data-q-unit="items per year" data-qtys="2,4,6">Branded clothing 1.00</button>
+        <button type="button" class="p-phone" data-eps="-1.20" data-name="Smartphones" data-unit="per phone" data-prices="400,800,1200" data-q-unit="phones per year" data-qtys="1,2,3">Smartphones 1.20</button>
+        <button type="button" class="p-games" data-eps="-1.50" data-name="Video games" data-unit="per game" data-prices="40,50,70" data-q-unit="games per year" data-qtys="2,4,6">Video games 1.50</button>
+        <button type="button" class="p-holiday" data-eps="-2.00" data-name="Holiday travel" data-unit="per trip" data-prices="250,500,800" data-q-unit="trips per year" data-qtys="1,2,3">Holiday travel 2.00</button>
+        <button type="button" class="p-cinema" data-eps="-3.00" data-name="Cinema tickets" data-unit="per ticket" data-prices="8,12,16" data-q-unit="tickets per month" data-qtys="2,4,8">Cinema tickets 3.00</button>
+      </div>
+
+      <label>2. Initial price P₁ <span class="ped-hint" id="ped-p1-hint">(£ — choose a product first)</span></label>
+      <div class="btn-group" id="ped-p1Group"></div>
+
+      <label>3. Initial quantity demanded Q₁ <span class="ped-hint" id="ped-q1-hint">(choose a product first)</span></label>
+      <div class="btn-group" id="ped-q1Group"></div>
+
+      <label>4. Change in price (this sets P₂)</label>
+      <div class="btn-group" id="ped-p2Group">
+        <button type="button" class="inc-btn" data-pct="0.05">+5%</button>
+        <button type="button" class="inc-btn" data-pct="0.10">+10%</button>
+        <button type="button" class="inc-btn" data-pct="0.15">+15%</button>
+        <button type="button" class="inc-btn" data-pct="0.20">+20%</button>
+        <button type="button" class="dec-btn" data-pct="-0.05">−5%</button>
+        <button type="button" class="dec-btn" data-pct="-0.10">−10%</button>
+        <button type="button" class="dec-btn" data-pct="-0.15">−15%</button>
+        <button type="button" class="dec-btn" data-pct="-0.20">−20%</button>
+      </div>
+
+      <div class="controls">
+        <button type="button" class="primary" id="ped-calc">Calculate PED</button>
+        <button type="button" class="secondary" id="ped-working" hidden>Show exam working</button>
+        <button type="button" class="reset" id="ped-reset">Reset</button>
+      </div>
+      <p class="ped-error" id="ped-error" role="status"></p>
+      <div class="ped-result" id="ped-output" hidden></div>
+      <div class="ped-fig">
+        <div class="ped-own-note" id="ped-own-note" hidden></div>
+        <canvas id="ped-diagram" width="700" height="440" aria-label="Demand diagram for the chosen price change."></canvas>
+        <p class="ped-caption" id="ped-caption">The diagram appears once all four choices are made.</p>
+      </div>
+      <div class="ped-factors" id="ped-factors" hidden></div>
+    </div>
+  </div>
+
+  <script>
+    function initPedBuilder() {
+      const root = document.getElementById("ped-builder");
+      if (!root || root.getAttribute("data-ready") === "1") return;
+      root.setAttribute("data-ready", "1");
+
+      const state = { eps: null, name: "", P1: null, Q1: null, P2: null, qUnit: "", results: null };
+      const fmt = function (n) { return Number(n).toFixed(2); };
+      const abs = function (n) { return Math.abs(n); };
+      const picked = function (n) { return n !== null && n !== undefined && isFinite(n); };
+
+      function setChosen(group, btn) {
+        group.querySelectorAll("button").forEach(function (b) { b.classList.remove("chosen"); });
+        if (btn) btn.classList.add("chosen");
+      }
+      function setError(text) {
+        document.getElementById("ped-error").textContent = text || "";
+      }
+      function moneyLabel(n) {
+        if (Math.abs(n - Math.round(n)) < 0.001) return String(Math.round(n));
+        return Number(n).toFixed(2);
+      }
+      function setPriceButtons(productBtn) {
+        const group = document.getElementById("ped-p1Group");
+        const hint = document.getElementById("ped-p1-hint");
+        group.innerHTML = "";
+        state.P1 = null;
+        if (!productBtn) {
+          hint.textContent = "(£ — choose a product first)";
+          return;
+        }
+        const unit = productBtn.getAttribute("data-unit") || "";
+        hint.textContent = unit ? "(£ " + unit + ")" : "(£)";
+        const prices = (productBtn.getAttribute("data-prices") || "").split(",").map(function (s) {
+          return parseFloat(s.trim());
+        }).filter(function (n) { return isFinite(n) && n > 0; });
+        prices.forEach(function (p) {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "price-btn";
+          b.setAttribute("data-p1", String(p));
+          b.textContent = moneyLabel(p);
+          group.appendChild(b);
+        });
+      }
+      function qtyLabel(n) {
+        return String(Math.round(n));
+      }
+      function setQtyButtons(productBtn) {
+        const group = document.getElementById("ped-q1Group");
+        const hint = document.getElementById("ped-q1-hint");
+        group.innerHTML = "";
+        state.Q1 = null;
+        state.qUnit = "";
+        if (!productBtn) {
+          hint.textContent = "(choose a product first)";
+          return;
+        }
+        const unit = productBtn.getAttribute("data-q-unit") || "";
+        state.qUnit = unit;
+        hint.textContent = unit ? "(" + unit + ")" : "";
+        const qtys = (productBtn.getAttribute("data-qtys") || "").split(",").map(function (s) {
+          return parseFloat(s.trim());
+        }).filter(function (n) { return isFinite(n) && n > 0; });
+        qtys.forEach(function (q) {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "qty-btn";
+          b.setAttribute("data-q1", String(q));
+          b.textContent = qtyLabel(q);
+          group.appendChild(b);
+        });
+      }
+      function updateSteps() {
+        const done = {
+          1: state.eps != null,
+          2: state.P1 != null,
+          3: state.Q1 != null,
+          4: state.P2 != null,
+          5: !!state.results
+        };
+        root.querySelectorAll(".ped-step").forEach(function (el) {
+          const n = el.getAttribute("data-step");
+          el.classList.remove("on", "done");
+          if (done[n] && n !== "5") el.classList.add("done");
+          else if (n === "1" && !done[1]) el.classList.add("on");
+          else if (n === "2" && done[1] && !done[2]) el.classList.add("on");
+          else if (n === "3" && done[2] && !done[3]) el.classList.add("on");
+          else if (n === "4" && done[3] && !done[4]) el.classList.add("on");
+          else if (n === "5" && done[4] && !done[5]) el.classList.add("on");
+          else if (done[5] && n === "5") el.classList.add("done");
+        });
+        document.getElementById("ped-calc").disabled = !(done[1] && done[2] && done[3] && done[4]);
+      }
+
+      document.getElementById("ped-productGroup").addEventListener("click", function (ev) {
+        const btn = ev.target.closest("button");
+        if (!btn) return;
+        state.eps = parseFloat(btn.getAttribute("data-eps"));
+        state.name = btn.getAttribute("data-name");
+        state.results = null;
+        setChosen(document.getElementById("ped-productGroup"), btn);
+        setPriceButtons(btn);
+        setQtyButtons(btn);
+        if (state.P2pct != null) state.P2 = null;
+        document.getElementById("ped-prod-hint").textContent =
+          "(" + state.name + " typically has PED ≈ " + fmt(state.eps) + ")";
+        setError("");
+        hideWorking();
+        maybeCalculate();
+      });
+      document.getElementById("ped-p1Group").addEventListener("click", function (ev) {
+        const btn = ev.target.closest("button");
+        if (!btn) return;
+        state.P1 = parseFloat(btn.getAttribute("data-p1"));
+        state.results = null;
+        if (state.P2pct != null) state.P2 = state.P1 * (1 + state.P2pct);
+        setChosen(document.getElementById("ped-p1Group"), btn);
+        setError("");
+        hideWorking();
+        maybeCalculate();
+      });
+      document.getElementById("ped-q1Group").addEventListener("click", function (ev) {
+        const btn = ev.target.closest("button");
+        if (!btn) return;
+        state.Q1 = parseFloat(btn.getAttribute("data-q1"));
+        state.results = null;
+        setChosen(document.getElementById("ped-q1Group"), btn);
+        setError("");
+        hideWorking();
+        maybeCalculate();
+      });
+      document.getElementById("ped-p2Group").addEventListener("click", function (ev) {
+        const btn = ev.target.closest("button");
+        if (!btn) return;
+        if (state.P1 == null) {
+          setError("Choose an initial price P₁ first.");
+          return;
+        }
+        state.P2pct = parseFloat(btn.getAttribute("data-pct"));
+        state.P2 = state.P1 * (1 + state.P2pct);
+        state.results = null;
+        setChosen(document.getElementById("ped-p2Group"), btn);
+        setError("");
+        hideWorking();
+        maybeCalculate();
+      });
+
+      function hideWorking() {
+        const out = document.getElementById("ped-output");
+        out.hidden = true;
+        out.innerHTML = "";
+        document.getElementById("ped-working").hidden = true;
+        hidePedFactors();
+      }
+      function hidePedFactors() {
+        const box = document.getElementById("ped-factors");
+        if (!box) return;
+        box.hidden = true;
+        box.innerHTML = "";
+      }
+      function hideOwnPriceNote() {
+        const el = document.getElementById("ped-own-note");
+        if (!el) return;
+        el.hidden = true;
+        el.innerHTML = "";
+      }
+      function showOwnPriceNote() {
+        const el = document.getElementById("ped-own-note");
+        if (!el || !state.name) return;
+        const n = /s$/i.test(state.name) ? state.name + "’" : state.name + "’s";
+        const priceUp = !(state.results && state.results.pctP < 0);
+        const mag = state.results ? Math.abs(state.results.PED) : 1;
+        let shape;
+        if (Math.abs(mag - 1) < 0.05) {
+          shape = "Demand is unit elastic: the percentage change in quantity matches the percentage change in price.";
+        } else if (mag > 1) {
+          shape = "Demand is elastic, so the curve is flatter: a price change causes a relatively large change in quantity demanded.";
+        } else {
+          shape = "Demand is inelastic, so the curve is steeper: a price change causes a relatively small change in quantity demanded.";
+        }
+        const move = priceUp
+          ? "Price rises → movement up the demand curve → quantity demanded falls."
+          : "Price falls → movement down the demand curve → quantity demanded rises.";
+        el.innerHTML =
+          "<h4>What happens when a good’s own price changes?</h4>" +
+          "<p>A change in " + n + " own price causes a movement along the demand curve, not a shift.</p>" +
+          "<p>" + move + "</p>" +
+          "<p>PED is about the good’s own price, so the demand curve already shows the relationship between " + n +
+          " price and " + n + " quantity demanded.</p>" +
+          "<p>" + shape + "</p>";
+        el.hidden = false;
+      }
+      const PED_FACTORS = {
+        "Insulin": [
+          ["Availability of substitutes", "Few realistic alternatives for people who need insulin; other medicines rarely replace it.", "Very few substitutes → highly inelastic (PED close to zero)."],
+          ["Proportion of income spent", "A pack of pens can be costly, but treatment is still bought because health depends on it.", "Even a higher budget share does little to raise elasticity when the good is essential."],
+          ["Addictiveness / brand loyalty", "Patients often stay on a prescribed brand or type because switching can be medically risky.", "Dependence and brand lock-in make demand less elastic."],
+          ["Time period considered", "In the short run there is almost no alternative. Over a longer period new treatments or biosimilars may appear.", "Short run → extremely inelastic; long run → still inelastic, but slightly more elastic."],
+          ["Necessity vs. luxury", "Insulin is a medical necessity for many people with diabetes, not a discretionary purchase.", "Necessities → less elastic."],
+          ["Market definition", "“Insulin” as a whole has almost no substitutes; a named brand may face some competition from similar pens.", "Broad market (all insulin) → more inelastic; a specific brand → a little more elastic."],
+          ["Price of complementary goods", "Needles, pumps, and blood-glucose testing add to the cost of using insulin.", "Dearer complements raise the overall cost of treatment and can make demand slightly more elastic."],
+          ["Consumer demographics", "Demand comes from people who need the medicine, across ages and incomes, rather than from casual buyers.", "Medical need dominates, so demand stays inelastic for most groups."]
+        ],
+        "Cigarettes": [
+          ["Availability of substitutes", "Vapes, nicotine patches, and quitting are options, but addiction makes switching hard in the short run.", "Limited effective substitutes → relatively inelastic."],
+          ["Proportion of income spent", "A regular habit can take a noticeable share of a low income, so price rises bite harder for poorer smokers.", "Higher income share → more elastic, especially for low-income smokers."],
+          ["Addictiveness / brand loyalty", "Nicotine addiction and loyalty to a particular brand reduce sensitivity to price.", "Makes demand less elastic."],
+          ["Time period considered", "Immediately after a price rise, most smokers still buy. Over time more people cut down, switch, or quit.", "Long run → more elastic; short run → less elastic."],
+          ["Necessity vs. luxury", "Cigarettes are not a true necessity, but addiction makes them behave like one in the short run.", "Habit/addiction → less elastic than a typical luxury."],
+          ["Market definition", "“Cigarettes” as a whole vs. a specific brand (e.g. switching from one make to a cheaper one).", "Broad market → more inelastic; a specific brand → more elastic."],
+          ["Price of complementary goods", "Lighters, rolling papers, or drinks often consumed with smoking affect the overall cost of the habit.", "Dearer complements can make demand for cigarettes a little more elastic."],
+          ["Consumer demographics", "Younger and lower-income smokers tend to react more to price; heavily addicted adult smokers less so.", "Younger / lower-income market → more elastic."]
+        ],
+        "Petrol": [
+          ["Availability of substitutes", "Public transport, cycling, car-sharing, or electric vehicles exist, but many journeys still need a petrol car.", "Few easy short-run substitutes → relatively inelastic."],
+          ["Proportion of income spent", "Filling the tank is a large weekly cost for commuters and families who drive a lot.", "Higher proportion → more elastic than for a cheap staple, but still often inelastic."],
+          ["Addictiveness / brand loyalty", "Drivers rarely care which petrol station brand they use, but they do depend on their car.", "Weak brand loyalty, strong need to drive → demand for petrol as a fuel stays fairly inelastic."],
+          ["Time period considered", "In the short run people still commute. Over time they can buy a more efficient car, move, or change how they travel.", "Long run → more elastic; short run → less elastic."],
+          ["Necessity vs. luxury", "For many households petrol is a derived necessity (getting to work). Leisure driving is more discretionary.", "Commuting fuel → less elastic; leisure use → more elastic."],
+          ["Market definition", "“Petrol” as a whole vs. a particular filling station or brand.", "Broad fuel market → more inelastic; one garage’s petrol → more elastic."],
+          ["Price of complementary goods", "Cars, insurance, parking, and road tax all affect the cost of driving.", "If complements become dearer, motorists may cut miles, making petrol demand more elastic."],
+          ["Consumer demographics", "Rural drivers and those without public transport have little choice; urban drivers can switch more easily.", "Captive / rural users → less elastic; urban users → more elastic."]
+        ],
+        "Bread": [
+          ["Availability of substitutes", "Other carbohydrates (rice, pasta, potatoes) and other bakeries or supermarket own-brand loaves are easy to switch to.", "Many substitutes for a particular loaf → more elastic; bread as a staple still fairly inelastic."],
+          ["Proportion of income spent", "A loaf is a small share of most household budgets.", "Low proportion → less elastic."],
+          ["Addictiveness / brand loyalty", "Some shoppers stick to a favourite branded loaf; many will switch to own-brand if the price jumps.", "Loyalty to a brand makes that brand less elastic; bread in general stays a staple."],
+          ["Time period considered", "Habits change slowly, but shoppers can try other foods or brands within a few weeks.", "Long run → a little more elastic; short run → less elastic."],
+          ["Necessity vs. luxury", "Bread is a everyday staple for many households, not a luxury.", "Necessities → less elastic."],
+          ["Market definition", "“Bread” broadly (few close food substitutes for some diets) vs. a named brand of loaf.", "Broad market → more inelastic; a specific brand → more elastic."],
+          ["Price of complementary goods", "Butter, cheese, and sandwich fillings affect how attractive bread is as a meal.", "Dearer complements can make demand for bread slightly more elastic."],
+          ["Consumer demographics", "Lower-income households may switch brand or cut waste; higher-income shoppers notice loaf prices less.", "Lower-income buyers → more elastic for branded bread."]
+        ],
+        "Salt": [
+          ["Availability of substitutes", "Other seasonings exist, but for cooking and preserving there are few close substitutes for salt itself.", "Very few substitutes → highly inelastic."],
+          ["Proportion of income spent", "A pack of salt costs very little relative to income, so price changes are barely noticed.", "Tiny income share → highly inelastic."],
+          ["Addictiveness / brand loyalty", "People are used to salty food, but they rarely insist on a particular supermarket brand of table salt.", "Habit of using salt keeps demand inelastic; brand loyalty is weak."],
+          ["Time period considered", "Even over a long period, households still need some salt for cooking. Diets change only slowly.", "Short run and long run both remain inelastic."],
+          ["Necessity vs. luxury", "Salt is a cheap kitchen staple, not a luxury.", "Necessity / staple → less elastic."],
+          ["Market definition", "“Salt” as a whole vs. a gourmet or branded table salt.", "Broad market → highly inelastic; a specialist brand → more elastic."],
+          ["Price of complementary goods", "The food salt is cooked with (meat, vegetables, ready meals) matters far more than the salt itself.", "Complements’ prices affect meals more than they change the PED of salt, which stays inelastic."],
+          ["Consumer demographics", "Almost all households buy some salt, and the spend is so small that age and income barely affect PED.", "Demand stays inelastic across demographic groups."]
+        ],
+        "Branded clothing": [
+          ["Availability of substitutes", "Other brands, supermarket clothing, and second-hand items are easy alternatives if a label becomes dearer.", "Many substitutes → more elastic."],
+          ["Proportion of income spent", "Branded items can take a large slice of a young person’s or family’s clothing budget.", "Higher proportion → more elastic."],
+          ["Addictiveness / brand loyalty", "Strong loyalty to labels (e.g. Nike, Adidas) means some buyers will still pay higher prices.", "Brand loyalty makes demand less elastic for devoted fans."],
+          ["Time period considered", "Shoppers can wait for sales, switch brand, or delay replacing items.", "Long run → more elastic; short run → less elastic."],
+          ["Necessity vs. luxury", "Branded fashion is largely discretionary; cheaper unbranded clothes can meet the basic need.", "Luxuries → more elastic."],
+          ["Market definition", "“Clothing” broadly vs. one fashion brand or a specific trainer model.", "Broad clothing market → less elastic; a specific brand → more elastic."],
+          ["Price of complementary goods", "Shoes, accessories, and the cost of keeping up with a look affect whether a branded item is affordable.", "Dearer complements make branded clothing more elastic."],
+          ["Consumer demographics", "Teenagers and lower-income buyers are more price-sensitive; high-income fashion buyers less so.", "Younger / lower-income market → more elastic."]
+        ],
+        "Smartphones": [
+          ["Availability of substitutes", "Other handset brands, keeping an old phone, or using a tablet can replace a new smartphone.", "Several substitutes → relatively elastic, but less so for people who feel they must have a phone."],
+          ["Proportion of income spent", "A new phone is a large one-off purchase compared with most everyday goods.", "High proportion → more elastic."],
+          ["Addictiveness / brand loyalty", "Loyalty to Apple or Android ecosystems (apps, photos, AirPods) reduces willingness to switch when price rises.", "Makes demand less elastic, especially for iPhone users."],
+          ["Time period considered", "Buyers can postpone an upgrade, wait for a new model, or buy refurbished.", "Long run → more elastic; short run (broken phone) → less elastic."],
+          ["Necessity vs. luxury", "A basic phone can be a necessity; a flagship model is a luxury.", "Basic connectivity → less elastic; premium models → more elastic."],
+          ["Market definition", "“Smartphones” as a category vs. a specific model (e.g. one iPhone).", "Broad market → less elastic; a specific model → more elastic."],
+          ["Price of complementary goods", "Contracts, cases, chargers, and app subscriptions affect the total cost of owning a phone.", "If contracts or extras become dearer, demand for new handsets becomes more elastic."],
+          ["Consumer demographics", "Students and lower-income buyers delay upgrades more; higher-income users replace phones more readily.", "Lower-income / student market → more elastic."]
+        ],
+        "Video games": [
+          ["Availability of substitutes", "Many alternative entertainment options (mobile games, streaming, sports, etc.) make switching easy.", "Increases elasticity (PED more negative)."],
+          ["Proportion of income spent", "Games can be relatively expensive compared to casual entertainment.", "Higher proportion → more elastic."],
+          ["Addictiveness / brand loyalty", "Strong loyalty to certain franchises (e.g., FIFA, Call of Duty) reduces sensitivity to price.", "Makes demand less elastic."],
+          ["Time period considered", "Over time, consumers find substitutes or wait for discounts.", "Long run → more elastic; short run → less elastic."],
+          ["Necessity vs. luxury", "Games are discretionary purchases, not necessities.", "Luxuries → more elastic."],
+          ["Market definition", "“Video games” broadly defined (many substitutes) vs. “specific title” narrowly defined (few substitutes).", "Broad market → more elastic."],
+          ["Price of complementary goods", "Consoles, controllers, or online subscriptions affect overall affordability.", "If complements become dearer, demand for games becomes more elastic."],
+          ["Consumer demographics", "Younger players with limited budgets react more to price changes than older, higher-income gamers.", "Younger market → more elastic."]
+        ],
+        "Holiday travel": [
+          ["Availability of substitutes", "Staycations, other destinations, or not travelling at all are easy alternatives if prices jump.", "Many substitutes → more elastic."],
+          ["Proportion of income spent", "A holiday is a large share of most households’ annual spending.", "High proportion → more elastic."],
+          ["Addictiveness / brand loyalty", "Some travellers are loyal to a destination or an airline, but most will switch if the price is much higher.", "Weak loyalty overall → more elastic; a “must-do” trip is less elastic."],
+          ["Time period considered", "Trips can be postponed, booked earlier, or switched to off-peak dates.", "Long run → more elastic; short run (fixed dates, e.g. half-term) → less elastic."],
+          ["Necessity vs. luxury", "Holiday travel is discretionary for most people, not a necessity.", "Luxuries → more elastic."],
+          ["Market definition", "“Holidays” in general vs. a specific destination, airline, or package.", "Broad holiday market → less elastic than one destination, which is more elastic."],
+          ["Price of complementary goods", "Hotels, car hire, insurance, and spending money sit alongside the fare.", "If complements become dearer, demand for the holiday itself becomes more elastic."],
+          ["Consumer demographics", "Families and lower-income travellers cut back first; higher-income travellers are less price-sensitive.", "Lower-income / family market → more elastic."]
+        ],
+        "Cinema tickets": [
+          ["Availability of substitutes", "Streaming services, TV, and other nights out are close substitutes for a trip to the cinema.", "Many substitutes → more elastic."],
+          ["Proportion of income spent", "A ticket (plus popcorn and travel) is noticeable for students, but small for higher earners.", "Higher budget share for young people → more elastic."],
+          ["Addictiveness / brand loyalty", "Fans of a franchise (e.g. a Marvel opening night) will still go; casual viewers will wait for streaming.", "Loyalty to a film or chain makes that demand less elastic."],
+          ["Time period considered", "People can wait for a cheaper day, a streaming release, or skip the film altogether.", "Long run → more elastic; opening weekend → less elastic."],
+          ["Necessity vs. luxury", "Cinema is leisure spending, not a necessity.", "Luxuries → more elastic."],
+          ["Market definition", "“Cinema tickets” in general vs. a particular film or a particular chain.", "Broad market → still fairly elastic; a specific film/chain can be more or less elastic depending on substitutes."],
+          ["Price of complementary goods", "Popcorn, drinks, parking, and transport add to the cost of the night out.", "If complements become dearer, demand for tickets becomes more elastic."],
+          ["Consumer demographics", "Students and younger viewers are more price-sensitive than older, higher-income film-goers.", "Younger market → more elastic."]
+        ]
+      };
+      function showPedFactors() {
+        const box = document.getElementById("ped-factors");
+        if (!box) return;
+        const rows = PED_FACTORS[state.name];
+        if (!rows) {
+          hidePedFactors();
+          return;
+        }
+        let body = "";
+        for (let i = 0; i < rows.length; i++) {
+          body += "<tr><td>" + rows[i][0] + "</td><td>" + rows[i][1] + "</td><td>" + rows[i][2] + "</td></tr>";
+        }
+        box.innerHTML =
+          "<h4>Key factors affecting PED for " + state.name.toLowerCase() + "</h4>" +
+          "<div class=\"ped-table-wrap\"><table>" +
+          "<thead><tr><th>Factor</th><th>Explanation</th><th>Likely effect on PED</th></tr></thead>" +
+          "<tbody>" + body + "</tbody></table></div>";
+        box.hidden = false;
+      }
+
+      function maybeCalculate() {
+        updateSteps();
+        if ([state.eps, state.P1, state.Q1, state.P2].every(picked)) calculate();
+        else {
+          drawEmpty();
+          updateSteps();
+        }
+      }
+
+      document.getElementById("ped-calc").addEventListener("click", calculate);
+
+      function calculate() {
+        setError("");
+        if (![state.eps, state.P1, state.Q1, state.P2].every(picked)) {
+          setError("Finish steps 1–4, then calculate.");
+          return;
+        }
+        const slope = state.eps * (state.Q1 / state.P1);
+        const Q2 = state.Q1 + slope * (state.P2 - state.P1);
+        if (!(Q2 > 0)) {
+          setError("That price change would push quantity to zero or below. Try a smaller percentage change.");
+          state.results = null;
+          hidePedFactors();
+          hideOwnPriceNote();
+          drawEmpty();
+          updateSteps();
+          return;
+        }
+        const changeQ = Q2 - state.Q1;
+        const pctQ = (changeQ / state.Q1) * 100;
+        const changeP = state.P2 - state.P1;
+        const pctP = (changeP / state.P1) * 100;
+        const PED = pctQ / pctP;
+        const mag = abs(PED);
+        let classification;
+        if (Math.abs(mag - 1) < 0.05) classification = "unit elastic";
+        else if (mag > 1) classification = "elastic";
+        else classification = "inelastic";
+        const TR1 = state.P1 * state.Q1;
+        const TR2 = state.P2 * Q2;
+        let trNote;
+        if (TR2 > TR1 + 0.01) trNote = "Total revenue rises.";
+        else if (TR2 < TR1 - 0.01) trNote = "Total revenue falls.";
+        else trNote = "Total revenue is unchanged.";
+        let trRule;
+        if (classification === "elastic") {
+          trRule = "Elastic demand: a price rise cuts TR; a price fall raises TR.";
+        } else if (classification === "inelastic") {
+          trRule = "Inelastic demand: a price rise raises TR; a price fall cuts TR.";
+        } else {
+          trRule = "Unit elastic demand: TR stays about the same.";
+        }
+        state.results = {
+          slope: slope, Q2: Q2, changeQ: changeQ, pctQ: pctQ, changeP: changeP, pctP: pctP,
+          PED: PED, classification: classification, TR1: TR1, TR2: TR2, trNote: trNote, trRule: trRule
+        };
+        const priceUp = pctP > 0;
+        const priceBit = priceUp
+          ? "A " + fmt(pctP) + "% increase in price"
+          : "A " + fmt(abs(pctP)) + "% decrease in price";
+        let qtyBit;
+        if (pctQ > 0) qtyBit = "raises quantity demanded by " + fmt(pctQ) + "%";
+        else if (pctQ < 0) qtyBit = "cuts quantity demanded by " + fmt(abs(pctQ)) + "%";
+        else qtyBit = "leaves quantity demanded unchanged";
+        document.getElementById("ped-caption").textContent =
+          priceBit + " " + qtyBit + ". Demand for " + state.name + " is " + classification + ".";
+        const out = document.getElementById("ped-output");
+        out.hidden = true;
+        out.innerHTML =
+          "<p><strong>" + state.name + "</strong> — typical PED ≈ " + fmt(state.eps) +
+          ". For this move, PED = " + fmt(PED) + " (" + classification + ").</p>" +
+          "<p><strong>%ΔQ</strong> = (" + fmt(Q2) + " − " + fmt(state.Q1) + ") ÷ " + fmt(state.Q1) +
+          " × 100 = <strong>" + fmt(pctQ) + "%</strong></p>" +
+          "<p><strong>%ΔP</strong> = (" + fmt(state.P2) + " − " + fmt(state.P1) + ") ÷ " + fmt(state.P1) +
+          " × 100 = <strong>" + fmt(pctP) + "%</strong></p>" +
+          "<p><strong>PED</strong> = %ΔQ ÷ %ΔP = " + fmt(pctQ) + " ÷ " + fmt(pctP) +
+          " = <strong>" + fmt(PED) + "</strong></p>" +
+          "<p>TR₁ = P₁ × Q₁ = £" + fmt(TR1) + ". TR₂ = P₂ × Q₂ = £" + fmt(TR2) +
+          ". " + trNote + " " + trRule + "</p>";
+        document.getElementById("ped-working").hidden = false;
+        document.getElementById("ped-working").textContent = "Show exam working";
+        drawDiagram(state.results);
+        showOwnPriceNote();
+        showPedFactors();
+        updateSteps();
+      }
+
+      document.getElementById("ped-working").addEventListener("click", function () {
+        const out = document.getElementById("ped-output");
+        out.hidden = !out.hidden;
+        this.textContent = out.hidden ? "Show exam working" : "Hide exam working";
+      });
+
+      document.getElementById("ped-reset").addEventListener("click", function () {
+        state.eps = null; state.name = ""; state.P1 = null; state.Q1 = null;
+        state.P2 = null; state.P2pct = null; state.results = null;
+        root.querySelectorAll(".chosen").forEach(function (b) { b.classList.remove("chosen"); });
+        setPriceButtons(null);
+        setQtyButtons(null);
+        document.getElementById("ped-prod-hint").textContent = "(each has a typical PED)";
+        setError("");
+        hideWorking();
+        document.getElementById("ped-working").textContent = "Show exam working";
+        document.getElementById("ped-caption").textContent = "The diagram appears once all four choices are made.";
+        hidePedFactors();
+        hideOwnPriceNote();
+        drawEmpty();
+        updateSteps();
+      });
+
+      function wrapText(ctx, text, x, y, maxW, lineH) {
+        const words = text.split(" ");
+        let line = "";
+        let yy = y;
+        words.forEach(function (word, i) {
+          const test = line ? line + " " + word : word;
+          if (ctx.measureText(test).width > maxW && line) {
+            ctx.fillText(line, x, yy);
+            line = word;
+            yy += lineH;
+          } else {
+            line = test;
+          }
+          if (i === words.length - 1) ctx.fillText(line, x, yy);
+        });
+      }
+
+      function drawEmpty() {
+        hideOwnPriceNote();
+        const canvas = document.getElementById("ped-diagram");
+        const ctx = canvas.getContext("2d");
+        const W = canvas.width, H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = "#4b5d73";
+        ctx.font = "15px system-ui, sans-serif";
+        wrapText(ctx, "Choose a product, P₁, Q₁ and a price change. A downward-sloping demand curve will show the movement from P₁ to P₂.", 40, H / 2, W - 80, 22);
+        const m = { left: 80, right: 36, top: 40, bottom: 56 };
+        ctx.strokeStyle = "#111";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(m.left, m.top);
+        ctx.lineTo(m.left, H - m.bottom);
+        ctx.lineTo(W - m.right, H - m.bottom);
+        ctx.stroke();
+        ctx.fillStyle = "#111";
+        ctx.font = "bold 13px system-ui, sans-serif";
+        ctx.fillText("Price (£)", 12, 28);
+        ctx.fillText("Quantity demanded", W / 2 - 60, H - 16);
+      }
+
+      function drawDiagram(r) {
+        const canvas = document.getElementById("ped-diagram");
+        const ctx = canvas.getContext("2d");
+        const W = canvas.width, H = canvas.height;
+        const P1 = state.P1, Q1 = state.Q1, P2 = state.P2, Q2 = r.Q2;
+        const margin = { left: 88, right: 48, top: 36, bottom: 62 };
+        const plotW = W - margin.left - margin.right;
+        const plotH = H - margin.top - margin.bottom;
+        const maxP = Math.max(P1, P2) * 1.45;
+        const maxQ = Math.max(Q1, Q2, 0.5) * 1.55;
+        const qToX = function (q) { return margin.left + (q / maxQ) * plotW; };
+        const pToY = function (p) { return margin.top + (1 - p / maxP) * plotH; };
+        function demandHits() {
+          let dq = Q2 - Q1, dp = P2 - P1;
+          if (Math.abs(dq) < 1e-9 && Math.abs(dp) < 1e-9) {
+            dq = 0.04 * maxQ;
+            dp = -0.12 * maxP;
+          }
+          const hits = [];
+          function add(q, p) {
+            if (!isFinite(q) || !isFinite(p)) return;
+            if (q < -1e-6 || q > maxQ + 1e-6 || p < -1e-6 || p > maxP + 1e-6) return;
+            hits.push({ q: Math.min(Math.max(q, 0), maxQ), p: Math.min(Math.max(p, 0), maxP) });
+          }
+          if (Math.abs(dq) < 1e-9) {
+            add(Q1, 0);
+            add(Q1, maxP);
+          } else {
+            const m = dp / dq;
+            add(0, P1 + m * (0 - Q1));
+            add(maxQ, P1 + m * (maxQ - Q1));
+            if (Math.abs(m) > 1e-12) {
+              add(Q1 + (0 - P1) / m, 0);
+              add(Q1 + (maxP - P1) / m, maxP);
+            }
+          }
+          hits.sort(function (a, b) { return a.q - b.q || b.p - a.p; });
+          const uniq = [];
+          hits.forEach(function (h) {
+            const last = uniq[uniq.length - 1];
+            if (!last || Math.abs(last.q - h.q) > 0.01 || Math.abs(last.p - h.p) > 0.01) uniq.push(h);
+          });
+          if (uniq.length < 2) return [{ q: 0, p: maxP * 0.85 }, { q: maxQ, p: maxP * 0.2 }];
+          return [uniq[0], uniq[uniq.length - 1]];
+        }
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, W, H);
+        ctx.strokeStyle = "#eef4ff";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        let i;
+        for (i = 0; i <= 5; i++) {
+          const y = margin.top + (i / 5) * plotH;
+          ctx.moveTo(margin.left, y);
+          ctx.lineTo(margin.left + plotW, y);
+          const x = margin.left + (i / 5) * plotW;
+          ctx.moveTo(x, margin.top);
+          ctx.lineTo(x, margin.top + plotH);
+        }
+        ctx.stroke();
+        ctx.strokeStyle = "#111";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, margin.top);
+        ctx.lineTo(margin.left, margin.top + plotH);
+        ctx.lineTo(margin.left + plotW, margin.top + plotH);
+        ctx.stroke();
+        ctx.fillStyle = "#111";
+        ctx.font = "bold 13px system-ui, sans-serif";
+        ctx.fillText("Price (£)", 10, 22);
+        const qAxis = state.qUnit ? "Quantity (" + state.qUnit + ")" : "Quantity demanded";
+        ctx.font = "bold 12px system-ui, sans-serif";
+        ctx.fillText(qAxis, margin.left + plotW / 2 - ctx.measureText(qAxis).width / 2, H - 14);
+        const ends = demandHits();
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(margin.left, margin.top, plotW, plotH);
+        ctx.clip();
+        ctx.strokeStyle = "#183a66";
+        ctx.lineWidth = 2.8;
+        ctx.beginPath();
+        ctx.moveTo(qToX(ends[0].q), pToY(ends[0].p));
+        ctx.lineTo(qToX(ends[ends.length - 1].q), pToY(ends[ends.length - 1].p));
+        ctx.stroke();
+        ctx.restore();
+        const x1 = qToX(Q1), y1 = pToY(P1);
+        const x2 = qToX(Q2), y2 = pToY(P2);
+        const dLab = ends[0].q + (ends[ends.length - 1].q - ends[0].q) * 0.78;
+        const dLabP = ends[0].p + (ends[ends.length - 1].p - ends[0].p) * 0.78;
+        ctx.fillStyle = "#111";
+        ctx.font = "bold 16px system-ui, sans-serif";
+        ctx.fillText("D", qToX(dLab) + 8, pToY(dLabP) + 4);
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = "#94a3b8";
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1); ctx.lineTo(margin.left, y1);
+        ctx.moveTo(x2, y2); ctx.lineTo(margin.left, y2);
+        ctx.moveTo(x1, y1); ctx.lineTo(x1, margin.top + plotH);
+        ctx.moveTo(x2, y2); ctx.lineTo(x2, margin.top + plotH);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        if (Math.abs(x2 - x1) > 12 || Math.abs(y2 - y1) > 12) {
+          ctx.strokeStyle = "#0f766e";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
+          const ang = Math.atan2(y2 - y1, x2 - x1);
+          ctx.beginPath();
+          ctx.moveTo(x2, y2);
+          ctx.lineTo(x2 - 10 * Math.cos(ang) + 6 * Math.sin(ang), y2 - 10 * Math.sin(ang) - 6 * Math.cos(ang));
+          ctx.lineTo(x2 - 10 * Math.cos(ang) - 6 * Math.sin(ang), y2 - 10 * Math.sin(ang) + 6 * Math.cos(ang));
+          ctx.closePath();
+          ctx.fillStyle = "#0f766e";
+          ctx.fill();
+        }
+        ctx.fillStyle = "#183a66";
+        ctx.beginPath(); ctx.arc(x1, y1, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x2, y2, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#111";
+        ctx.font = "bold 12px system-ui, sans-serif";
+        const pGap = Math.abs(y1 - y2) < 16;
+        ctx.fillText("P₁", margin.left - 28, y1 + (pGap && y1 > y2 ? 12 : 4));
+        ctx.fillText("P₂", margin.left - 28, y2 + (pGap && y2 > y1 ? 12 : 4));
+        ctx.fillText("Q₁", x1 - (Math.abs(x2 - x1) < 28 && x1 <= x2 ? 22 : 10), margin.top + plotH + 32);
+        ctx.fillText("Q₂", x2 - (Math.abs(x2 - x1) < 28 && x2 >= x1 ? -4 : 10), margin.top + plotH + 32);
+      }
+
+      drawEmpty();
+      updateSteps();
+    }
+    initPedBuilder();
+  </script>
+</body>
+</html>

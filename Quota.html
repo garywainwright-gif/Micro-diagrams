@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quota</title>
+  <link rel="stylesheet" href="diagram-economist.css" />
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #f0dce2;
+      --paper: #fffaf3;
+      --bg: #fef7f9;
+      --formula: #f8e8ec;
+      --accent: #9a3412;
+      --accent-soft: #f8e8ec;
+      --ok: #166534;
+      --ok-bg: #e7f6ec;
+      --ok-line: #b7e4c7;
+      --bad: #9f1239;
+      --bad-bg: #fde8ee;
+      --bad-line: #f3c1cf;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Financier Text", Georgia, "Palatino Linotype", Palatino, serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+      font-size: 1.05rem;
+    }
+    h1, h2, .mark {
+      font-family: "Financier Display", Georgia, "Palatino Linotype", Palatino, serif;
+      letter-spacing: -0.02em;
+    }
+    a { color: inherit; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 0 22px 72px; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 22px 0 8px;
+    }
+    .mark {
+      font-size: 1.35rem;
+      font-weight: 700;
+      text-decoration: none;
+      line-height: 1.15;
+    }
+    .mark span { color: var(--accent); }
+    header nav a {
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.92rem;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 1px;
+    }
+    h1 { margin: 12px 0 8px; font-size: 1.85rem; }
+    .lead { margin: 0 0 16px; max-width: 46em; }
+    .play {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.7fr);
+      gap: 18px;
+      align-items: start;
+    }
+    .chart-wrap {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 8px;
+    }
+    .chart-wrap img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 16px 14px;
+    }
+    .q-kicker {
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.88rem;
+    }
+    h2 { margin: 0 0 8px; font-size: 1.28rem; line-height: 1.25; }
+    .hint { margin: 0 0 12px; color: var(--muted); }
+    .names { display: flex; flex-direction: column; gap: 8px; }
+    .names button, .actions button {
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+      border-radius: 8px;
+      border: 1px solid #e4b8c4;
+      background: #fff;
+      color: var(--accent);
+      padding: 10px 12px;
+    }
+    .names button { width: 100%; }
+    .names button:hover, .actions button:hover { background: var(--accent-soft); }
+    .names button.done {
+      background: #166534;
+      border-color: #166534;
+      color: #fff;
+      cursor: default;
+    }
+    .names button:disabled { opacity: 1; }
+    .names button.done:hover { background: #166534; color: #fff; }
+    .score-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      margin: 0 0 10px;
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--accent);
+    }
+    .score-row .best { color: var(--muted); font-weight: 700; font-size: 0.95rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .actions button.secondary {
+      background: transparent;
+      color: var(--ink);
+      border-color: var(--line);
+    }
+    button:focus-visible, a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .feedback {
+      min-height: 3.2em;
+      margin: 12px 0 0;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: var(--formula);
+      border: 1px solid var(--line);
+    }
+    .feedback.ok { background: var(--ok-bg); border-color: var(--ok-line); color: var(--ok); }
+    .feedback.bad { background: var(--bad-bg); border-color: var(--bad-line); color: var(--bad); }
+    @media (min-width: 900px) {
+      .panel { position: sticky; top: 16px; }
+    }
+    @media (max-width: 860px) {
+      .play { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="mark" href="Diagram Economist.html">The Diagram <span>Economist</span></a>
+      <nav><a href="macro-diagrams.html">Back</a></nav>
+    </header>
+    <main>
+      <h1>Quota</h1>
+      <p class="lead" id="lead">Country Y is willing to supply Country X with goods at the world price, Pf. The quantity of products demanded domestically in Country X is E. Country X has its own suppliers of the product, and they supply up to point A. The quantity between A and E is imported.</p>
+      <div class="play">
+        <div class="chart-wrap">
+          <img id="diagram" src="quota-free-trade.png" alt="Country X importer. Domestic demand slopes down and domestic supply slopes up. World price Pf is a horizontal line. Quantity A is domestic supply at Pf and quantity E is domestic demand at Pf." />
+        </div>
+        <aside class="panel">
+          <p class="q-kicker" id="q-kicker">Question 1</p>
+          <h2 id="q-title">Before the quota is imposed, the equilibrium price is:</h2>
+          <p class="hint" id="q-hint">Choose the one correct answer.</p>
+          <div class="score-row" aria-live="polite">
+            <span id="score">Score: 0 / 10</span>
+            <span class="best" id="best">Best: 0 / 10</span>
+          </div>
+          <div class="names" id="names"></div>
+          <p class="feedback" id="feedback" aria-live="polite">Choose the equilibrium price before the quota.</p>
+          <div class="actions">
+            <button type="button" class="secondary" id="reset">Try again</button>
+            <button type="button" id="btn-save">Save diagram</button>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <script>
+    (function () {
+      var QUESTIONS = [
+        {
+          title: "Before the quota is imposed, the equilibrium price is:",
+          hint: "Choose the one correct answer.",
+          prompt: "Choose the equilibrium price before the quota.",
+          ok: "Pf.",
+          choices: [
+            { text: "A. P1", correct: false },
+            { text: "B. Pf", correct: true },
+            { text: "C. N", correct: false },
+            { text: "D. M", correct: false }
+          ]
+        },
+        {
+          title: "At a price of Pf country X has a domestic demand of:",
+          hint: "Choose the one correct answer.",
+          prompt: "Choose the domestic demand at Pf.",
+          ok: "E.",
+          choices: [
+            { text: "A. A", correct: false },
+            { text: "B. B", correct: false },
+            { text: "C. C", correct: false },
+            { text: "D. E", correct: true }
+          ]
+        },
+        {
+          title: "Before the quota, A is supplied by domestic suppliers and the rest AE is:",
+          hint: "Choose the one correct answer.",
+          prompt: "Choose what the quantity AE represents.",
+          ok: "Imported from Country Y.",
+          choices: [
+            { text: "A. Imported from Country Y", correct: true },
+            { text: "B. Exported to Country Y", correct: false },
+            { text: "C. Produced only by domestic suppliers in Country X", correct: false },
+            { text: "D. A surplus that remains unsold", correct: false }
+          ]
+        },
+        {
+          title: "After the price increases from Pf to P1, what happens to domestic demand?",
+          hint: "Choose the one correct answer.",
+          prompt: "Choose what happens to domestic demand.",
+          ok: "It reduces from E to C.",
+          choices: [
+            { text: "A. It reduces from E to C", correct: true },
+            { text: "B. It increases from C to E", correct: false },
+            { text: "C. It reduces from E to A", correct: false },
+            { text: "D. It stays the same at E", correct: false }
+          ]
+        },
+        {
+          title: "Before the quota, imports were the quantity from A to E. What is the quantity imported following the quota?",
+          hint: "Choose the one correct answer.",
+          prompt: "Choose the quantity imported after the quota.",
+          ok: "B to C.",
+          choices: [
+            { text: "A. B to C", correct: true },
+            { text: "B. A to E", correct: false },
+            { text: "C. A to B", correct: false },
+            { text: "D. C to E", correct: false }
+          ]
+        },
+        {
+          title: "What is represented by the shaded area?",
+          hint: "Choose the one correct answer.",
+          prompt: "Choose what the shaded area represents.",
+          ok: "The producer surplus for domestic suppliers following the quota.",
+          choices: [
+            { text: "A. The producer surplus for domestic suppliers following the quota", correct: true },
+            { text: "B. The producer surplus before the quota", correct: false },
+            { text: "C. The consumer surplus following the quota", correct: false },
+            { text: "D. The welfare loss caused by the quota", correct: false }
+          ]
+        },
+        {
+          title: "What does the area KLHG represent?",
+          hint: "Choose the one correct answer.",
+          prompt: "Choose what the area KLHG represents.",
+          ok: "The increase in producer surplus for Country Y exporters.",
+          choices: [
+            { text: "A. The increase in producer surplus for Country Y exporters", correct: true },
+            { text: "B. The producer surplus for domestic suppliers in Country X", correct: false },
+            { text: "C. The consumer surplus following the quota", correct: false },
+            { text: "D. The fall in domestic demand from E to C", correct: false }
+          ]
+        },
+        {
+          title: "Which two statements explain the welfare loss highlighted in the red and amber shaded areas?",
+          hint: "Choose the one correct answer.",
+          prompt: "Choose the statements that explain the red and amber areas.",
+          ok: "The amber area is a complete welfare loss; the red is a loss of inefficient production by domestic producers.",
+          choices: [
+            { text: "A. The amber area is a complete welfare loss; the red is a loss of inefficient production by domestic producers", correct: true },
+            { text: "B. The red area is a complete welfare loss; the amber is a gain in producer surplus for Country Y", correct: false },
+            { text: "C. Both areas show an increase in consumer surplus after the quota", correct: false },
+            { text: "D. The amber area is inefficient domestic production; the red is a complete welfare loss", correct: false }
+          ]
+        },
+        {
+          title: "What is the most likely effect of the quota on consumers?",
+          hint: "Choose the one correct answer.",
+          prompt: "Choose the most likely effect on consumers.",
+          ok: "Higher prices and reduced quantity available.",
+          choices: [
+            { text: "A. Lower prices and greater choice", correct: false },
+            { text: "B. Higher prices and reduced quantity available", correct: true },
+            { text: "C. Higher prices and greater quantity available", correct: false },
+            { text: "D. No change in price", correct: false }
+          ]
+        },
+        {
+          title: "Which of the following is a common reason governments impose quotas?",
+          hint: "Choose the one correct answer.",
+          prompt: "Choose a common reason for imposing quotas.",
+          ok: "To protect domestic producers from foreign competition.",
+          choices: [
+            { text: "A. To increase imports", correct: false },
+            { text: "B. To reduce production costs", correct: false },
+            { text: "C. To protect domestic producers from foreign competition", correct: true },
+            { text: "D. To increase market competition", correct: false }
+          ]
+        }
+      ];
+
+      var FREE_TRADE_LEAD = "Country Y is willing to supply Country X with goods at the world price, Pf. The quantity of products demanded domestically in Country X is E. Country X has its own suppliers of the product, and they supply up to point A. The quantity between A and E is imported.";
+      var QUOTA_LEAD = "A quota has been imposed by Country X. This restricts the supply of goods from Country Y. Total supply is now limited to domestic supply plus the quota of imports. This means there is a new equilibrium price at P1 and quantity C.";
+      var FREE_TRADE_ALT = "Country X importer. Domestic demand slopes down and domestic supply slopes up. World price Pf is a horizontal line. Quantity A is domestic supply at Pf and quantity E is domestic demand at Pf.";
+      var QUOTA_ALT = "Country X importer after a quota. Domestic supply plus quota is shown as a dashed line. The new equilibrium is at price P1 and quantity C.";
+      var IMPORTS_AFTER_ALT = "Country X importer after a quota. Imports fall from A to E before the quota to B to C after the quota.";
+      var PS_AFTER_ALT = "Country X importer after a quota. The shaded area above domestic supply and below P1 is producer surplus following the quota.";
+      var QUOTA_RENT_ALT = "Country X importer after a quota. The shaded rectangle KLHG between P1 and Pf, from B to C, is the increase in producer surplus for Country Y exporters.";
+      var WELFARE_LOSS_ALT = "Country X importer after a quota. The red triangle shows inefficient domestic production loss and the amber triangle shows a complete welfare loss.";
+
+      var BEST_KEY = "quota-game-best";
+      var namesEl = document.getElementById("names");
+      var feedback = document.getElementById("feedback");
+      var scoreEl = document.getElementById("score");
+      var bestEl = document.getElementById("best");
+      var qKicker = document.getElementById("q-kicker");
+      var qTitle = document.getElementById("q-title");
+      var qHint = document.getElementById("q-hint");
+      var leadEl = document.getElementById("lead");
+      var diagramEl = document.getElementById("diagram");
+      var SCORE_TOTAL = QUESTIONS.length;
+      var score = 0;
+      var index = 0;
+      var answered = false;
+      var firstTry = true;
+      var advanceTimer = null;
+
+      function getBest() {
+        try { return Number(localStorage.getItem(BEST_KEY)) || 0; } catch (err) { return 0; }
+      }
+
+      function setBest(value) {
+        try { localStorage.setItem(BEST_KEY, String(value)); } catch (err) {}
+      }
+
+      function updateScore() {
+        scoreEl.textContent = "Score: " + score + " / " + SCORE_TOTAL;
+        bestEl.textContent = "Best: " + getBest() + " / " + SCORE_TOTAL;
+      }
+
+      function finishIfComplete() {
+        if (index < QUESTIONS.length - 1) return;
+        if (score > getBest()) setBest(score);
+        updateScore();
+        setFeedback("Finished. Score: " + score + " / " + SCORE_TOTAL + ". Best: " + getBest() + " / " + SCORE_TOTAL + ".", "ok");
+      }
+
+      function saveDiagram() {
+        var src = diagramEl.currentSrc || diagramEl.src;
+        var name = (src.split("/").pop() || "quota-diagram.png").split("?")[0];
+        fetch(src)
+          .then(function (res) { return res.blob(); })
+          .then(function (blob) {
+            var url = URL.createObjectURL(blob);
+            var link = document.createElement("a");
+            link.href = url;
+            link.download = name;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+          })
+          .catch(function () {
+            var link = document.createElement("a");
+            link.href = src;
+            link.download = name;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+          });
+      }
+
+      function setFeedback(text, kind) {
+        feedback.textContent = text;
+        feedback.classList.toggle("ok", kind === "ok");
+        feedback.classList.toggle("bad", kind === "bad");
+      }
+
+      function shuffleChoices(list) {
+        var arr = list.slice();
+        var i;
+        for (i = arr.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var tmp = arr[i];
+          arr[i] = arr[j];
+          arr[j] = tmp;
+        }
+        var letters = ["A", "B", "C", "D"];
+        return arr.map(function (choice, index) {
+          return {
+            correct: choice.correct,
+            text: letters[index] + ". " + choice.text.replace(/^[A-D]\.\s*/, "")
+          };
+        });
+      }
+
+      function showFreeTradeDiagram() {
+        diagramEl.src = "quota-free-trade.png";
+        diagramEl.alt = FREE_TRADE_ALT;
+        leadEl.textContent = FREE_TRADE_LEAD;
+      }
+
+      function showQuotaDiagram() {
+        diagramEl.src = "quota-with-quota.png";
+        diagramEl.alt = QUOTA_ALT;
+        leadEl.textContent = QUOTA_LEAD;
+      }
+
+      function showImportsAfterDiagram() {
+        diagramEl.src = "quota-imports-after.png";
+        diagramEl.alt = IMPORTS_AFTER_ALT;
+      }
+
+      function showPsAfterDiagram() {
+        diagramEl.src = "quota-ps-after.png";
+        diagramEl.alt = PS_AFTER_ALT;
+      }
+
+      function showQuotaRentDiagram() {
+        diagramEl.src = "quota-rent.png";
+        diagramEl.alt = QUOTA_RENT_ALT;
+      }
+
+      function showWelfareLossDiagram() {
+        diagramEl.src = "quota-welfare-loss.png";
+        diagramEl.alt = WELFARE_LOSS_ALT;
+      }
+
+      function showQuestion() {
+        var q = QUESTIONS[index];
+        answered = false;
+        firstTry = true;
+        qKicker.textContent = "Question " + (index + 1);
+        qTitle.textContent = q.title;
+        qHint.textContent = q.hint;
+        namesEl.textContent = "";
+        shuffleChoices(q.choices).forEach(function (choice) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = choice.text;
+          btn.addEventListener("click", function () {
+            if (answered) return;
+            if (!choice.correct) {
+              firstTry = false;
+              setFeedback("Try again.", "bad");
+              return;
+            }
+            answered = true;
+            btn.classList.add("done");
+            btn.disabled = true;
+            Array.prototype.forEach.call(namesEl.querySelectorAll("button"), function (b) {
+              b.disabled = true;
+            });
+            if (firstTry) score += 1;
+            updateScore();
+            setFeedback(q.ok || "Correct.", "ok");
+            if (advanceTimer) clearTimeout(advanceTimer);
+            if (index < QUESTIONS.length - 1) {
+              advanceTimer = setTimeout(function () {
+                advanceTimer = null;
+                if (index === 2) showQuotaDiagram();
+                if (index === 3) showImportsAfterDiagram();
+                if (index === 4) showPsAfterDiagram();
+                if (index === 5) showQuotaRentDiagram();
+                if (index === 6) showWelfareLossDiagram();
+                index += 1;
+                showQuestion();
+              }, 750);
+            } else {
+              finishIfComplete();
+            }
+          });
+          namesEl.appendChild(btn);
+        });
+        setFeedback(q.prompt, "");
+      }
+
+      document.getElementById("reset").addEventListener("click", function () {
+        if (advanceTimer) clearTimeout(advanceTimer);
+        advanceTimer = null;
+        score = 0;
+        index = 0;
+        firstTry = true;
+        showFreeTradeDiagram();
+        updateScore();
+        showQuestion();
+      });
+
+      document.getElementById("btn-save").addEventListener("click", saveDiagram);
+
+      updateScore();
+      showQuestion();
+    })();
+  </script>
+</body>
+</html>

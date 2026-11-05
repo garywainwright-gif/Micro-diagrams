@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Elasticity and equilibrium</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #f0dce2;
+      --paper: #fef7f9;
+      --bg: #fef7f9;
+      --card: #fffaf3;
+      --formula: #f8e8ec;
+      --accent: #9a3412;
+      --accent-soft: #f8e8ec;
+      --tick: #b45309;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Financier Text", Georgia, "Palatino Linotype", Palatino, serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+    }
+    h1, h2, h3 {
+      font-family: "Financier Display", Georgia, "Palatino Linotype", Palatino, serif;
+      letter-spacing: -0.02em;
+    }
+    .book { max-width: 1280px; margin: 0 auto; padding: 16px 16px 48px; }
+    .topic {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 22px 24px;
+      margin: 16px 0;
+    }
+    h1 { margin: 0 0 8px; font-size: 1.75rem; }
+    .intro {
+      background: var(--accent-soft);
+      border: 1px solid #e4b8c4;
+      border-radius: 10px;
+      padding: 16px 18px 14px;
+      margin-bottom: 32px;
+    }
+    .intro .steps { margin: 0; }
+    h2 { margin: 0 0 10px; font-size: 1.05rem; }
+    .meta { color: var(--muted); font-size: 0.92rem; margin: 0 0 12px; }
+    .meta a { color: var(--accent); font-weight: 700; }
+    .stage {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+    .steps { margin: 8px 0 0; padding-left: 1.2rem; }
+    .steps li { margin: 4px 0; }
+    .key {
+      display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 8px 4px 0;
+      color: var(--muted); font-size: 0.86rem;
+    }
+    .key b.d { color: #183a66; }
+    .key b.s { color: #9a3412; }
+    .nudge { margin: 6px 0 0; font-weight: 700; }
+    #demand-forces, #supply-forces {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      align-items: start;
+    }
+    #demand-forces > h3, #supply-forces > h3,
+    #demand-forces > .lead, #supply-forces > .lead,
+    #demand-forces > .elasticity-box,
+    #supply-forces > .elasticity-box { grid-column: 1 / -1; }
+    .elasticity-box {
+      background: var(--accent-soft);
+      border: 1px solid #e4b8c4;
+      border-radius: 10px;
+      padding: 10px 12px 12px;
+    }
+    .elasticity-box h3 { margin-top: 0; }
+    .elasticity-box .seg button { background: #fff; }
+    .side h2 { font-size: 0.98rem; }
+    .side h3 { margin: 12px 0 6px; font-size: 0.88rem; color: var(--accent); }
+    .side h3:first-of-type { margin-top: 0; }
+    .side .lead { margin: 0 0 8px; color: var(--muted); font-size: 0.82rem; font-weight: 500; }
+    .seg.stack { flex-direction: column; }
+    .seg.stack button, .choice.stack span { text-align: left; }
+    .chart-wrap {
+      background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 4px 4px 0;
+    }
+    svg.chart {
+      display: block; width: 100%; max-width: 100%; height: auto; margin: 0 auto;
+    }
+    .readout {
+      display: grid; grid-template-columns: 0.7fr 1.6fr 0.8fr; gap: 8px; margin: 8px 0;
+    }
+    .stat {
+      background: var(--formula); border-radius: 8px; padding: 8px 12px;
+    }
+    .stat span { display: block; color: var(--muted); font-size: 0.8rem; }
+    .stat strong { font-size: 1.05rem; }
+    .story { margin: 0 0 8px; min-height: 2.8em; font-size: 0.92rem; }
+    .limit { margin: 0 0 8px; color: #9a3412; font-weight: 700; font-size: 0.92rem; }
+    .price-row { margin: 0 0 16px; }
+    .price-row label { font-weight: 700; display: block; margin-bottom: 6px; }
+    .price-row input { width: 100%; }
+    .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .tools button, .seg button {
+      font: inherit; font-weight: 700; cursor: pointer; border-radius: 8px;
+    }
+    .tools button {
+      background: var(--accent); color: #fff; border: 0; padding: 8px 12px;
+    }
+    .tools button.ghost { background: var(--card); color: var(--accent); border: 1px solid #e4b8c4; }
+    .tools button:disabled, .seg button:disabled { opacity: 0.45; cursor: default; }
+    .force { margin: 0 0 8px; }
+    .force p { margin: 0 0 4px; font-weight: 700; font-size: 0.86rem; }
+    .seg { display: flex; flex-wrap: wrap; gap: 4px; }
+    .seg button {
+      background: var(--card); color: var(--accent); border: 1px solid #e4b8c4;
+      padding: 8px 10px; font-size: 0.86rem;
+    }
+    .seg button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .tools button.ready { outline: 3px solid var(--tick); outline-offset: 2px; }
+    .path-head {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 10px; margin-top: 18px;
+    }
+    .path-head h2 { margin: 0; }
+    #save-all {
+      font: inherit; font-weight: 700; cursor: pointer; border-radius: 8px;
+      background: var(--card); color: var(--accent); border: 1px solid #e4b8c4; padding: 8px 12px;
+    }
+    .path {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 14px; margin-top: 12px;
+    }
+    .path h2, .recap h2 { font-size: 1.05rem; }
+    .path h2 span.on {
+      display: inline-block; background: var(--accent); color: #fff;
+      border-radius: 8px; padding: 6px 10px;
+    }
+    .path .chart-wrap svg.chart { width: auto; max-height: 220px; }
+    .choice { margin: 0 0 8px; }
+    .choice span {
+      font-weight: 700; font-size: 0.86rem; border: 1px solid #e4b8c4;
+      border-radius: 8px; padding: 8px 10px; color: var(--accent); background: var(--card);
+    }
+    .choice span.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .caption { margin: 6px 0 0; color: var(--muted); font-size: 0.92rem; }
+    .recap {
+      margin-top: 14px; background: var(--formula); border-radius: 8px; padding: 12px 16px;
+    }
+    .recap p { margin: 0; }
+    @media (min-width: 1100px) {
+      .stage { grid-template-columns: minmax(220px, 300px) minmax(0, 1fr) minmax(220px, 300px); }
+    }
+    @media (max-width: 1099px) {
+      .centre { order: -1; }
+    }
+    @media (max-width: 760px) {
+      .readout { grid-template-columns: 1fr; }
+    }
+  </style>
+  <link rel="stylesheet" href="../diagram-economist.css" />
+</head>
+<body>
+  <div class="book">
+    <article class="topic">
+      <header class="intro">
+        <h1>Elasticity and equilibrium</h1>
+        <p class="meta"><a href="../micro-diagrams.html">Back to interactive games</a></p>
+        <ol class="steps">
+          <li>Change an elasticity. The curve becomes flatter or steeper. It pivots through the original equilibrium, so price and quantity stay the same.</li>
+          <li>Choose one demand and supply change to the market.</li>
+          <li>Press <strong>Move to the new equilibrium</strong>. The price rises or falls until quantity demanded equals quantity supplied.</li>
+        </ol>
+      </header>
+      <div class="stage">
+      <section class="side">
+        <h2>Demand</h2>
+        <div id="demand-forces"></div>
+      </section>
+      <div class="centre">
+      <div class="price-row">
+        <label for="price">Try another price: <span id="price-now">£40</span>. This does not move the curves.</label>
+        <input id="price" type="range" min="8" max="92" step="1" value="40" />
+        <div class="tools">
+          <button type="button" id="settle" disabled>Move to the new equilibrium</button>
+          <button type="button" class="ghost" id="reset">Reset</button>
+          <button type="button" class="ghost" id="save-diagram" data-file="elasticity-equilibrium.png">Save diagram</button>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <svg class="chart" id="chart" viewBox="0 0 680 420" role="img" aria-labelledby="chart-title">
+          <title id="chart-title">Demand and supply meeting at equilibrium</title>
+          <line x1="64" y1="36" x2="64" y2="352" stroke="#1c1915" stroke-width="2" />
+          <polygon points="64,28 59,42 69,42" fill="#1c1915" />
+          <line x1="64" y1="352" x2="620" y2="352" stroke="#1c1915" stroke-width="2" />
+          <polygon points="632,352 618,347 618,357" fill="#1c1915" />
+          <defs>
+            <marker id="gap-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 Z" fill="#1c1915" />
+            </marker>
+          </defs>
+          <text x="74" y="44" fill="#5c5348" font-size="15" font-family="Financier Text, Georgia, Palatino, serif">Price</text>
+          <text x="548" y="376" fill="#5c5348" font-size="15" font-family="Financier Text, Georgia, Palatino, serif">Quantity</text>
+          <line id="d0" stroke="#183a66" stroke-width="2.5" stroke-dasharray="8 6" opacity="0" />
+          <line id="s0" stroke="#9a3412" stroke-width="2.5" stroke-dasharray="8 6" opacity="0" />
+          <line id="demand" stroke="#183a66" stroke-width="3" />
+          <line id="supply" stroke="#9a3412" stroke-width="3" />
+          <line id="guide-h" stroke="#1c1915" stroke-width="1.5" stroke-dasharray="5 4" />
+          <line id="guide-v" stroke="#1c1915" stroke-width="1.5" stroke-dasharray="5 4" />
+          <line id="guide-v2" stroke="#1c1915" stroke-width="1.5" stroke-dasharray="5 4" opacity="0" />
+          <line id="gap" stroke="#1c1915" stroke-width="3" opacity="0" marker-start="url(#gap-arrow)" marker-end="url(#gap-arrow)" />
+          <text id="gap-label" fill="#9a3412" stroke="#fff" stroke-width="5" paint-order="stroke" font-size="18" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif" text-anchor="middle" opacity="0"></text>
+          <text id="price-label" fill="#1c1915" font-size="15" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif" text-anchor="end"></text>
+          <text id="q-label" fill="#1c1915" font-size="15" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif" text-anchor="middle" opacity="0"></text>
+          <circle id="eq" r="7" fill="#1c1915" stroke="#fff" stroke-width="1.5" />
+          <text id="d-label" fill="#183a66" font-size="18" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif">D</text>
+          <text id="d1-label" fill="#183a66" font-size="18" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif" opacity="0">D1</text>
+          <text id="s-label" fill="#9a3412" font-size="18" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif">S</text>
+          <text id="s1-label" fill="#9a3412" font-size="18" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif" opacity="0">S1</text>
+          <text id="e-label" fill="#183a66" font-size="16" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif">E</text>
+        </svg>
+      </div>
+      <p class="key"><b class="d">Blue D</b> demand <b class="s">Brown S</b> supply <span>Dashed curve: where it started</span> <span>E: equilibrium</span></p>
+      <div class="readout" aria-live="polite">
+        <div class="stat"><span>Price</span><strong id="stat-p">£40</strong></div>
+        <div class="stat"><span id="stat-q-label">Quantity</span><strong id="stat-q">60</strong></div>
+        <div class="stat"><span>Market</span><strong id="stat-m">Equilibrium</strong></div>
+      </div>
+      <p class="story" id="story">The market starts in equilibrium. Demand and supply are both unit elastic. Change one thing, then read what happened under the diagram.</p>
+      <p class="limit" id="limit-note" hidden>Another choice that way would move a curve off the diagram, so that choice is turned off.</p>
+      </div>
+      <section class="side">
+        <h2>Supply</h2>
+        <div id="supply-forces"></div>
+      </section>
+      </div>
+      <div class="path-head">
+        <h2 class="path-title">What changed</h2>
+        <button type="button" id="save-all">Save all diagrams</button>
+      </div>
+      <section class="path" id="path" aria-label="Diagrams from the start to the new equilibrium"></section>
+      <div class="recap" id="recap" hidden>
+        <h2>How the market moved</h2>
+        <p id="recap-text"></p>
+      </div>
+    </article>
+  </div>
+  <script src="../equilibrium-save.js"></script>
+  <script>
+    (function () {
+      var STEP = 40;
+      var QMAX = 140;
+      var P0 = 40;
+      var Q0 = 60;
+      var FORCES = [
+        { id: "ped", side: "d", group: "Price elasticity of demand", name: "Price elasticity of demand", boxed: true,
+          hint: "This changes the slope of demand. Elastic is flatter. Inelastic is steeper. The curve pivots. It does not shift.",
+          low: "Inelastic", mid: "Unit elastic", high: "Elastic",
+          up: "Price elasticity of demand is elastic, so the demand curve becomes flatter. Quantity demanded changes by more when the price changes.",
+          down: "Price elasticity of demand is inelastic, so the demand curve becomes steeper. Quantity demanded changes by less when the price changes.",
+          flat: "Price elasticity of demand returns to unit elastic, so the demand curve returns to its original slope." },
+        { id: "income", side: "d", group: "Shifts in demand", stack: true, sign: 1, name: "Income",
+          hint: "These move the whole demand curve. Choose one shift at a time. The price stays where it is until you press Move to the new equilibrium.",
+          low: "Falls", high: "Rises",
+          up: "Income rises. For a normal good, buyers want more at each price, so demand shifts right.",
+          down: "Income falls. For a normal good, buyers want less at each price, so demand shifts left." },
+        { id: "substitutes", side: "d", group: "Shifts in demand", stack: true, sign: 1, name: "Price of substitutes",
+          low: "Falls", high: "Rises",
+          up: "A substitute becomes dearer, so buyers switch towards this good. Demand shifts right.",
+          down: "A substitute becomes cheaper, so buyers switch away from this good. Demand shifts left." },
+        { id: "complements", side: "d", group: "Shifts in demand", stack: true, sign: -1, name: "Price of complements",
+          low: "Falls", high: "Rises",
+          up: "A complement becomes dearer, so this good is bought less often. Demand shifts left.",
+          down: "A complement becomes cheaper, so this good is bought more often. Demand shifts right." },
+        { id: "tastes", side: "d", group: "Shifts in demand", stack: true, sign: 1, name: "Tastes and preferences",
+          low: "Weaker", high: "Stronger",
+          up: "Tastes move in favour of this good, so demand shifts right.",
+          down: "Tastes move away from this good, so demand shifts left." },
+        { id: "dexpect", side: "d", group: "Shifts in demand", stack: true, sign: 1, name: "Buyer expectations",
+          low: "Expect a lower price", high: "Expect a higher price",
+          up: "Buyers expect the price to rise later, so they buy more now. Demand shifts right.",
+          down: "Buyers expect the price to fall later, so they buy less now. Demand shifts left." },
+        { id: "consumers", side: "d", group: "Shifts in demand", stack: true, sign: 1, name: "Number of consumers",
+          low: "Fewer", high: "More",
+          up: "More consumers enter the market, so demand shifts right.",
+          down: "Fewer consumers are in the market, so demand shifts left." },
+        { id: "pes", side: "s", group: "Price elasticity of supply", name: "Price elasticity of supply", boxed: true,
+          hint: "This changes the slope of supply. Elastic is flatter. Inelastic is steeper. The curve pivots. It does not shift.",
+          low: "Inelastic", mid: "Unit elastic", high: "Elastic",
+          up: "Price elasticity of supply is elastic, so the supply curve becomes flatter. Quantity supplied changes by more when the price changes.",
+          down: "Price elasticity of supply is inelastic, so the supply curve becomes steeper. Quantity supplied changes by less when the price changes.",
+          flat: "Price elasticity of supply returns to unit elastic, so the supply curve returns to its original slope." },
+        { id: "output", side: "s", group: "What makes supply elastic or inelastic", name: "Increasing output", stack: true,
+          hint: "Supply is more elastic when producers can adjust easily, and more inelastic when they cannot. Choose one at a time.",
+          low: "Production takes time (e.g., oil extraction)", high: "Producers can easily increase output",
+          up: "Producers can easily increase output, so supply is more elastic and the supply curve becomes flatter.",
+          down: "Production takes time, for example oil extraction, so supply is more inelastic and the supply curve becomes steeper.",
+          flat: "Ease of increasing output returns to its original level, so this no longer changes the slope of supply." },
+        { id: "inputs", side: "s", group: "What makes supply elastic or inelastic", name: "Inputs", stack: true,
+          low: "Inputs are scarce or specialised", high: "Inputs are readily available",
+          up: "Inputs are readily available, so supply is more elastic and the supply curve becomes flatter.",
+          down: "Inputs are scarce or specialised, so supply is more inelastic and the supply curve becomes steeper.",
+          flat: "Availability of inputs returns to its original level, so this no longer changes the slope of supply." },
+        { id: "storage", side: "s", group: "What makes supply elastic or inelastic", name: "Storing goods", stack: true,
+          low: "Goods cannot be stored", high: "Goods can be stored",
+          up: "Goods can be stored, so supply is more elastic and the supply curve becomes flatter.",
+          down: "Goods cannot be stored, so supply is more inelastic and the supply curve becomes steeper.",
+          flat: "Storage returns to its original position, so this no longer changes the slope of supply." },
+        { id: "firms", side: "s", group: "What makes supply elastic or inelastic", name: "Firms in the market", stack: true,
+          low: "Firms are highly specialised", high: "Many firms operate in the market",
+          up: "Many firms operate in the market, so supply is more elastic and the supply curve becomes flatter.",
+          down: "Firms are highly specialised, so supply is more inelastic and the supply curve becomes steeper.",
+          flat: "The number and type of firms return to the original position, so this no longer changes the slope of supply." },
+        { id: "horizon", side: "s", group: "What makes supply elastic or inelastic", name: "Time period", stack: true,
+          low: "Short run", high: "Time period is long (firms can expand capacity)",
+          up: "The time period is long, so firms can expand capacity. Supply is more elastic and the supply curve becomes flatter.",
+          down: "The time period is short, so firms cannot expand capacity. Supply is more inelastic and the supply curve becomes steeper.",
+          flat: "The time period returns to its original length, so this no longer changes the slope of supply." }
+      ];
+
+      var values = {};
+      FORCES.forEach(function (f) { values[f.id] = 0; });
+      var shown = { d: 0, s: 0, ped: 1, pes: 1, price: P0 };
+      var anchor = { d: 0, s: 0, ped: 1, pes: 1, p: P0, q: Q0 };
+      var manual = false;
+      var lastCause = "";
+      var anim = 0;
+      var busy = false;
+
+      var storyEl = document.getElementById("story");
+      var priceInput = document.getElementById("price");
+      var settleBtn = document.getElementById("settle");
+
+      function money(n) { return "£" + String(Math.round(n)); }
+      function qty(n) { return String(Math.round(n)); }
+      function pedOf(vals) {
+        var score = vals.ped || 0;
+        var slope = Math.pow(1.65, score);
+        if (slope < 0.34) return 0.34;
+        if (slope > 3.4) return 3.4;
+        return slope;
+      }
+      function pesOf(vals) {
+        var score = (vals.pes || 0) + (vals.output || 0) + (vals.inputs || 0) + (vals.storage || 0) + (vals.firms || 0) + (vals.horizon || 0);
+        var slope = Math.pow(1.65, score);
+        if (slope < 0.34) return 0.34;
+        if (slope > 3.4) return 3.4;
+        return slope;
+      }
+      function curvesFrom(vals) {
+        var d = 0;
+        FORCES.forEach(function (f) {
+          if (f.sign) d += (vals[f.id] || 0) * f.sign * STEP;
+        });
+        return { d: d, s: 0, ped: pedOf(vals), pes: pesOf(vals) };
+      }
+      function currentCurves() { return curvesFrom(values); }
+      function exclusiveGroup(force) {
+        if (force.group === "Shifts in demand" || force.group === "What makes supply elastic or inelastic") return force.group;
+        return "";
+      }
+      function trialCurves(id, v) {
+        var chosen = null;
+        FORCES.forEach(function (f) { if (f.id === id) chosen = f; });
+        var group = chosen ? exclusiveGroup(chosen) : "";
+        var vals = {};
+        FORCES.forEach(function (f) {
+          if (f.id === id) vals[f.id] = v;
+          else if (group && exclusiveGroup(f) === group) vals[f.id] = 0;
+          else vals[f.id] = values[f.id];
+        });
+        return curvesFrom(vals);
+      }
+      function fitsOnAxes(d, s, ped, pes) {
+        var eq = equilibrium(d, s, ped, pes);
+        if (eq.p < 8 || eq.p > 92) return false;
+        if (eq.q < 12 || eq.q > QMAX - 12) return false;
+        var qDem = qd(shown.price, d, ped);
+        var qSup = qs(shown.price, s, pes);
+        if (qDem < 0 || qDem > QMAX || qSup < 0 || qSup > QMAX) return false;
+        var dLine = clipDemand(d, ped);
+        var sLine = clipSupply(s, pes);
+        if (Math.abs(dLine.x2 - dLine.x1) < 12 && Math.abs(dLine.y2 - dLine.y1) < 12) return false;
+        if (Math.abs(sLine.x2 - sLine.x1) < 12 && Math.abs(sLine.y2 - sLine.y1) < 12) return false;
+        return true;
+      }
+      function qd(p, d, ped) { return Q0 + d - ped * (p - P0); }
+      function qs(p, s, pes) { return Q0 + s + pes * (p - P0); }
+      function equilibrium(d, s, ped, pes) {
+        var p = P0 + (d - s) / (ped + pes);
+        return { p: p, q: qs(p, s, pes) };
+      }
+      function xOf(q) { return 64 + (Math.max(0, Math.min(QMAX, q)) / QMAX) * 540; }
+      function yOf(p) { return 352 - (p / 100) * 300; }
+
+      function clipDemand(d, ped) {
+        var pTop = 100;
+        var qTop = qd(pTop, d, ped);
+        var pBot = 0;
+        var qBot = qd(pBot, d, ped);
+        if (qTop < 0) { qTop = 0; pTop = P0 + (Q0 + d) / ped; }
+        if (qBot > QMAX) { qBot = QMAX; pBot = P0 + (Q0 + d - QMAX) / ped; }
+        if (qBot < 0) { qBot = 0; pBot = P0 + (Q0 + d) / ped; }
+        pTop = Math.max(0, Math.min(100, pTop));
+        pBot = Math.max(0, Math.min(100, pBot));
+        return { x1: xOf(qBot), y1: yOf(pBot), x2: xOf(qTop), y2: yOf(pTop) };
+      }
+      function clipSupply(s, pes) {
+        var pBot = 0;
+        var qBot = qs(pBot, s, pes);
+        if (qBot < 0) { qBot = 0; pBot = P0 - (Q0 + s) / pes; }
+        var pTop = 100;
+        var qTop = qs(pTop, s, pes);
+        if (qTop > QMAX) { qTop = QMAX; pTop = P0 + (QMAX - Q0 - s) / pes; }
+        if (qTop < 0) { qTop = 0; pTop = P0 - (Q0 + s) / pes; }
+        pBot = Math.max(0, Math.min(100, pBot));
+        pTop = Math.max(0, Math.min(100, pTop));
+        return { x1: xOf(qBot), y1: yOf(pBot), x2: xOf(qTop), y2: yOf(pTop) };
+      }
+      function styleLine(id, seg, opts) {
+        var el = document.getElementById(id);
+        if (!opts.show) {
+          el.setAttribute("opacity", "0");
+          return;
+        }
+        el.setAttribute("x1", String(seg.x1));
+        el.setAttribute("y1", String(seg.y1));
+        el.setAttribute("x2", String(seg.x2));
+        el.setAttribute("y2", String(seg.y2));
+        el.setAttribute("stroke", opts.stroke);
+        el.setAttribute("stroke-width", opts.width);
+        el.setAttribute("stroke-dasharray", opts.dash || "none");
+        el.setAttribute("opacity", opts.opacity || "1");
+      }
+
+      function placeLabel(id, x, y, text, show) {
+        var el = document.getElementById(id);
+        el.textContent = text;
+        el.setAttribute("x", String(x));
+        el.setAttribute("y", String(y));
+        el.setAttribute("opacity", show ? "1" : "0");
+      }
+
+      function setVGuide(id, q, yTop, show) {
+        var el = document.getElementById(id);
+        if (!show) {
+          el.setAttribute("opacity", "0");
+          return;
+        }
+        var x = xOf(q);
+        el.setAttribute("x1", String(x));
+        el.setAttribute("y1", String(yTop));
+        el.setAttribute("x2", String(x));
+        el.setAttribute("y2", "352");
+        el.setAttribute("opacity", "1");
+      }
+
+      function demandMoved(d, ped, d2, ped2) {
+        return Math.abs(d - d2) > 0.05 || Math.abs(ped - ped2) > 0.02;
+      }
+      function supplyMoved(s, pes, s2, pes2) {
+        return Math.abs(s - s2) > 0.05 || Math.abs(pes - pes2) > 0.02;
+      }
+
+      function draw(view) {
+        var eq = equilibrium(view.d, view.s, view.ped, view.pes);
+        var qDem = qd(view.price, view.d, view.ped);
+        var qSup = qs(view.price, view.s, view.pes);
+        var gapN = qDem - qSup;
+        var showGap = Math.abs(gapN) > 0.6 && (manual || view.mark === "gap");
+        var dShifted = demandMoved(view.d, view.ped, anchor.d, anchor.ped);
+        var sShifted = supplyMoved(view.s, view.pes, anchor.s, anchor.pes);
+        var shiftGap = showGap && (dShifted || sShifted);
+        var solidD = shiftGap && dShifted ? anchor.d : view.d;
+        var solidPed = shiftGap && dShifted ? anchor.ped : view.ped;
+        var solidS = shiftGap && sShifted ? anchor.s : view.s;
+        var solidPes = shiftGap && sShifted ? anchor.pes : view.pes;
+        var showOldD = shiftGap && dShifted;
+        var showOldS = shiftGap && sShifted;
+        var fadedD = !shiftGap && demandMoved(view.d, view.ped, 0, 1);
+        var fadedS = !shiftGap && supplyMoved(view.s, view.pes, 0, 1);
+        var dLine = clipDemand(solidD, solidPed);
+        var sLine = clipSupply(solidS, solidPes);
+        var oldD = showOldD ? clipDemand(view.d, view.ped) : fadedD ? clipDemand(0, 1) : dLine;
+        var oldS = showOldS ? clipSupply(view.s, view.pes) : fadedS ? clipSupply(0, 1) : sLine;
+        styleLine("demand", dLine, { show: true, stroke: "#183a66", width: "3" });
+        styleLine("supply", sLine, { show: true, stroke: "#9a3412", width: "3" });
+        styleLine("d0", oldD, {
+          show: showOldD || fadedD,
+          stroke: shiftGap ? "#183a66" : "#9aafc7",
+          width: "2.5",
+          dash: "8 6",
+          opacity: shiftGap ? "1" : "0.95"
+        });
+        styleLine("s0", oldS, {
+          show: showOldS || fadedS,
+          stroke: shiftGap ? "#9a3412" : "#c4a090",
+          width: "2.5",
+          dash: "8 6",
+          opacity: shiftGap ? "1" : "0.95"
+        });
+        var demandRenamed = demandMoved(view.d, view.ped, 0, 1);
+        var supplyRenamed = supplyMoved(view.s, view.pes, 0, 1);
+        placeLabel("d-label", dLine.x1 + 8, Math.min(346, dLine.y1 - 6), shiftGap || !demandRenamed ? "D" : "D1", true);
+        placeLabel("d1-label", oldD.x1 + 8, Math.min(346, oldD.y1 + 16), shiftGap ? "D1" : "D", showOldD || fadedD);
+        placeLabel("s-label", sLine.x2 + 8, sLine.y2 + 4, shiftGap || !supplyRenamed ? "S" : "S1", true);
+        placeLabel("s1-label", oldS.x2 + 8, oldS.y2 + 18, shiftGap ? "S1" : "S", showOldS || fadedS);
+
+        var dot = { q: eq.q, p: eq.p };
+        if (shiftGap) {
+          if (dShifted && !sShifted) dot = { q: qs(view.price, view.s, view.pes), p: view.price };
+          else if (sShifted && !dShifted) dot = { q: qd(view.price, view.d, view.ped), p: view.price };
+          else {
+            var span = eq.p - anchor.p;
+            var t = Math.abs(span) < 0.4 ? 1 : Math.max(0, Math.min(1, (view.price - anchor.p) / span));
+            dot = { q: anchor.q + (eq.q - anchor.q) * t, p: view.price };
+          }
+        }
+        var cx = xOf(dot.q);
+        var cy = yOf(dot.p);
+        document.getElementById("eq").setAttribute("cx", String(cx));
+        document.getElementById("eq").setAttribute("cy", String(cy));
+        var eLabel = document.getElementById("e-label");
+        eLabel.setAttribute("x", String(cx + 10));
+        eLabel.setAttribute("y", String(cy - 10));
+        eLabel.setAttribute("opacity", showGap ? "0" : "1");
+
+        var priceY = yOf(showGap ? view.price : eq.p);
+        var priceXEnd = showGap ? xOf(Math.max(qDem, qSup)) : cx;
+        document.getElementById("guide-h").setAttribute("x1", "64");
+        document.getElementById("guide-h").setAttribute("y1", String(priceY));
+        document.getElementById("guide-h").setAttribute("x2", String(priceXEnd));
+        document.getElementById("guide-h").setAttribute("y2", String(priceY));
+        if (showGap) {
+          setVGuide("guide-v", Math.min(qDem, qSup), priceY, true);
+          setVGuide("guide-v2", Math.max(qDem, qSup), priceY, Math.abs(qDem - qSup) > 0.6);
+        } else {
+          setVGuide("guide-v", eq.q, cy, true);
+          setVGuide("guide-v2", 0, 0, false);
+        }
+        var priceLabel = document.getElementById("price-label");
+        priceLabel.textContent = String(Math.round(showGap ? view.price : eq.p));
+        priceLabel.setAttribute("x", "56");
+        priceLabel.setAttribute("y", String(priceY + 5));
+        var qtyLabel = document.getElementById("q-label");
+        if (!showGap || view.labelQty) {
+          var qn = view.labelQty ? dot.q : eq.q;
+          qtyLabel.textContent = String(Math.round(qn));
+          qtyLabel.setAttribute("x", String(Math.max(86, Math.min(520, xOf(qn)))));
+          qtyLabel.setAttribute("y", "370");
+          qtyLabel.setAttribute("opacity", "1");
+        } else {
+          qtyLabel.setAttribute("opacity", "0");
+        }
+
+        var excess = gapN > 0.6 ? "Excess demand" : gapN < -0.6 ? "Excess supply" : "";
+        var gap = document.getElementById("gap");
+        var gapLabel = document.getElementById("gap-label");
+        if (showGap && excess) {
+          var x1 = xOf(Math.min(qSup, qDem));
+          var x2 = xOf(Math.max(qSup, qDem));
+          gap.setAttribute("x1", String(x1));
+          gap.setAttribute("y1", String(priceY));
+          gap.setAttribute("x2", String(x2));
+          gap.setAttribute("y2", String(priceY));
+          gap.setAttribute("opacity", "1");
+          gapLabel.textContent = excess;
+          gapLabel.setAttribute("x", String((x1 + x2) / 2));
+          gapLabel.setAttribute("y", String(priceY > 320 ? priceY - 12 : priceY + 22));
+          gapLabel.setAttribute("opacity", "1");
+        } else {
+          gap.setAttribute("opacity", "0");
+          gapLabel.setAttribute("opacity", "0");
+        }
+        document.getElementById("stat-p").textContent = money(showGap ? view.price : eq.p);
+        document.getElementById("stat-q-label").textContent = showGap ? "At this price" : "Quantity";
+        document.getElementById("stat-q").textContent = showGap ? qty(qDem) + " demanded, " + qty(qSup) + " supplied" : qty(eq.q);
+        document.getElementById("stat-m").textContent = showGap && excess ? excess : "Equilibrium";
+        document.getElementById("price-now").textContent = money(view.price);
+      }
+
+      var stepN = 0;
+      var pending = [];
+      var notes = [];
+      var pendingNotes = [];
+      var lastShot = { d: 0, s: 0, price: P0 };
+
+      function mountCopy(host, prefix) {
+        var svg = document.getElementById("chart").cloneNode(true);
+        svg.id = prefix + "svg";
+        Array.prototype.forEach.call(svg.querySelectorAll("[id]"), function (el) {
+          el.id = prefix + el.id;
+        });
+        host.appendChild(svg);
+      }
+
+      function writeRecap() {
+        var recap = document.getElementById("recap");
+        if (!notes.length) {
+          recap.hidden = true;
+          document.getElementById("recap-text").textContent = "";
+          return;
+        }
+        recap.hidden = false;
+        document.getElementById("recap-text").textContent = notes.join(" ");
+      }
+
+      function captureStep(opts) {
+        stepN += 1;
+        var card = document.createElement("div");
+        card.className = "step";
+        var heading = document.createElement("h2");
+        if (opts.highlightTitle) {
+          var mark = document.createElement("span");
+          mark.className = "on";
+          mark.textContent = opts.title;
+          heading.appendChild(mark);
+        } else {
+          heading.textContent = opts.title;
+        }
+        card.appendChild(heading);
+        var host = document.createElement("div");
+        host.className = "chart-wrap";
+        card.appendChild(host);
+        var cap = document.createElement("p");
+        cap.className = "caption";
+        cap.textContent = opts.caption;
+        card.appendChild(cap);
+        var path = document.getElementById("path");
+        path.appendChild(card);
+        mountCopy(host, "step" + stepN + "-");
+        var first = pending[0] || card;
+        if (opts.reveal) {
+          pending.forEach(function (item) { item.hidden = false; });
+          pending = [];
+          notes = notes.concat(pendingNotes);
+          pendingNotes = [];
+          if (opts.note) notes.push(opts.note);
+          writeRecap();
+          if (opts.scroll !== false) first.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        } else {
+          card.hidden = true;
+          pending.push(card);
+          if (opts.note) pendingNotes.push(opts.note);
+        }
+        lastShot = { d: shown.d, s: shown.s, ped: shown.ped, pes: shown.pes, price: shown.price };
+      }
+
+      function revealPending(note) {
+        var first = pending[0];
+        pending.forEach(function (item) { item.hidden = false; });
+        pending = [];
+        notes = notes.concat(pendingNotes);
+        pendingNotes = [];
+        if (note) notes.push(note);
+        writeRecap();
+        if (first) first.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        lastShot = { d: shown.d, s: shown.s, ped: shown.ped, pes: shown.pes, price: shown.price };
+      }
+
+      function shotsMatch() {
+        return Math.abs(lastShot.d - shown.d) < 0.4
+          && Math.abs(lastShot.s - shown.s) < 0.4
+          && Math.abs(lastShot.ped - shown.ped) < 0.02
+          && Math.abs(lastShot.pes - shown.pes) < 0.02
+          && Math.abs(lastShot.price - shown.price) < 0.4;
+      }
+
+      function showStartCopy() {
+        var start = equilibrium(0, 0, 1, 1);
+        captureStep({
+          title: "Starting equilibrium",
+          caption: money(P0) + " and " + qty(start.q) + " units",
+          reveal: true,
+          scroll: false
+        });
+      }
+
+      function clearPath() {
+        document.getElementById("path").innerHTML = "";
+        pending = [];
+        notes = [];
+        pendingNotes = [];
+        stepN = 0;
+        writeRecap();
+      }
+
+      function refreshLimits() {
+        var blocked = false;
+        var now = currentCurves();
+        var lo = Math.max(8, P0 + (Q0 + now.d - QMAX) / now.ped, P0 - (Q0 + now.s) / now.pes);
+        var hi = Math.min(92, P0 + (Q0 + now.d) / now.ped, P0 + (QMAX - Q0 - now.s) / now.pes);
+        priceInput.min = String(Math.ceil(lo));
+        priceInput.max = String(Math.floor(hi));
+        Array.prototype.forEach.call(document.querySelectorAll(".seg button"), function (btn) {
+          var id = btn.getAttribute("data-force");
+          var v = Number(btn.getAttribute("data-v"));
+          if (values[id] === v || v === 0) {
+            btn.disabled = false;
+            btn.removeAttribute("title");
+            return;
+          }
+          var trial = trialCurves(id, v);
+          var ok = fitsOnAxes(trial.d, trial.s, trial.ped, trial.pes);
+          btn.disabled = !ok;
+          if (ok) {
+            btn.removeAttribute("title");
+          } else {
+            blocked = true;
+            btn.title = "Another choice this way would move a curve off the diagram.";
+          }
+        });
+        document.getElementById("limit-note").hidden = !blocked;
+      }
+
+      function buttonsOff(off) {
+        busy = off;
+        document.getElementById("reset").disabled = off;
+        priceInput.disabled = off;
+        settleBtn.disabled = off || !manual;
+        settleBtn.classList.toggle("ready", !off && manual);
+        if (off) {
+          Array.prototype.forEach.call(document.querySelectorAll(".seg button"), function (btn) {
+            btn.disabled = true;
+          });
+          return;
+        }
+        refreshLimits();
+      }
+
+      function ease(t) { return t * t * (3 - 2 * t); }
+
+      function excessName(gap) {
+        if (gap > 0.6) return "Excess demand";
+        if (gap < -0.6) return "Excess supply";
+        return "";
+      }
+
+      function reasonFor(force, v) {
+        if (v === 0) return force.flat || (force.name + " returns to its original level.");
+        return v > 0 ? force.up : force.down;
+      }
+
+      var CAUSES = {
+        ped: {
+          up: "price elasticity of demand becoming elastic, so the demand curve is flatter",
+          down: "price elasticity of demand becoming inelastic, so the demand curve is steeper",
+          flat: "price elasticity of demand returning to unit elastic"
+        },
+        income: {
+          up: "an increase in income",
+          down: "a fall in income",
+          flat: "income returning to its original level"
+        },
+        substitutes: {
+          up: "a rise in the price of substitutes",
+          down: "a fall in the price of substitutes",
+          flat: "the price of substitutes returning to its original level"
+        },
+        complements: {
+          up: "a rise in the price of complements",
+          down: "a fall in the price of complements",
+          flat: "the price of complements returning to its original level"
+        },
+        tastes: {
+          up: "stronger tastes and preferences",
+          down: "weaker tastes and preferences",
+          flat: "tastes and preferences returning to their original level"
+        },
+        dexpect: {
+          up: "buyers expecting a higher price",
+          down: "buyers expecting a lower price",
+          flat: "buyer expectations returning to their original level"
+        },
+        consumers: {
+          up: "an increase in the number of consumers",
+          down: "a fall in the number of consumers",
+          flat: "the number of consumers returning to its original level"
+        },
+        pes: {
+          up: "price elasticity of supply becoming elastic, so the supply curve is flatter",
+          down: "price elasticity of supply becoming inelastic, so the supply curve is steeper",
+          flat: "price elasticity of supply returning to unit elastic"
+        },
+        output: {
+          up: "producers being able to increase output easily, so supply is more elastic",
+          down: "production taking time, so supply is more inelastic",
+          flat: "the ease of increasing output returning to its original level"
+        },
+        inputs: {
+          up: "inputs being readily available, so supply is more elastic",
+          down: "inputs being scarce or specialised, so supply is more inelastic",
+          flat: "the availability of inputs returning to its original level"
+        },
+        storage: {
+          up: "goods being able to be stored, so supply is more elastic",
+          down: "goods not being able to be stored, so supply is more inelastic",
+          flat: "storage returning to its original position"
+        },
+        firms: {
+          up: "many firms operating in the market, so supply is more elastic",
+          down: "firms being highly specialised, so supply is more inelastic",
+          flat: "the number and type of firms returning to the original position"
+        },
+        horizon: {
+          up: "a longer time period, so firms can expand capacity and supply is more elastic",
+          down: "a short time period, so supply is more inelastic",
+          flat: "the time period returning to its original length"
+        }
+      };
+
+      function causeOf(force, v) {
+        var row = CAUSES[force.id] || {};
+        if (v > 0) return row.up || force.high;
+        if (v < 0) return row.down || force.low;
+        return row.flat || (force.name + " returning to its original level");
+      }
+
+      function gapCaption(excess, price, cause) {
+        return excess + " at " + money(price) + (cause ? " due to " + cause : "") + ".";
+      }
+
+      function picture(price, mark, labelQty) {
+        return {
+          d: shown.d, s: shown.s, ped: shown.ped, pes: shown.pes,
+          price: price, mark: mark, labelQty: labelQty
+        };
+      }
+
+      function applyShift(force, v) {
+        if (anim) cancelAnimationFrame(anim);
+        var reason = reasonFor(force, v);
+        var startD = shown.d;
+        var startS = shown.s;
+        var startPed = shown.ped;
+        var startPes = shown.pes;
+        var end = currentCurves();
+        var held = shown.price;
+        var excess = excessName(qd(held, end.d, end.ped) - qs(held, end.s, end.pes));
+        buttonsOff(true);
+        var t0 = performance.now();
+        function frame(now) {
+          var k = ease(Math.min(1, (now - t0) / 480));
+          shown.d = startD + (end.d - startD) * k;
+          shown.s = startS + (end.s - startS) * k;
+          shown.ped = startPed + (end.ped - startPed) * k;
+          shown.pes = startPes + (end.pes - startPes) * k;
+          shown.price = held;
+          draw(picture(held, "gap"));
+          storyEl.textContent = excess ? reason + " " + excess + "." : reason;
+          if (k < 1) {
+            anim = requestAnimationFrame(frame);
+            return;
+          }
+          shown.d = end.d;
+          shown.s = end.s;
+          shown.ped = end.ped;
+          shown.pes = end.pes;
+          manual = excess !== "";
+          priceInput.value = String(Math.round(held));
+          if (excess) {
+            lastCause = causeOf(force, v);
+            draw(picture(held, "gap"));
+            storyEl.textContent = reason + " " + excess + " at the current price. Press Move to the new equilibrium.";
+            captureStep({
+              title: force.name,
+              force: force,
+              v: v,
+              caption: gapCaption(excess, held, lastCause),
+              note: reason + " " + excess + " at " + money(held) + ".",
+              reveal: false
+            });
+          } else {
+            var eq = equilibrium(end.d, end.s, end.ped, end.pes);
+            lastCause = "";
+            shown.price = eq.p;
+            anchor = { d: end.d, s: end.s, ped: end.ped, pes: end.pes, p: eq.p, q: eq.q };
+            priceInput.value = String(Math.round(eq.p));
+            draw(picture(eq.p, "eq"));
+            storyEl.textContent = !force.sign
+              ? reason + " The equilibrium stays at " + money(eq.p) + " and " + qty(eq.q) + " units, because the curve pivots through that point."
+              : reason + " Quantity demanded still equals quantity supplied. Equilibrium is " + money(eq.p) + " and " + qty(eq.q) + " units.";
+            captureStep({
+              title: force.name,
+              force: force,
+              v: v,
+              caption: money(eq.p) + " and " + qty(eq.q) + " units due to " + causeOf(force, v) + ".",
+              note: reason + " Equilibrium is " + money(eq.p) + " and " + qty(eq.q) + " units.",
+              reveal: true
+            });
+          }
+          buttonsOff(false);
+          anim = 0;
+        }
+        anim = requestAnimationFrame(frame);
+      }
+
+      function moveToEquilibrium() {
+        if (busy) return;
+        var endEq = equilibrium(shown.d, shown.s, shown.ped, shown.pes);
+        var fromP = shown.price;
+        var excess = excessName(qd(fromP, shown.d, shown.ped) - qs(fromP, shown.s, shown.pes));
+        if (!excess) return;
+        if (!shotsMatch()) {
+          captureStep({
+            title: "Price of the good",
+            caption: lastCause
+              ? gapCaption(excess, fromP, lastCause)
+              : excess + " at " + money(fromP) + " because the price was moved. The curves have not shifted.",
+            note: "The price of the good is set at " + money(fromP) + ", leaving " + excess.toLowerCase() + ".",
+            reveal: false
+          });
+        }
+        if (anim) cancelAnimationFrame(anim);
+        var fromQ = anchor.q;
+        buttonsOff(true);
+        var t0 = performance.now();
+        function frame(now) {
+          var k = ease(Math.min(1, (now - t0) / 700));
+          shown.price = fromP + (endEq.p - fromP) * k;
+          draw(picture(shown.price, "gap", true));
+          storyEl.textContent = excess === "Excess demand"
+            ? "Excess demand, so the price rises towards the new equilibrium."
+            : "Excess supply, so the price falls towards the new equilibrium.";
+          if (k < 1) {
+            anim = requestAnimationFrame(frame);
+            return;
+          }
+          shown.price = endEq.p;
+          manual = false;
+          anchor = { d: shown.d, s: shown.s, ped: shown.ped, pes: shown.pes, p: endEq.p, q: endEq.q };
+          priceInput.value = String(Math.round(endEq.p));
+          draw(picture(endEq.p, "eq"));
+          var priceWord = endEq.p > fromP + 0.4 ? "rises" : "falls";
+          var qtyBit = Math.abs(endEq.q - fromQ) < 0.4
+            ? "quantity stays at " + qty(endEq.q) + " units"
+            : "quantity " + (endEq.q > fromQ ? "rises" : "falls") + " from " + qty(fromQ) + " to " + qty(endEq.q) + " units";
+          storyEl.textContent = excess + ". The price " + priceWord + " until quantity demanded equals quantity supplied. The new equilibrium is " + money(endEq.p) + " and " + qty(endEq.q) + " units.";
+          revealPending("The price " + priceWord + " from " + money(fromP) + " to " + money(endEq.p) + " and " + qtyBit + ".");
+          lastCause = "";
+          buttonsOff(false);
+          anim = 0;
+        }
+        anim = requestAnimationFrame(frame);
+      }
+
+      function paintForces(rootId, side) {
+        var root = document.getElementById(rootId);
+        var lastGroup = "";
+        var groupHost = root;
+        FORCES.forEach(function (f) {
+          if (f.side !== side) return;
+          if (f.group !== lastGroup) {
+            groupHost = root;
+            if (f.boxed) {
+              groupHost = document.createElement("div");
+              groupHost.className = "elasticity-box";
+              root.appendChild(groupHost);
+            }
+            var heading = document.createElement("h3");
+            heading.textContent = f.group;
+            groupHost.appendChild(heading);
+            if (f.hint) {
+              var hint = document.createElement("p");
+              hint.className = "lead";
+              hint.textContent = f.hint;
+              groupHost.appendChild(hint);
+            }
+            lastGroup = f.group;
+          }
+          var block = document.createElement("div");
+          block.className = "force";
+          if (f.lead) {
+            var lead = document.createElement("p");
+            lead.className = "lead";
+            lead.textContent = f.lead;
+            root.appendChild(lead);
+          }
+          if (f.name !== f.group) {
+            var name = document.createElement("p");
+            name.textContent = f.name;
+            block.appendChild(name);
+          }
+          var seg = document.createElement("div");
+          seg.className = f.stack ? "seg stack" : "seg";
+          [{ v: -1, label: f.low }, { v: 0, label: f.mid || "Unchanged" }, { v: 1, label: f.high }].forEach(function (opt) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.textContent = opt.label;
+            btn.setAttribute("data-force", f.id);
+            btn.setAttribute("data-v", String(opt.v));
+            btn.setAttribute("aria-pressed", opt.v === 0 ? "true" : "false");
+            if (opt.v === 0) btn.className = "on";
+            btn.addEventListener("click", function () { choose(f, opt.v, seg); });
+            seg.appendChild(btn);
+          });
+          block.appendChild(seg);
+          groupHost.appendChild(block);
+        });
+      }
+
+      function clearOtherInGroup(force) {
+        var group = exclusiveGroup(force);
+        if (!group) return;
+        FORCES.forEach(function (f) {
+          if (exclusiveGroup(f) !== group || f.id === force.id) return;
+          values[f.id] = 0;
+          Array.prototype.forEach.call(document.querySelectorAll('[data-force="' + f.id + '"]'), function (btn) {
+            var on = btn.getAttribute("data-v") === "0";
+            btn.className = on ? "on" : "";
+            btn.setAttribute("aria-pressed", on ? "true" : "false");
+          });
+        });
+      }
+
+      function choose(force, v, seg) {
+        if (busy || values[force.id] === v) return;
+        var trial = trialCurves(force.id, v);
+        if (v !== 0 && !fitsOnAxes(trial.d, trial.s, trial.ped, trial.pes)) {
+          refreshLimits();
+          return;
+        }
+        clearOtherInGroup(force);
+        values[force.id] = v;
+        Array.prototype.forEach.call(seg.querySelectorAll("button"), function (btn) {
+          var on = Number(btn.getAttribute("data-v")) === v;
+          btn.className = on ? "on" : "";
+          btn.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+        applyShift(force, v);
+      }
+
+      function showManual() {
+        if (busy) return;
+        manual = true;
+        shown.price = Number(priceInput.value);
+        draw(picture(shown.price, "gap"));
+        var qDem = qd(shown.price, shown.d, shown.ped);
+        var qSup = qs(shown.price, shown.s, shown.pes);
+        var gapN = qDem - qSup;
+        settleBtn.disabled = Math.abs(gapN) < 0.6;
+        settleBtn.classList.toggle("ready", Math.abs(gapN) >= 0.6);
+        if (Math.abs(gapN) < 0.6) {
+          storyEl.textContent = "At " + money(shown.price) + ", quantity demanded equals quantity supplied. This price is the equilibrium.";
+          document.getElementById("stat-m").textContent = "Equilibrium";
+          document.getElementById("stat-q").textContent = qty(qDem);
+          return;
+        }
+        if (gapN > 0) {
+          storyEl.textContent = "At " + money(shown.price) + ", quantity demanded is " + qty(qDem) + " and quantity supplied is " + qty(qSup) + ". Excess demand. The price of the good has not shifted either curve. Let the price rise to reach equilibrium.";
+        } else {
+          storyEl.textContent = "At " + money(shown.price) + ", quantity demanded is " + qty(qDem) + " and quantity supplied is " + qty(qSup) + ". Excess supply. The price of the good has not shifted either curve. Let the price fall to reach equilibrium.";
+        }
+      }
+
+      paintForces("demand-forces", "d");
+      paintForces("supply-forces", "s");
+      draw(picture(P0, "eq"));
+      showStartCopy();
+      refreshLimits();
+
+      priceInput.addEventListener("input", showManual);
+      settleBtn.addEventListener("click", function () {
+        if (busy || !manual) return;
+        moveToEquilibrium();
+      });
+      document.getElementById("reset").addEventListener("click", function () {
+        if (anim) cancelAnimationFrame(anim);
+        anim = 0;
+        busy = false;
+        manual = false;
+        FORCES.forEach(function (f) { values[f.id] = 0; });
+        shown.d = 0;
+        shown.s = 0;
+        shown.ped = 1;
+        shown.pes = 1;
+        shown.price = P0;
+        anchor = { d: 0, s: 0, ped: 1, pes: 1, p: P0, q: equilibrium(0, 0, 1, 1).q };
+        priceInput.value = String(P0);
+        Array.prototype.forEach.call(document.querySelectorAll(".seg button"), function (btn) {
+          var home = btn.getAttribute("data-v") === "0";
+          btn.className = home ? "on" : "";
+          btn.setAttribute("aria-pressed", home ? "true" : "false");
+        });
+        draw(picture(P0, "eq"));
+        storyEl.textContent = "The market starts in equilibrium. Demand and supply are both unit elastic. Change one thing, then read what happened under the diagram.";
+        settleBtn.classList.remove("ready");
+        clearPath();
+        lastCause = "";
+        showStartCopy();
+        refreshLimits();
+        settleBtn.disabled = true;
+      });
+
+      function downloadFile(blob, name) {
+        var link = document.createElement("a");
+        var url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = name;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      }
+
+      function diagramImage(svg) {
+        return new Promise(function (resolve, reject) {
+          var clone = svg.cloneNode(true);
+          clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+          clone.setAttribute("width", "680");
+          clone.setAttribute("height", "420");
+          var ids = {};
+          Array.prototype.forEach.call(clone.querySelectorAll("[id]"), function (el) {
+            ids[el.id] = true;
+          });
+          var xml = new XMLSerializer().serializeToString(clone).replace(/url\(#([^)]+)\)/g, function (all, id) {
+            if (ids[id]) return all;
+            var match = Object.keys(ids).filter(function (key) {
+              return key === id || key.slice(-(id.length + 1)) === "-" + id;
+            })[0];
+            return match ? "url(#" + match + ")" : all;
+          });
+          var url = URL.createObjectURL(new Blob([xml], { type: "image/svg+xml;charset=utf-8" }));
+          var image = new Image();
+          image.onload = function () {
+            URL.revokeObjectURL(url);
+            resolve(image);
+          };
+          image.onerror = function () {
+            URL.revokeObjectURL(url);
+            reject(new Error("diagram"));
+          };
+          image.src = url;
+        });
+      }
+
+      function wrapLines(ctx, text, maxWidth) {
+        var lines = [];
+        var line = "";
+        String(text || "").split(/\s+/).forEach(function (word) {
+          if (!word) return;
+          var trial = line ? line + " " + word : word;
+          if (line && ctx.measureText(trial).width > maxWidth) {
+            lines.push(line);
+            line = word;
+          } else {
+            line = trial;
+          }
+        });
+        if (line) lines.push(line);
+        return lines.length ? lines : [""];
+      }
+
+      document.getElementById("save-all").addEventListener("click", function () {
+        var cards = Array.prototype.filter.call(document.querySelectorAll("#path .step"), function (card) {
+          return !card.hidden && card.querySelector("svg");
+        });
+        if (!cards.length) return;
+        Promise.all(cards.map(function (card) {
+          return diagramImage(card.querySelector("svg")).then(function (image) {
+            return {
+              title: card.querySelector("h2").textContent,
+              caption: card.querySelector(".caption").textContent,
+              image: image
+            };
+          });
+        })).then(function (items) {
+          var scale = 2;
+          var width = 720;
+          var pad = 24;
+          var measure = document.createElement("canvas").getContext("2d");
+          measure.font = "18px \"Financier Text\", Georgia, Palatino, serif";
+          var blocks = items.map(function (item) {
+            return {
+              item: item,
+              captionLines: wrapLines(measure, item.caption, width - pad * 2)
+            };
+          });
+          var height = pad;
+          blocks.forEach(function (block, index) {
+            block.top = height;
+            height += 34 + 8 + 420 + 10 + block.captionLines.length * 24 + (index === blocks.length - 1 ? pad : 28);
+          });
+          var canvas = document.createElement("canvas");
+          canvas.width = width * scale;
+          canvas.height = height * scale;
+          var ctx = canvas.getContext("2d");
+          ctx.scale(scale, scale);
+          ctx.fillStyle = "#fffaf3";
+          ctx.fillRect(0, 0, width, height);
+          blocks.forEach(function (block) {
+            var y = block.top;
+            ctx.fillStyle = "#1c1915";
+            ctx.font = "700 26px \"Financier Display\", Georgia, Palatino, serif";
+            ctx.fillText(block.item.title, pad, y + 26);
+            y += 34 + 8;
+            ctx.drawImage(block.item.image, pad, y, 680, 420);
+            y += 420 + 10;
+            ctx.fillStyle = "#5c5348";
+            ctx.font = "18px \"Financier Text\", Georgia, Palatino, serif";
+            block.captionLines.forEach(function (line) {
+              ctx.fillText(line, pad, y + 18);
+              y += 24;
+            });
+          });
+          canvas.toBlob(function (png) {
+            if (png) downloadFile(png, "elasticity-all-diagrams.png");
+          }, "image/png");
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

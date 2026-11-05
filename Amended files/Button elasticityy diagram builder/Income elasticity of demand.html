@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Income elasticity of demand — diagram builder</title>
+  <link rel="stylesheet" href="../../diagram-economist.css" />
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #f0dce2;
+      --paper: #fef7f9;
+      --bg: #fef7f9;
+      --card: #fffaf3;
+      --formula: #fffaf3;
+      --accent: #9a3412;
+      --accent-soft: #f8e8ec;
+      --tick: #b45309;
+      --ok: #166534;
+      --ok-bg: #e7f6ec;
+      --ok-line: #b7e4c7;
+      --bad: #9f1239;
+      --bad-bg: #fde8ee;
+      --bad-line: #f3c1cf;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Financier Text", Georgia, "Palatino Linotype", Palatino, serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+    }
+    h3 {
+      font-family: "Financier Display", Georgia, "Palatino Linotype", Palatino, serif;
+    }
+    .book { max-width: 860px; margin: 0 auto; padding: 20px 16px 72px; }
+
+    /* Copy #yed-builder when embedding in a word cloud */
+    #yed-builder {
+      background: var(--card, #fffaf3);
+      border: 1px solid var(--line, #f0dce2);
+      border-radius: 10px;
+      padding: 12px 14px 16px;
+      margin-top: 12px;
+    }
+    #yed-builder h3 { margin: 0 0 4px; font-size: 1.05rem; color: var(--accent, #9a3412); }
+    #yed-builder .yed-lead { margin: 0 0 10px; color: var(--muted, #5c5348); font-size: 0.92rem; }
+    #yed-builder .yed-steps { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+    #yed-builder .yed-step {
+      font-size: 0.78rem; font-weight: 700; padding: 4px 8px; border-radius: 999px;
+      background: var(--paper, #fef7f9); border: 1px solid var(--line, #f0dce2); color: var(--muted, #5c5348);
+    }
+    #yed-builder .yed-step.on { background: var(--accent); color: var(--card); border-color: var(--accent); }
+    #yed-builder .yed-step.done { background: var(--ok-bg); color: var(--ok); border-color: var(--ok-line); }
+    #yed-builder label { display: block; margin: 10px 0 4px; font-size: 0.88rem; font-weight: 700; }
+    #yed-builder .yed-hint { font-weight: 500; color: var(--muted, #5c5348); }
+    #yed-builder .yed-cat { margin: 8px 0 4px; }
+    #yed-builder .yed-cat-title {
+      margin: 0 0 6px; font-size: 0.88rem; font-weight: 800; color: var(--accent, #9a3412);
+      font-family: "Financier Display", Georgia, "Palatino Linotype", Palatino, serif;
+    }
+    #yed-builder .yed-subcat { margin: 8px 0 0 10px; }
+    #yed-builder .yed-subcat .yed-cat-title { font-size: 0.82rem; font-weight: 700; }
+    #yed-builder .btn-group { display: flex; flex-wrap: wrap; gap: 6px; }
+    #yed-builder .pct-line {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 8px;
+    }
+    #yed-builder .pct-label { font-size: 0.88rem; font-weight: 700; }
+    #yed-builder .btn-group button {
+      font-family: inherit; cursor: pointer; border: 1px solid var(--line, #f0dce2);
+      border-radius: 8px; padding: 7px 10px; font-size: 0.84rem; font-weight: 700;
+      background: var(--paper, #fef7f9); color: var(--ink, #1c1915);
+    }
+    #yed-builder .btn-group button.inc-btn { background: #f8e8ec; color: #9a3412; }
+    #yed-builder .btn-group button.qty-btn { background: #f3e2d4; color: #9a3412; }
+    #yed-builder .btn-group button.up-btn { background: #e7f6ec; color: #166534; }
+    #yed-builder .btn-group button.down-btn { background: #fde8ee; color: #9f1239; }
+    #yed-builder .btn-group button.chosen {
+      background: #9a3412; color: #fffaf3; border-color: #9a3412;
+      outline: 2px solid #9a3412; outline-offset: 1px;
+    }
+    #yed-builder .y-bus,
+    #yed-builder .y-noodles,
+    #yed-builder .y-value,
+    #yed-builder .y-milk,
+    #yed-builder .y-power,
+    #yed-builder .y-food,
+    #yed-builder .y-clothes,
+    #yed-builder .y-rest,
+    #yed-builder .y-hol,
+    #yed-builder .y-car { background: var(--paper, #fef7f9); color: var(--ink, #1c1915); }
+    #yed-builder .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    #yed-builder .primary, #yed-builder .secondary, #yed-builder .reset {
+      font-family: inherit; cursor: pointer; border-radius: 8px; padding: 8px 12px;
+      font-size: 0.9rem; font-weight: 700;
+    }
+    #yed-builder .primary { background: #9a3412; color: #fffaf3; border: 0; }
+    #yed-builder .primary:disabled { opacity: 0.45; cursor: not-allowed; }
+    #yed-builder .secondary {
+      background: var(--paper, #fef7f9); color: var(--ink, #1c1915); border: 1px solid var(--line, #f0dce2);
+    }
+    #yed-builder .reset { background: #9f1239; color: #fffaf3; border: 0; }
+    #yed-builder .yed-error { color: #9f1239; min-height: 1.2em; margin: 8px 0 0; font-size: 0.9rem; }
+    #yed-builder .yed-result {
+      margin-top: 12px; background: var(--paper, #fef7f9); border: 1px solid var(--line, #f0dce2);
+      border-radius: 8px; padding: 10px 12px; font-size: 0.92rem;
+    }
+    #yed-builder .yed-result p { margin: 0 0 8px; }
+    #yed-builder .yed-result p:last-child { margin-bottom: 0; }
+    #yed-builder .yed-fig { margin-top: 12px; }
+    #yed-builder .yed-inferior-note {
+      margin: 0 0 10px; font-size: 0.92rem; color: var(--ink, #1c1915); line-height: 1.45;
+    }
+    #yed-builder .yed-inferior-note p { margin: 0 0 8px; }
+    #yed-builder .yed-inferior-note p:last-child { margin-bottom: 0; }
+    #yed-builder .yed-inferior-note h4 { margin: 0 0 8px; font-size: 0.95rem; color: var(--accent, #9a3412); }
+    #yed-builder .yed-fig canvas {
+      display: block; width: 100%; height: auto; background: #fffaf3;
+      border: 1px solid var(--line, #f0dce2); border-radius: 8px;
+    }
+    #yed-builder .yed-caption { margin: 6px 0 0; font-size: 0.88rem; color: var(--muted, #5c5348); }
+    #yed-builder .yed-save {
+      font-family: inherit; cursor: pointer; border-radius: 8px; padding: 8px 12px;
+      font-size: 0.9rem; font-weight: 700;
+      background: #fff; color: var(--accent, #9a3412); border: 1px solid var(--line, #f0dce2);
+    }
+    #yed-builder .yed-save:disabled { opacity: 0.45; cursor: not-allowed; }
+    #yed-builder .yed-save:hover:not(:disabled) { background: #f8e8ec; }
+    #yed-builder .yed-factors {
+      margin-top: 12px; background: var(--paper, #fef7f9); border: 1px solid var(--line, #f0dce2);
+      border-radius: 8px; padding: 10px 12px; font-size: 0.92rem;
+    }
+    #yed-builder .yed-factors h4 { margin: 0 0 8px; font-size: 0.95rem; color: var(--accent, #9a3412); }
+    #yed-builder .yed-factors .yed-table-wrap { overflow-x: auto; }
+    #yed-builder .yed-factors table {
+      width: 100%; border-collapse: collapse; font-size: 0.88rem; background: #fffaf3;
+    }
+    #yed-builder .yed-factors th, #yed-builder .yed-factors td {
+      border: 1px solid var(--line, #f0dce2); padding: 8px 10px; text-align: left; vertical-align: top;
+    }
+    #yed-builder .yed-factors th { background: #f8e8ec; color: var(--accent, #9a3412); font-weight: 800; }
+    #yed-builder .yed-amend {
+      margin-top: 14px; background: var(--paper, #fef7f9); border: 1px solid var(--line, #f0dce2);
+      border-radius: 8px; padding: 10px 12px;
+    }
+    #yed-builder .yed-amend h4 { margin: 0 0 6px; font-size: 0.95rem; color: var(--accent, #9a3412); }
+    #yed-builder .yed-amend-lead { margin: 0 0 10px; font-size: 0.88rem; color: var(--muted, #5c5348); }
+    #yed-builder .yed-amd-group { margin: 0 0 10px; }
+    #yed-builder .yed-amd-group p {
+      margin: 0 0 4px; font-size: 0.82rem; font-weight: 800; color: var(--accent, #9a3412);
+    }
+    #yed-builder .yed-amd-btn {
+      display: block; width: 100%; text-align: left; margin: 4px 0 0;
+      font-family: inherit; cursor: pointer; border: 1px solid var(--line, #f0dce2);
+      background: #f8e8ec; color: var(--accent, #9a3412); border-radius: 8px;
+      padding: 8px 10px; font-size: 0.84rem;
+    }
+    #yed-builder .yed-amd-btn strong { display: block; margin-bottom: 2px; }
+    #yed-builder .yed-amd-btn span { font-weight: 500; color: var(--muted, #5c5348); }
+    #yed-builder .yed-amd-btn.chosen { outline: 2px solid #9a3412; background: #f3e2d4; }
+    #yed-builder .secondary.chosen { outline: 2px solid #9a3412; outline-offset: 1px; }
+  </style>
+</head>
+<body>
+  <div class="book">
+    <div id="yed-builder">
+      <h3>Income elasticity of demand</h3>
+      <p class="meta"><a href="../../micro-diagrams.html">Back to interactive games</a></p>
+      <p class="yed-lead">YED = %ΔQ ÷ %ΔY. Income elasticity of demand (YED) tells you how responsive consumers are to income changes. Their responsiveness varies between whether the product is a normal good, an inferior good or a luxury good. Choose a product from the list to see the different impact of a change in income.</p>
+      <div class="yed-steps" aria-hidden="true">
+        <span class="yed-step on" data-step="1">Step 1 Product</span>
+        <span class="yed-step" data-step="2">Step 2 Income Y₁</span>
+        <span class="yed-step" data-step="3">Step 3 Quantity Q₁</span>
+        <span class="yed-step" data-step="4">Step 4 Income change</span>
+        <span class="yed-step" data-step="5">Step 5 Calculate</span>
+      </div>
+
+      <label>Step 1. Product <span class="yed-hint" id="yed-prod-hint">(choose a type of good)</span></label>
+      <div id="yed-productGroup">
+        <div class="yed-cat">
+          <p class="yed-cat-title">Inferior goods</p>
+          <div class="btn-group">
+            <button type="button" class="y-bus" data-eps="-0.60" data-name="Bus travel" data-q-unit="journeys per month" data-qtys="8,16,24">Bus travel</button>
+            <button type="button" class="y-noodles" data-eps="-0.80" data-name="Instant noodles" data-q-unit="packs per month" data-qtys="4,8,12">Instant noodles</button>
+            <button type="button" class="y-value" data-eps="-0.30" data-name="Own-brand bread" data-q-unit="loaves per week" data-qtys="2,4,6">Own-brand bread</button>
+          </div>
+        </div>
+        <div class="yed-cat">
+          <p class="yed-cat-title">Normal goods</p>
+          <div class="yed-subcat">
+            <p class="yed-cat-title">Necessity</p>
+            <div class="btn-group">
+              <button type="button" class="y-milk" data-eps="0.20" data-name="Milk" data-q-unit="pints per week" data-qtys="4,7,10">Milk</button>
+              <button type="button" class="y-power" data-eps="0.30" data-name="Electricity" data-q-unit="kWh per month" data-qtys="200,280,360">Electricity</button>
+              <button type="button" class="y-food" data-eps="0.50" data-name="Basic groceries" data-q-unit="weekly shops per month" data-qtys="4,6,8">Basic groceries</button>
+              <button type="button" class="y-clothes" data-eps="0.80" data-name="Everyday clothing" data-q-unit="items per year" data-qtys="4,8,12">Everyday clothing</button>
+            </div>
+          </div>
+          <div class="yed-subcat">
+            <p class="yed-cat-title">Luxury goods</p>
+            <div class="btn-group">
+              <button type="button" class="y-rest" data-eps="1.40" data-name="Restaurant meals" data-q-unit="meals per month" data-qtys="2,4,8">Restaurant meals</button>
+              <button type="button" class="y-hol" data-eps="2.00" data-name="Foreign holidays" data-q-unit="trips per year" data-qtys="1,2,3">Foreign holidays</button>
+              <button type="button" class="y-car" data-eps="1.80" data-name="New cars" data-q-unit="cars per 10 years" data-qtys="1,2,3">New cars</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <label>Step 2. Initial real income Y₁ <span class="yed-hint">(£ per year, household)</span></label>
+      <div class="btn-group" id="yed-y1Group">
+        <button type="button" class="inc-btn" data-y1="20000">20,000</button>
+        <button type="button" class="inc-btn" data-y1="30000">30,000</button>
+        <button type="button" class="inc-btn" data-y1="45000">45,000</button>
+      </div>
+
+      <label>Step 3. Initial quantity demanded Q₁ <span class="yed-hint" id="yed-q1-hint">(choose a product first)</span></label>
+      <div class="btn-group" id="yed-q1Group"></div>
+
+      <label>Step 4. Change in real income (this sets Y₂)</label>
+      <div id="yed-y2Group">
+        <div class="pct-line">
+          <span class="pct-label">Percentage increase in income</span>
+          <div class="btn-group">
+            <button type="button" class="up-btn" data-pct="0.05">+5%</button>
+            <button type="button" class="up-btn" data-pct="0.10">+10%</button>
+            <button type="button" class="up-btn" data-pct="0.15">+15%</button>
+            <button type="button" class="up-btn" data-pct="0.20">+20%</button>
+          </div>
+        </div>
+        <div class="pct-line">
+          <span class="pct-label">Percentage decrease in income</span>
+          <div class="btn-group">
+            <button type="button" class="down-btn" data-pct="-0.05">−5%</button>
+            <button type="button" class="down-btn" data-pct="-0.10">−10%</button>
+            <button type="button" class="down-btn" data-pct="-0.15">−15%</button>
+            <button type="button" class="down-btn" data-pct="-0.20">−20%</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button type="button" class="primary" id="yed-calc">Calculate YED</button>
+        <button type="button" class="secondary" id="yed-working" hidden>Show exam working</button>
+        <button type="button" class="yed-save" id="yed-save" disabled>Save diagram</button>
+        <button type="button" class="reset" id="yed-reset">Reset</button>
+      </div>
+      <p class="yed-error" id="yed-error" role="status"></p>
+      <div class="yed-result" id="yed-output" hidden></div>
+      <div class="yed-fig">
+        <div class="yed-inferior-note" id="yed-inferior-note" hidden></div>
+        <canvas id="yed-diagram" width="700" height="440" aria-label="Demand curve shifting when real income changes."></canvas>
+        <p class="yed-caption" id="yed-caption">The demand diagram appears once all four choices are made.</p>
+      </div>
+      <div class="yed-factors" id="yed-factors" hidden></div>
+      <div class="yed-amend" id="yed-amend" hidden></div>
+    </div>
+  </div>
+
+  <script>
+    function initYedBuilder() {
+      const root = document.getElementById("yed-builder");
+      if (!root || root.getAttribute("data-ready") === "1") return;
+      root.setAttribute("data-ready", "1");
+
+      const state = { eps: null, name: "", Y1: null, Q1: null, Y2: null, Y2pct: null, qUnit: "", results: null, amendmentId: null };
+      const fmt = function (n) { return Number(n).toFixed(2); };
+      const abs = function (n) { return Math.abs(n); };
+      const picked = function (n) { return n !== null && n !== undefined && isFinite(n); };
+      const money = function (n) {
+        return "£" + Math.round(n).toLocaleString("en-GB");
+      };
+
+      function setChosen(group, btn) {
+        group.querySelectorAll("button").forEach(function (b) { b.classList.remove("chosen"); });
+        if (btn) btn.classList.add("chosen");
+      }
+      function setError(text) {
+        document.getElementById("yed-error").textContent = text || "";
+      }
+      function setQtyButtons(productBtn) {
+        const group = document.getElementById("yed-q1Group");
+        const hint = document.getElementById("yed-q1-hint");
+        group.innerHTML = "";
+        state.Q1 = null;
+        state.qUnit = "";
+        if (!productBtn) {
+          hint.textContent = "(choose a product first)";
+          return;
+        }
+        const unit = productBtn.getAttribute("data-q-unit") || "";
+        state.qUnit = unit;
+        hint.textContent = unit ? "(" + unit + ")" : "";
+        (productBtn.getAttribute("data-qtys") || "").split(",").map(function (s) {
+          return parseFloat(s.trim());
+        }).filter(function (n) { return isFinite(n) && n > 0; }).forEach(function (q) {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "qty-btn";
+          b.setAttribute("data-q1", String(q));
+          b.textContent = String(Math.round(q));
+          group.appendChild(b);
+        });
+      }
+      function classify(yed) {
+        if (yed < -0.05) {
+          return {
+            short: "inferior",
+            line: "Inferior good: quantity demanded falls as real income rises (YED &lt; 0).",
+            engel: "Income is a demand shifter: for an inferior good the demand curve shifts left if income rises and right if income falls."
+          };
+        }
+        if (yed <= 0.05) {
+          return {
+            short: "income independent",
+            line: "Quantity barely changes when real income changes (YED ≈ 0).",
+            engel: "The demand curve barely shifts when income changes."
+          };
+        }
+        if (yed < 0.95) {
+          return {
+            short: "normal necessity",
+            line: "Normal necessity: income inelastic (0 &lt; YED &lt; 1). Quantity rises by less than the rise in real income.",
+            engel: "The demand curve shifts right when income rises (and left when income falls). The shift is relatively small because YED &lt; 1."
+          };
+        }
+        if (yed <= 1.05) {
+          return {
+            short: "unit income elastic",
+            line: "Quantity demanded rises in the same proportion as real income (YED ≈ 1).",
+            engel: "The demand curve shifts right when income rises (and left when income falls)."
+          };
+        }
+        return {
+          short: "normal luxury",
+          line: "Normal luxury: income elastic (YED &gt; 1). Quantity rises by more than the rise in real income.",
+            engel: "The demand curve shifts right when income rises (and left when income falls). The shift is relatively large because YED &gt; 1."
+        };
+      }
+      const CAR_AMENDMENTS = [
+        {
+          id: "confidence",
+          group: "1. Changes in consumer expectations",
+          title: "Confidence about future income",
+          text: "If households expect income to stay strong, they are more willing to buy a new car now.",
+          yedMult: 0.85,
+          qMult: 1.12,
+          effect: "Quantity is higher at each income and YED is a little lower: purchases are brought forward rather than postponed."
+        },
+        {
+          id: "fear",
+          group: "1. Changes in consumer expectations",
+          title: "Fear of recession",
+          text: "If consumers expect worse times ahead, they may cut car purchases more aggressively.",
+          yedMult: 1.5,
+          qMult: 0.82,
+          effect: "New cars become more income-elastic. Quantity is lower at each income, and %ΔQ is larger for the same %ΔY."
+        },
+        {
+          id: "used",
+          group: "2. Availability of substitutes",
+          title: "Used cars cheaper or more available",
+          text: "If used cars become significantly cheaper or more available, consumers switch more easily.",
+          yedMult: 1.35,
+          qMult: 0.78,
+          effect: "Demand for new cars is more income-elastic: when income falls, more buyers switch to the used-car substitute."
+        },
+        {
+          id: "rates",
+          group: "3. Financing conditions",
+          title: "Higher interest rates",
+          text: "Higher borrowing costs make new cars harder to finance. Even if income falls only slightly, quantity demanded may fall sharply.",
+          yedMult: 1.6,
+          qMult: 0.88,
+          effect: "YED rises. Finance is part of the effective price, so a small income change produces a larger change in new-car demand."
+        },
+        {
+          id: "ev",
+          group: "4. Changes in car characteristics",
+          title: "Shift toward electric vehicles (EVs)",
+          text: "EVs may be seen as long-term cost savers (fuel + maintenance).",
+          yedMult: 0.72,
+          qMult: 1.1,
+          effect: "YED falls toward a less luxury-like value: some buyers treat an EV as an investment that saves running costs, so demand holds up better."
+        },
+        {
+          id: "ageing",
+          group: "5. Demographic changes",
+          title: "Ageing population",
+          text: "Older consumers may buy fewer new cars regardless of income.",
+          yedMult: 0.7,
+          qMult: 0.7,
+          effect: "Demand shifts left. Quantity is lower at both Y₁ and Y₂, and income has a weaker effect (lower YED)."
+        },
+        {
+          id: "fuel",
+          group: "6. Macroeconomic shocks",
+          title: "Fuel price spikes",
+          text: "Consumers may avoid buying new cars even if income is stable.",
+          yedMult: 1.2,
+          qMult: 0.75,
+          effect: "Quantity demanded is lower at each income (a leftward shift). Demand also becomes a little more income-elastic as buyers delay replacement."
+        },
+        {
+          id: "loyalty",
+          group: "7. Brand-specific effects",
+          title: "Strong brand loyalty",
+          text: "Loyal customers may continue buying even with lower income.",
+          yedMult: 0.55,
+          qMult: 1.0,
+          effect: "YED falls. Quantity changes less when income changes, because loyal buyers stick with the brand."
+        },
+        {
+          id: "durable",
+          group: "8. Durability and replacement cycles",
+          title: "If cars last longer",
+          text: "Replacement is delayed, so fewer new cars are bought at any given income.",
+          yedMult: 1.25,
+          qMult: 0.65,
+          effect: "Demand shifts left (lower Q at each income). Replacement can be postponed until income is high, so measured YED rises."
+        }
+      ];
+      function currentAmendment() {
+        if (!state.amendmentId) return null;
+        let found = null;
+        CAR_AMENDMENTS.forEach(function (a) { if (a.id === state.amendmentId) found = a; });
+        return found;
+      }
+      function hideAmendments() {
+        const box = document.getElementById("yed-amend");
+        if (!box) return;
+        box.hidden = true;
+        box.innerHTML = "";
+        state.amendmentId = null;
+      }
+      function showAmendments() {
+        hideAmendments();
+      }
+      const YED_FACTORS = {
+        "Bus travel": [
+          ["Necessity vs. luxury", "Bus travel is often a cheaper way to get about. As incomes rise, many households switch to cars or trains.", "Inferior good: YED is negative."],
+          ["Level of income", "At low incomes the bus is a necessity. At higher incomes it is easier to drop bus use for private transport.", "Higher-income users → YED more negative; low-income users → YED closer to zero."],
+          ["Time period considered", "A pay rise does not change travel overnight. Over time people buy cars, move, or change season tickets.", "Long run → more income-elastic (YED more negative); short run → closer to zero."],
+          ["Availability of superior alternatives", "Cars, taxis, and rail are seen as higher-quality substitutes when the household can afford them.", "Better alternatives → YED more negative."],
+          ["Habit / brand loyalty", "Regular commuters may keep a bus pass out of habit even after income rises.", "Habit makes YED less negative (less inferior)."],
+          ["Proportion of income spent", "Fares can be a noticeable share of a low income, so extra earnings are used to upgrade travel.", "Higher budget share at low incomes → stronger inferior response."],
+          ["Market definition", "“Bus travel” as a whole vs. a particular operator or route.", "Broad market → still inferior; a single route with few alternatives may have YED closer to zero."],
+          ["Consumer demographics", "Students and lower-income urban travellers rely on buses more than higher-income or rural car owners.", "Lower-income / student market → YED closer to zero; as this group’s income rises, YED becomes more negative."]
+        ],
+        "Instant noodles": [
+          ["Necessity vs. luxury", "Instant noodles are a cheap filler food. Richer households often switch to fresher meals.", "Inferior good: YED is negative."],
+          ["Level of income", "Students and low-income households buy more packs. As income grows they trade up to other food.", "Higher incomes → YED more negative."],
+          ["Time period considered", "Eating habits change slowly. A short-run income rise may barely cut noodle purchases.", "Long run → more inferior; short run → YED closer to zero."],
+          ["Availability of superior alternatives", "Ready meals, takeaways, and cooking from scratch become realistic once income allows.", "More superior foods available → YED more negative."],
+          ["Habit / brand loyalty", "Some buyers like a favourite flavour and keep buying even when they can afford better food.", "Loyalty makes YED less negative."],
+          ["Proportion of income spent", "Packs are cheap, so they take a larger share of a tight budget than of a high one.", "Low-income households show a clearer inferior pattern."],
+          ["Market definition", "“Instant noodles” vs. a named brand, or vs. all cheap convenience food.", "A specific brand is easier to drop → YED more negative than for cheap food as a whole."],
+          ["Consumer demographics", "Younger and student households consume more; older, higher-income households less.", "Student / low-income market → strongly inferior as income later rises."]
+        ],
+        "Own-brand bread": [
+          ["Necessity vs. luxury", "Own-brand bread is the cheaper loaf. Higher-income shoppers often switch to branded or bakery bread.", "Inferior good: YED is negative."],
+          ["Level of income", "Value ranges matter more when income is tight. A rise in income makes branded bread affordable.", "Higher incomes → YED more negative."],
+          ["Time period considered", "Shoppers can switch loaf the next week, so the inferior response can appear fairly quickly.", "Even the short run can show negative YED; the long run may be more negative still."],
+          ["Availability of superior alternatives", "Branded loaves and in-store bakeries are close, higher-status substitutes.", "Easy trading-up → YED more negative."],
+          ["Habit / brand loyalty", "Some households always buy the supermarket’s own loaf and do not switch when income rises.", "Habit makes YED closer to zero."],
+          ["Proportion of income spent", "A loaf is a small share of income, but own-brand is chosen to stretch a tight food budget.", "Budget shoppers → clearer inferior good."],
+          ["Market definition", "Own-brand bread vs. “bread” in general (which is usually a normal necessity).", "Narrow own-brand market → negative YED; bread as a whole → YED positive but less than 1."],
+          ["Consumer demographics", "Lower-income families buy more own-brand; higher-income shoppers already buy branded bread.", "Lower-income market → YED more negative as income rises."]
+        ],
+        "Milk": [
+          ["Necessity vs. luxury", "Milk is a staple in many diets. Extra income does not lead to much extra milk.", "Normal necessity: 0 < YED < 1."],
+          ["Level of income", "Once a household already buys enough milk, further income rises add little quantity.", "Higher incomes → YED closer to zero."],
+          ["Time period considered", "Weekly shopping habits are slow to change; over time diets may add plant drinks or more dairy.", "Short run → very income-inelastic; long run → YED a little higher but still a necessity."],
+          ["Availability of superior alternatives", "Plant milks and premium organic milk are alternatives, but cow’s milk remains a staple for many.", "Trading up to premium types can raise YED for those products, while plain milk stays a necessity."],
+          ["Habit / brand loyalty", "Breakfast and tea habits keep milk demand fairly steady when income changes.", "Habit keeps YED low and positive."],
+          ["Proportion of income spent", "Milk is a small share of most household budgets, so income changes barely affect how much is bought.", "Low budget share → YED close to zero."],
+          ["Market definition", "“Milk” as a whole vs. a branded or organic pint.", "Broad milk market → income-inelastic; a luxury dairy drink → higher YED."],
+          ["Consumer demographics", "Households with children buy more, but still as a staple rather than a luxury.", "YED stays in the necessity range for most groups."]
+        ],
+        "Electricity": [
+          ["Necessity vs. luxury", "Households need lighting, heating, and appliances. Extra income does not raise use one-for-one.", "Normal necessity: 0 < YED < 1."],
+          ["Level of income", "Low-income homes already use electricity for basics. High-income homes add gadgets but also more efficient kit.", "YED stays below 1; it may be a little higher for poorer households that were under-heating."],
+          ["Time period considered", "In the short run the house and appliances are fixed. Over years people buy more devices or insulate.", "Short run → very income-inelastic; long run → YED a little higher."],
+          ["Availability of superior alternatives", "Gas, oil, or better insulation can substitute for some electricity use, but many uses have no alternative.", "Few substitutes for lighting and gadgets → YED remains a necessity."],
+          ["Habit / brand loyalty", "Daily routines (heating, cooking, screens) keep consumption fairly stable when pay rises.", "Habit keeps YED low."],
+          ["Proportion of income spent", "Bills are a large share of a low income, so extra earnings may first go on warmer homes.", "Higher budget share at low incomes → YED a little larger, but still < 1."],
+          ["Market definition", "Household electricity vs. a particular tariff or extra gadgets that use power.", "Electricity as a whole → necessity; luxury gadgets that raise use → higher YED."],
+          ["Consumer demographics", "Families and people who work from home use more, but still as a household necessity.", "YED remains income-inelastic across most groups."]
+        ],
+        "Basic groceries": [
+          ["Necessity vs. luxury", "A weekly food shop is essential. Richer households spend more on quality more than on extra shops.", "Normal necessity: 0 < YED < 1."],
+          ["Level of income", "At low incomes extra money raises the food shop. At high incomes people buy better food rather than much more food.", "Higher incomes → YED closer to zero (Engel’s law)."],
+          ["Time period considered", "Menus change slowly. Over time households may add more meat, fruit, or convenience food.", "Long run → YED a little higher; short run → strongly income-inelastic."],
+          ["Availability of superior alternatives", "Eating out and premium ranges compete with the basic shop once income allows.", "Trading up can hold the quantity of basic groceries down → YED stays below 1."],
+          ["Habit / brand loyalty", "Weekly shopping lists are habitual, so a pay rise does not quickly change how many shops are done.", "Habit keeps YED in the necessity range."],
+          ["Proportion of income spent", "Food is a large share of a poor household’s budget and a smaller share of a rich one.", "Higher food share → YED a little larger, but still a necessity."],
+          ["Market definition", "“Basic groceries” vs. all food including restaurants and luxury ingredients.", "Basic shop → 0 < YED < 1; food out / luxuries → YED > 1."],
+          ["Consumer demographics", "Larger and lower-income families spend more of their income on groceries.", "Lower-income households → YED higher within the necessity range."]
+        ],
+        "Everyday clothing": [
+          ["Necessity vs. luxury", "People need clothes, but many extra items are discretionary. Everyday wear sits between a staple and a treat.", "Normal good: YED positive and often close to, but still below, 1."],
+          ["Level of income", "Low-income buyers replace worn items. Higher incomes mean more items and more frequent replacement.", "Higher incomes → YED larger, and some clothing becomes a luxury (YED > 1)."],
+          ["Time period considered", "Wardrobes adjust slowly. Over a year people replace more items if income stays higher.", "Long run → more income-elastic; short run → closer to a necessity."],
+          ["Availability of superior alternatives", "Branded fashion and online fast fashion compete with basic everyday clothes.", "Trading up to brands can keep YED for everyday clothing lower."],
+          ["Habit / brand loyalty", "Some shoppers stick to the same supermarket or value ranges even after a pay rise.", "Loyalty keeps YED lower."],
+          ["Proportion of income spent", "Clothing can take a noticeable share of a young person’s budget.", "Higher budget share → YED larger."],
+          ["Market definition", "Everyday clothing vs. fashion / designer wear.", "Everyday wear → often 0 < YED < 1; designer → YED > 1."],
+          ["Consumer demographics", "Younger buyers and growing families buy more items as income rises.", "Younger / family market → higher YED."]
+        ],
+        "Restaurant meals": [
+          ["Necessity vs. luxury", "Eating out is discretionary. Households can cook at home if income is tight.", "Normal luxury: YED > 1."],
+          ["Level of income", "As income rises, meals out increase more than proportionately; at very high incomes some satiation appears.", "Higher incomes → YED well above 1 for most households."],
+          ["Time period considered", "People can book a meal quickly. Over time eating-out becomes a habit if income stays high.", "Both short run and long run can be income-elastic; long run often more so."],
+          ["Availability of superior alternatives", "Fine dining, takeaways, and meal kits compete; cooking at home is the inferior alternative when income falls.", "Easy to cut or upgrade → YED remains > 1."],
+          ["Habit / brand loyalty", "Regulars at a favourite restaurant keep going even if income dips a little.", "Loyalty makes YED a little lower, but still usually a luxury."],
+          ["Proportion of income spent", "A family meal out is a large slice of a modest budget.", "High budget share → strongly income-elastic."],
+          ["Market definition", "Restaurant meals in general vs. a particular cuisine or high-end restaurant.", "Broad eating-out market → YED > 1; a specific luxury venue → even higher YED."],
+          ["Consumer demographics", "Young professionals and higher-income households eat out more as pay rises.", "Higher-income / urban market → YED more elastic."]
+        ],
+        "Foreign holidays": [
+          ["Necessity vs. luxury", "A foreign holiday is a discretionary treat, not a necessity. Households can stay at home.", "Normal luxury: YED > 1."],
+          ["Level of income", "Extra income is often spent on more trips or further destinations. A fall in income cancels holidays first.", "Higher incomes → YED well above 1."],
+          ["Time period considered", "Trips can be booked or cancelled within months. Over years, foreign travel becomes a regular habit for richer households.", "Long run → even more income-elastic."],
+          ["Availability of superior alternatives", "Staycations, cheaper destinations, or a more expensive long-haul trip are all options as income changes.", "Easy to trade up or down → YED remains highly elastic."],
+          ["Habit / brand loyalty", "Some families always take the same annual holiday and will protect that spend.", "Habit can make YED a little lower, but holidays stay a luxury."],
+          ["Proportion of income spent", "Flights and hotels take a large share of annual income.", "High proportion → YED strongly greater than 1."],
+          ["Market definition", "Foreign holidays as a whole vs. a specific destination or first-class travel.", "Broad market → YED > 1; a luxury destination → higher still."],
+          ["Consumer demographics", "Higher-income and younger travellers increase trips sharply as income rises; pensioners on fixed incomes less so.", "Higher-income market → more income-elastic."]
+        ],
+        "New cars": [
+          ["Necessity vs. luxury", "A brand-new car is usually discretionary; a household can keep the old car or buy used.", "Normal luxury: YED > 1."],
+          ["Level of income", "New-car buying rises more than proportionately as incomes grow, and is cut quickly in a downturn.", "Higher incomes → YED well above 1."],
+          ["Time period considered", "In the short run people delay replacing a car. Over several years a lasting income rise leads to an upgrade.", "Long run → more income-elastic; short run → still a luxury but a little less elastic."],
+          ["Availability of superior alternatives", "Used cars, leasing, and public transport compete; premium models are the upgrade when income rises.", "Easy to postpone or trade up → YED remains > 1."],
+          ["Habit / brand loyalty", "Loyalty to a marque (Ford, BMW, etc.) can keep buyers in the new-car market even if income dips.", "Loyalty makes YED a little lower, but new cars stay income-elastic."],
+          ["Proportion of income spent", "A new car is a very large purchase relative to annual income.", "High proportion → strongly income-elastic."],
+          ["Market definition", "New cars as a whole vs. a luxury marque or a particular model.", "Broad new-car market → YED > 1; supercars / premium brands → even higher YED."],
+          ["Consumer demographics", "Higher-income and middle-aged households buy more new cars as earnings rise; first-time buyers often start with used cars.", "Higher-income market → more income-elastic."]
+        ]
+      };
+      function hideYedFactors() {
+        const box = document.getElementById("yed-factors");
+        if (!box) return;
+        box.hidden = true;
+        box.innerHTML = "";
+      }
+      const YED_INFERIOR_NOTES = {
+        "Instant noodles": {
+          lead: "Instant noodles are an inferior good (YED &lt; 0).",
+          rise: "As income rises, consumers buy fewer noodles and switch to higher-quality substitutes. Therefore, the demand curve shifts to the left.",
+          fall: "As income falls, consumers buy more noodles instead of higher-quality substitutes. Therefore, the demand curve shifts to the right."
+        },
+        "Bus travel": {
+          lead: "Bus travel is an inferior good (YED &lt; 0).",
+          rise: "As income rises, consumers take fewer bus journeys and switch to higher-quality substitutes. Therefore, the demand curve shifts to the left.",
+          fall: "As income falls, consumers take more bus journeys instead of higher-quality substitutes. Therefore, the demand curve shifts to the right."
+        },
+        "Own-brand bread": {
+          lead: "Own-brand bread is an inferior good (YED &lt; 0).",
+          rise: "As income rises, consumers buy fewer own-brand loaves and switch to higher-quality substitutes. Therefore, the demand curve shifts to the left.",
+          fall: "As income falls, consumers buy more own-brand loaves instead of higher-quality substitutes. Therefore, the demand curve shifts to the right."
+        }
+      };
+      function hideInferiorNote() {
+        const el = document.getElementById("yed-inferior-note");
+        if (!el) return;
+        el.hidden = true;
+        el.innerHTML = "";
+      }
+      function showInferiorNote() {
+        const el = document.getElementById("yed-inferior-note");
+        if (!el) return;
+        const rise = !(state.results && state.results.orig && state.results.orig.pctY < 0);
+        const inferior = YED_INFERIOR_NOTES[state.name];
+        let html = "";
+        if (inferior) {
+          html = "<p>" + inferior.lead + " " + (rise ? inferior.rise : inferior.fall) + "</p>";
+        } else if (state.name === "Restaurant meals" || state.name === "Foreign holidays" || state.name === "New cars") {
+          html =
+            "<h4>Why luxury goods behave differently</h4>" +
+            "<p>When income rises, consumers don’t just buy a bit more — they often upgrade to higher-quality or premium versions.</p>" +
+            "<p>This makes the demand curve shift further to the " + (rise ? "right" : "left") +
+            ", showing a stronger response of quantity demanded to income.</p>" +
+            "<p>In recessions, demand for luxury goods falls sharply — the flip side of their high elasticity.</p>";
+        } else if (YED_FACTORS[state.name]) {
+          html = rise
+            ? "<p>Normal goods have a positive income elasticity of demand (YED &gt; 0). As income rises, consumers buy more of them, so the demand curve shifts to the right. Price is unchanged: this is a shift of demand, not a movement along the curve.</p>"
+            : "<p>Normal goods have a positive income elasticity of demand (YED &gt; 0). As income falls, consumers buy less of them, so the demand curve shifts to the left. Price is unchanged: this is a shift of demand, not a movement along the curve.</p>";
+        }
+        if (!html) {
+          hideInferiorNote();
+          return;
+        }
+        el.innerHTML = html;
+        el.hidden = false;
+      }
+      function showYedFactors() {
+        const box = document.getElementById("yed-factors");
+        if (!box) return;
+        const rows = YED_FACTORS[state.name];
+        if (!rows) {
+          hideYedFactors();
+          return;
+        }
+        let body = "";
+        for (let i = 0; i < rows.length; i++) {
+          body += "<tr><td>" + rows[i][0] + "</td><td>" + rows[i][1] + "</td><td>" + rows[i][2] + "</td></tr>";
+        }
+        box.innerHTML =
+          "<h4>Key factors affecting YED for " + state.name.toLowerCase() + "</h4>" +
+          "<div class=\"yed-table-wrap\"><table>" +
+          "<thead><tr><th>Factor</th><th>Explanation</th><th>Likely effect on YED</th></tr></thead>" +
+          "<tbody>" + body + "</tbody></table></div>";
+        box.hidden = false;
+      }
+      function updateSteps() {
+        const done = {
+          1: state.eps != null,
+          2: state.Y1 != null,
+          3: state.Q1 != null,
+          4: state.Y2 != null,
+          5: !!state.results
+        };
+        root.querySelectorAll(".yed-step").forEach(function (el) {
+          const n = el.getAttribute("data-step");
+          el.classList.remove("on", "done");
+          if (done[n] && n !== "5") el.classList.add("done");
+          else if (n === "1" && !done[1]) el.classList.add("on");
+          else if (n === "2" && done[1] && !done[2]) el.classList.add("on");
+          else if (n === "3" && done[2] && !done[3]) el.classList.add("on");
+          else if (n === "4" && done[3] && !done[4]) el.classList.add("on");
+          else if (n === "5" && done[4] && !done[5]) el.classList.add("on");
+          else if (done[5] && n === "5") el.classList.add("done");
+        });
+        document.getElementById("yed-calc").disabled = false;
+      }
+      function hideWorking() {
+        const out = document.getElementById("yed-output");
+        out.hidden = true;
+        out.innerHTML = "";
+        document.getElementById("yed-working").hidden = true;
+        document.getElementById("yed-caption").textContent = "The demand diagram appears once all four choices are made.";
+        hideYedFactors();
+        hideInferiorNote();
+      }
+      function maybeCalculate() {
+        updateSteps();
+        if ([state.eps, state.Y1, state.Q1, state.Y2].every(picked)) calculate();
+        else {
+          drawEmpty();
+          updateSteps();
+        }
+      }
+
+      document.getElementById("yed-productGroup").addEventListener("click", function (ev) {
+        const btn = ev.target.closest("button");
+        if (!btn) return;
+        state.eps = parseFloat(btn.getAttribute("data-eps"));
+        state.name = btn.getAttribute("data-name");
+        state.results = null;
+        hideAmendments();
+        setChosen(document.getElementById("yed-productGroup"), btn);
+        setQtyButtons(btn);
+        document.getElementById("yed-prod-hint").textContent =
+          "(" + state.name + ")";
+        setError("");
+        hideWorking();
+        maybeCalculate();
+      });
+      document.getElementById("yed-y1Group").addEventListener("click", function (ev) {
+        const btn = ev.target.closest("button");
+        if (!btn) return;
+        state.Y1 = parseFloat(btn.getAttribute("data-y1"));
+        state.results = null;
+        if (state.Y2pct != null) state.Y2 = state.Y1 * (1 + state.Y2pct);
+        setChosen(document.getElementById("yed-y1Group"), btn);
+        setError("");
+        hideWorking();
+        maybeCalculate();
+      });
+      document.getElementById("yed-q1Group").addEventListener("click", function (ev) {
+        const btn = ev.target.closest("button");
+        if (!btn) return;
+        state.Q1 = parseFloat(btn.getAttribute("data-q1"));
+        state.results = null;
+        setChosen(document.getElementById("yed-q1Group"), btn);
+        setError("");
+        hideWorking();
+        maybeCalculate();
+      });
+      document.getElementById("yed-y2Group").addEventListener("click", function (ev) {
+        const btn = ev.target.closest("button");
+        if (!btn) return;
+        if (state.Y1 == null) {
+          setError("Choose an initial real income Y₁ first.");
+          return;
+        }
+        state.Y2pct = parseFloat(btn.getAttribute("data-pct"));
+        state.Y2 = state.Y1 * (1 + state.Y2pct);
+        state.results = null;
+        setChosen(document.getElementById("yed-y2Group"), btn);
+        setError("");
+        hideWorking();
+        maybeCalculate();
+      });
+
+      document.getElementById("yed-calc").addEventListener("click", calculate);
+
+      function pairFrom(eps, Q1, Y1, Y2) {
+        const slope = eps * (Q1 / Y1);
+        const Q2 = Q1 + slope * (Y2 - Y1);
+        const pctQ = ((Q2 - Q1) / Q1) * 100;
+        const pctY = ((Y2 - Y1) / Y1) * 100;
+        const YED = pctQ / pctY;
+        return { slope: slope, Q1: Q1, Q2: Q2, pctQ: pctQ, pctY: pctY, YED: YED, cls: classify(YED) };
+      }
+      function yedSentence(pair, name) {
+        const yBit = pair.pctY > 0
+          ? "A " + fmt(pair.pctY) + "% increase in real income"
+          : "A " + fmt(abs(pair.pctY)) + "% decrease in real income";
+        let qBit;
+        if (pair.pctQ > 0.05) qBit = "raises quantity demanded by " + fmt(pair.pctQ) + "%";
+        else if (pair.pctQ < -0.05) qBit = "cuts quantity demanded by " + fmt(abs(pair.pctQ)) + "%";
+        else qBit = "leaves quantity demanded almost unchanged";
+        return yBit + " " + qBit + ". " + name + " is a " + pair.cls.short + " (YED = " + fmt(pair.YED) + ").";
+      }
+      function shiftDir(pair) {
+        if (pair.Q2 > pair.Q1 + 0.01) return "right";
+        if (pair.Q2 < pair.Q1 - 0.01) return "left";
+        return "very little";
+      }
+      function workingBlock(title, pair, epsNote) {
+        return "<p><strong>" + title + "</strong>" + (epsNote ? " — " + epsNote : "") + "</p>" +
+          "<p><strong>%ΔQ</strong> = (" + fmt(pair.Q2) + " − " + fmt(pair.Q1) + ") ÷ " + fmt(pair.Q1) +
+          " × 100 = <strong>" + fmt(pair.pctQ) + "%</strong></p>" +
+          "<p><strong>%ΔY</strong> = (" + money(state.Y2) + " − " + money(state.Y1) + ") ÷ " + money(state.Y1) +
+          " × 100 = <strong>" + fmt(pair.pctY) + "%</strong></p>" +
+          "<p><strong>YED</strong> = %ΔQ ÷ %ΔY = " + fmt(pair.pctQ) + " ÷ " + fmt(pair.pctY) +
+          " = <strong>" + fmt(pair.YED) + "</strong> (" + pair.cls.short + ").</p>" +
+          "<p>" + pair.cls.line + " " + pair.cls.engel + "</p>";
+      }
+      function calculate() {
+        setError("");
+        if (![state.eps, state.Y1, state.Q1, state.Y2].every(picked)) {
+          setError("Finish Step 1 to Step 4, then calculate.");
+          return;
+        }
+        const orig = pairFrom(state.eps, state.Q1, state.Y1, state.Y2);
+        if (!(orig.Q2 > 0)) {
+          setError("That income change would push quantity to zero or below. Try a smaller percentage change.");
+          state.results = null;
+          drawEmpty();
+          updateSteps();
+          hideAmendments();
+          hideYedFactors();
+          hideInferiorNote();
+          return;
+        }
+        const factor = currentAmendment();
+        let amd = null;
+        if (factor) {
+          amd = pairFrom(state.eps * factor.yedMult, Math.max(0.05, state.Q1 * factor.qMult), state.Y1, state.Y2);
+          if (!(amd.Q2 > 0)) {
+            setError("That factor would push quantity to zero or below. Try a smaller income fall, or a different amendment.");
+            return;
+          }
+        }
+        const shown = amd || orig;
+        state.results = { orig: orig, amd: amd, factor: factor };
+        document.getElementById("yed-caption").textContent = factor
+          ? factor.title + ": " + yedSentence(shown, state.name) + " Demand shifts " + shiftDir(shown) + ". " + factor.effect
+          : yedSentence(orig, state.name) + " Demand shifts " + shiftDir(orig) + ".";
+        const out = document.getElementById("yed-output");
+        let html = workingBlock(
+          state.name + " (original)",
+          orig,
+          "typical YED ≈ " + fmt(state.eps) + ". For this move, YED = " + fmt(orig.YED) + "."
+        );
+        if (factor && amd) {
+          html += "<p><strong>Amendment — " + factor.title + "</strong></p>" +
+            "<p>" + factor.text + " " + factor.effect + "</p>" +
+            workingBlock(
+              "After the amendment",
+              amd,
+              "the demand curves are redrawn. Grey D and D₁ are the original income shift; navy curves are after this factor."
+            ) +
+            "<p>Original YED = " + fmt(orig.YED) + "; amended YED = " + fmt(amd.YED) +
+            ". Original Q₁ = " + fmt(orig.Q1) + ", Q₂ = " + fmt(orig.Q2) +
+            "; amended Q₁′ = " + fmt(amd.Q1) + ", Q₂′ = " + fmt(amd.Q2) + ".</p>";
+        }
+        out.hidden = true;
+        out.innerHTML = html;
+        document.getElementById("yed-working").hidden = false;
+        document.getElementById("yed-working").textContent = "Show exam working";
+        drawDiagram(state.results);
+        showInferiorNote();
+        showYedFactors();
+        updateSteps();
+        hideAmendments();
+        document.getElementById("yed-caption").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      document.getElementById("yed-working").addEventListener("click", function () {
+        const out = document.getElementById("yed-output");
+        out.hidden = !out.hidden;
+        this.textContent = out.hidden ? "Show exam working" : "Hide exam working";
+      });
+
+      document.getElementById("yed-reset").addEventListener("click", function () {
+        state.eps = null; state.name = ""; state.Y1 = null; state.Q1 = null;
+        state.Y2 = null; state.Y2pct = null; state.results = null;
+        hideAmendments();
+        root.querySelectorAll(".chosen").forEach(function (b) { b.classList.remove("chosen"); });
+        setQtyButtons(null);
+        document.getElementById("yed-prod-hint").textContent = "(choose a type of good)";
+        setError("");
+        hideWorking();
+        document.getElementById("yed-working").textContent = "Show exam working";
+        document.getElementById("yed-caption").textContent = "The demand diagram appears once all four choices are made.";
+        hideYedFactors();
+        hideInferiorNote();
+        drawEmpty();
+        updateSteps();
+      });
+
+      function wrapText(ctx, text, x, y, maxW, lineH) {
+        const words = text.split(" ");
+        let line = "";
+        let yy = y;
+        words.forEach(function (word, i) {
+          const test = line ? line + " " + word : word;
+          if (ctx.measureText(test).width > maxW && line) {
+            ctx.fillText(line, x, yy);
+            line = word;
+            yy += lineH;
+          } else line = test;
+          if (i === words.length - 1) ctx.fillText(line, x, yy);
+        });
+      }
+
+      function demandEnds(qAt, pAt, maxQ, maxP) {
+        const hits = [];
+        function pushHit(q, p) {
+          if (!isFinite(q) || !isFinite(p)) return;
+          if (q < -0.001 || q > maxQ + 0.001 || p < -0.001 || p > maxP + 0.001) return;
+          hits.push({ q: Math.min(Math.max(q, 0), maxQ), p: Math.min(Math.max(p, 0), maxP) });
+        }
+        pushHit(0, pAt(0));
+        pushHit(maxQ, pAt(maxQ));
+        pushHit(qAt(0), 0);
+        pushHit(qAt(maxP), maxP);
+        hits.sort(function (a, b) { return a.q - b.q; });
+        const ends = [];
+        hits.forEach(function (h) {
+          const last = ends[ends.length - 1];
+          if (!last || Math.abs(last.q - h.q) > 0.02) ends.push(h);
+        });
+        return ends;
+      }
+      function drawDemandLine(ctx, ends, qToX, pToY, color, width) {
+        if (ends.length < 2) return;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width || 2.8;
+        ctx.beginPath();
+        ctx.moveTo(qToX(ends[0].q), pToY(ends[0].p));
+        ctx.lineTo(qToX(ends[ends.length - 1].q), pToY(ends[ends.length - 1].p));
+        ctx.stroke();
+      }
+      function alongEnds(ends, t) {
+        const a = ends[0], b = ends[ends.length - 1];
+        return { q: a.q + (b.q - a.q) * t, p: a.p + (b.p - a.p) * t };
+      }
+      function syncSave() {
+        const btn = document.getElementById("yed-save");
+        if (btn) btn.disabled = !state.results;
+      }
+      function saveDiagram() {
+        const canvas = document.getElementById("yed-diagram");
+        const slug = String(state.name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+        const name = slug ? "income-elasticity-" + slug + ".png" : "income-elasticity.png";
+        const link = document.createElement("a");
+        link.download = name;
+        link.href = canvas.toDataURL("image/png");
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+      document.getElementById("yed-save").addEventListener("click", saveDiagram);
+
+      function drawEmpty() {
+        hideYedFactors();
+        hideInferiorNote();
+        const canvas = document.getElementById("yed-diagram");
+        const ctx = canvas.getContext("2d");
+        const W = canvas.width, H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = "#fffaf3";
+        ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = "#5c5348";
+        ctx.font = "15px \"Financier Text\", Georgia, serif";
+        wrapText(ctx, "Choose a product, Y₁, Q₁ and an income change. Dashed lines will link Y₁ to Q₁ and Y₂ to Q₂.", 40, H / 2, W - 80, 22);
+        ctx.strokeStyle = "#1c1915";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(88, 40);
+        ctx.lineTo(88, H - 56);
+        ctx.lineTo(W - 36, H - 56);
+        ctx.stroke();
+        ctx.fillStyle = "#1c1915";
+        ctx.font = "bold 13px \"Financier Text\", Georgia, serif";
+        ctx.fillText("Real income (£)", 12, 28);
+        ctx.fillText("Quantity demanded", W / 2 - 60, H - 16);
+        syncSave();
+      }
+
+      function drawDiagram(r) {
+        {
+        const canvas = document.getElementById("yed-diagram");
+        const ctx = canvas.getContext("2d");
+        const W = canvas.width, H = canvas.height;
+        const orig = r.orig;
+        const amd = r.amd;
+        const shown = amd || orig;
+        const Y1 = state.Y1, Y2 = state.Y2;
+        const Q1 = shown.Q1, Q2 = shown.Q2;
+        const margin = { left: 92, right: 56, top: 36, bottom: 66 };
+        const plotW = W - margin.left - margin.right;
+        const plotH = H - margin.top - margin.bottom;
+        const maxY = Math.max(Y1, Y2) * 1.45;
+        const maxQ = Math.max(orig.Q1, orig.Q2, amd ? amd.Q1 : 0, amd ? amd.Q2 : 0, 0.5) * 1.55;
+        const qToX = function (q) { return margin.left + (q / maxQ) * plotW; };
+        const yToY = function (y) { return margin.top + (1 - y / maxY) * plotH; };
+        function hitsFor(pair) {
+          const qA = pair.Q1, yA = Y1, qB = pair.Q2, yB = Y2;
+          let dq = qB - qA, dy = yB - yA;
+          if (Math.abs(dq) < 1e-9 && Math.abs(dy) < 1e-9) {
+            dq = 0.04 * maxQ;
+            dy = pair.YED >= 0 ? 0.12 * maxY : -0.12 * maxY;
+          }
+          const hits = [];
+          function add(q, y) {
+            if (!isFinite(q) || !isFinite(y)) return;
+            if (q < -1e-6 || q > maxQ + 1e-6 || y < -1e-6 || y > maxY + 1e-6) return;
+            hits.push({ q: Math.min(Math.max(q, 0), maxQ), y: Math.min(Math.max(y, 0), maxY) });
+          }
+          if (Math.abs(dq) < 1e-9) {
+            add(qA, 0);
+            add(qA, maxY);
+          } else {
+            const m = dy / dq;
+            add(0, yA + m * (0 - qA));
+            add(maxQ, yA + m * (maxQ - qA));
+            if (Math.abs(m) > 1e-12) {
+              add(qA + (0 - yA) / m, 0);
+              add(qA + (maxY - yA) / m, maxY);
+            }
+          }
+          hits.sort(function (a, b) { return a.q - b.q || a.y - b.y; });
+          const uniq = [];
+          hits.forEach(function (h) {
+            const last = uniq[uniq.length - 1];
+            if (!last || Math.abs(last.q - h.q) > 0.01 || Math.abs(last.y - h.y) > 1) uniq.push(h);
+          });
+          if (uniq.length < 2) return [{ q: 0, y: maxY * 0.2 }, { q: maxQ, y: maxY * 0.8 }];
+          return [uniq[0], uniq[uniq.length - 1]];
+        }
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = "#fffaf3";
+        ctx.fillRect(0, 0, W, H);
+        ctx.strokeStyle = "#f0dce2";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        let i;
+        for (i = 0; i <= 5; i++) {
+          const y = margin.top + (i / 5) * plotH;
+          ctx.moveTo(margin.left, y);
+          ctx.lineTo(margin.left + plotW, y);
+          const x = margin.left + (i / 5) * plotW;
+          ctx.moveTo(x, margin.top);
+          ctx.lineTo(x, margin.top + plotH);
+        }
+        ctx.stroke();
+        ctx.strokeStyle = "#1c1915";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, margin.top);
+        ctx.lineTo(margin.left, margin.top + plotH);
+        ctx.lineTo(margin.left + plotW, margin.top + plotH);
+        ctx.stroke();
+        ctx.fillStyle = "#1c1915";
+        ctx.font = "bold 13px \"Financier Text\", Georgia, serif";
+        ctx.fillText("Real income (£)", 10, 22);
+        const qAxis = state.qUnit ? "Quantity (" + state.qUnit + ")" : "Quantity demanded";
+        ctx.font = "bold 12px \"Financier Text\", Georgia, serif";
+        ctx.fillText(qAxis, margin.left + plotW / 2 - ctx.measureText(qAxis).width / 2, H - 12);
+        const endsShown = hitsFor(shown);
+        const endsOrig = hitsFor(orig);
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(margin.left, margin.top, plotW, plotH);
+        ctx.clip();
+        if (amd) {
+          ctx.strokeStyle = "#c4b5a8";
+          ctx.lineWidth = 2.2;
+          ctx.beginPath();
+          ctx.moveTo(qToX(endsOrig[0].q), yToY(endsOrig[0].y));
+          ctx.lineTo(qToX(endsOrig[endsOrig.length - 1].q), yToY(endsOrig[endsOrig.length - 1].y));
+          ctx.stroke();
+        }
+        ctx.strokeStyle = "#9a3412";
+        ctx.lineWidth = 2.8;
+        ctx.beginPath();
+        ctx.moveTo(qToX(endsShown[0].q), yToY(endsShown[0].y));
+        ctx.lineTo(qToX(endsShown[endsShown.length - 1].q), yToY(endsShown[endsShown.length - 1].y));
+        ctx.stroke();
+        ctx.restore();
+        const dQ = endsShown[0].q + (endsShown[endsShown.length - 1].q - endsShown[0].q) * 0.78;
+        const dY = endsShown[0].y + (endsShown[endsShown.length - 1].y - endsShown[0].y) * 0.78;
+        ctx.fillStyle = "#1c1915";
+        ctx.font = "bold 16px \"Financier Text\", Georgia, serif";
+        ctx.fillText("D", qToX(dQ) + 8, yToY(dY) + 4);
+        const x1 = qToX(Q1), yy1 = yToY(Y1);
+        const x2 = qToX(Q2), yy2 = yToY(Y2);
+        const axisY = margin.top + plotH;
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = "#c4b5a8";
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, yy1); ctx.lineTo(x1, yy1); ctx.lineTo(x1, axisY);
+        ctx.moveTo(margin.left, yy2); ctx.lineTo(x2, yy2); ctx.lineTo(x2, axisY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#9a3412";
+        ctx.beginPath(); ctx.arc(x1, yy1, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x2, yy2, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#1c1915";
+        ctx.font = "bold 12px \"Financier Text\", Georgia, serif";
+        const yGap = Math.abs(yy1 - yy2) < 16;
+        ctx.fillText("Y₁", margin.left - 28, yy1 + (yGap && yy1 > yy2 ? 12 : 4));
+        ctx.fillText("Y₂", margin.left - 28, yy2 + (yGap && yy2 > yy1 ? 12 : 4));
+        const qClose = Math.abs(x2 - x1) < 28;
+        ctx.fillText("Q₁", x1 - (qClose && x1 <= x2 ? 22 : 10), axisY + 32);
+        ctx.fillText("Q₂", x2 - (qClose && x2 >= x1 ? -4 : 10), axisY + 32);
+      }
+        const canvas = document.getElementById("yed-diagram");
+        const ctx = canvas.getContext("2d");
+        const W = canvas.width, H = canvas.height;
+        const orig = r.orig;
+        const amd = r.amd;
+        const shown = amd || orig;
+        const Q1 = shown.Q1, Q2 = shown.Q2;
+        const margin = { left: 88, right: 56, top: 36, bottom: 62 };
+        const plotW = W - margin.left - margin.right;
+        const plotH = H - margin.top - margin.bottom;
+        const qFocus = Math.max(orig.Q1, orig.Q2, amd ? amd.Q1 : 0, amd ? amd.Q2 : 0, 0.5);
+        const maxQ = qFocus * 1.55;
+        const pStar = 40;
+        const maxP = 72;
+        const k = -(maxQ * 0.62) / maxP;
+        function qAtFor(q0, p) { return q0 + k * (p - pStar); }
+        function pAtFor(q0, q) { return pStar + (q - q0) / k; }
+        const qToX = function (q) { return margin.left + (q / maxQ) * plotW; };
+        const pToY = function (p) { return margin.top + (1 - p / maxP) * plotH; };
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = "#fffaf3";
+        ctx.fillRect(0, 0, W, H);
+        ctx.strokeStyle = "#f0dce2";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        let i;
+        for (i = 0; i <= 5; i++) {
+          const y = margin.top + (i / 5) * plotH;
+          ctx.moveTo(margin.left, y);
+          ctx.lineTo(margin.left + plotW, y);
+          const x = margin.left + (i / 5) * plotW;
+          ctx.moveTo(x, margin.top);
+          ctx.lineTo(x, margin.top + plotH);
+        }
+        ctx.stroke();
+        ctx.strokeStyle = "#1c1915";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, margin.top);
+        ctx.lineTo(margin.left, margin.top + plotH);
+        ctx.lineTo(margin.left + plotW, margin.top + plotH);
+        ctx.stroke();
+        ctx.fillStyle = "#1c1915";
+        ctx.font = "bold 13px \"Financier Text\", Georgia, serif";
+        ctx.fillText("Price (£)", 10, 22);
+        const qAxis = state.qUnit ? "Quantity (" + state.qUnit + ")" : "Quantity demanded";
+        ctx.font = "bold 12px \"Financier Text\", Georgia, serif";
+        ctx.fillText(qAxis, margin.left + plotW / 2 - ctx.measureText(qAxis).width / 2, H - 14);
+        ctx.fillStyle = "#5c5348";
+        ctx.font = "11px \"Financier Text\", Georgia, serif";
+        for (i = 0; i <= 5; i++) {
+          ctx.fillText(String(Math.round(maxP * (1 - i / 5))), margin.left - 28, margin.top + (i / 5) * plotH + 4);
+          const rawQ = (i / 5) * maxQ;
+          const qLab = maxQ < 8 ? rawQ.toFixed(1) : String(Math.round(rawQ));
+          ctx.fillText(qLab, margin.left + (i / 5) * plotW - 8, margin.top + plotH + 18);
+        }
+        function endsAt(q0) {
+          return demandEnds(function (p) { return qAtFor(q0, p); }, function (q) { return pAtFor(q0, q); }, maxQ, maxP);
+        }
+        const endsOrig1 = endsAt(orig.Q1);
+        const endsOrig2 = endsAt(orig.Q2);
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(margin.left, margin.top, plotW, plotH);
+        ctx.clip();
+        if (amd) {
+          drawDemandLine(ctx, endsOrig1, qToX, pToY, "#c4b5a8", 2.2);
+          drawDemandLine(ctx, endsOrig2, qToX, pToY, "#c4b5a8", 2.2);
+          drawDemandLine(ctx, endsAt(amd.Q1), qToX, pToY, "#9a3412", 2.8);
+          drawDemandLine(ctx, endsAt(amd.Q2), qToX, pToY, "#b45309", 2.8);
+        } else {
+          drawDemandLine(ctx, endsOrig1, qToX, pToY, "#9a3412", 2.8);
+          drawDemandLine(ctx, endsOrig2, qToX, pToY, "#b45309", 2.8);
+        }
+        ctx.restore();
+        function placeCurveLabel(text, ends, t, color, xShift, yShift) {
+          if (ends.length < 2) return;
+          const pos = alongEnds(ends, t);
+          ctx.font = "bold 16px \"Financier Text\", Georgia, serif";
+          const w = ctx.measureText(text).width;
+          let x = qToX(pos.q) + xShift;
+          let y = pToY(pos.p) + yShift;
+          if (x + w > W - 10) x = W - 10 - w;
+          if (x < margin.left + 6) x = margin.left + 6;
+          if (y < margin.top + 16) y = margin.top + 16;
+          if (y > H - 22) y = H - 22;
+          ctx.fillStyle = "#fffaf3";
+          ctx.fillRect(x - 3, y - 14, w + 6, 18);
+          ctx.fillStyle = color;
+          ctx.fillText(text, x, y);
+        }
+        const d1Right = Q2 >= Q1;
+        if (amd) {
+          placeCurveLabel("D′", endsAt(amd.Q1), 0.28, "#9a3412", d1Right ? -22 : 10, -8);
+          placeCurveLabel("D₁′", endsAt(amd.Q2), 0.78, "#b45309", d1Right ? 10 : -26, 6);
+        } else {
+          placeCurveLabel("D", endsOrig1, 0.28, "#9a3412", d1Right ? -20 : 12, -8);
+          placeCurveLabel("D₁", endsOrig2, 0.78, "#b45309", d1Right ? 12 : -24, 6);
+        }
+        const x1 = qToX(Q1), x2 = qToX(Q2);
+        const yP = pToY(pStar);
+        const axisY = margin.top + plotH;
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = "#c4b5a8";
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, yP);
+        ctx.lineTo(Math.max(x1, x2), yP);
+        ctx.moveTo(x1, yP); ctx.lineTo(x1, axisY);
+        ctx.moveTo(x2, yP); ctx.lineTo(x2, axisY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        if (Math.abs(x2 - x1) > 18) {
+          const midY = yP - 18;
+          ctx.strokeStyle = "#b45309";
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(x1, midY);
+          ctx.lineTo(x2, midY);
+          ctx.stroke();
+          const dir = x2 > x1 ? 1 : -1;
+          ctx.beginPath();
+          ctx.moveTo(x2, midY);
+          ctx.lineTo(x2 - 8 * dir, midY - 5);
+          ctx.lineTo(x2 - 8 * dir, midY + 5);
+          ctx.closePath();
+          ctx.fillStyle = "#b45309";
+          ctx.fill();
+        }
+        ctx.fillStyle = "#9a3412";
+        ctx.beginPath(); ctx.arc(x1, yP, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#b45309";
+        ctx.beginPath(); ctx.arc(x2, yP, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#1c1915";
+        ctx.font = "bold 12px \"Financier Text\", Georgia, serif";
+        ctx.fillText("P", margin.left - 22, yP + 4);
+        const qClose = Math.abs(x2 - x1) < 28;
+        ctx.fillText("Q₁", x1 - (qClose && x1 <= x2 ? 22 : 10), axisY + 32);
+        ctx.fillText("Q₂", x2 - (qClose && x2 >= x1 ? -4 : 10), axisY + 32);
+        syncSave();
+      }
+
+      drawEmpty();
+      updateSteps();
+    }
+    initYedBuilder();
+  </script>
+</body>
+</html>

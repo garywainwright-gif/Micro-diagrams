@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Subsidies</title>
+  <link rel="stylesheet" href="../diagram-economist.css" />
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #f0dce2;
+      --paper: #fffaf3;
+      --bg: #fef7f9;
+      --formula: #f8e8ec;
+      --accent: #9a3412;
+      --accent-soft: #f8e8ec;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Financier Text", Georgia, "Palatino Linotype", Palatino, serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+      font-size: 1.05rem;
+    }
+    h1, h2, h3 {
+      font-family: "Financier Display", Georgia, "Palatino Linotype", Palatino, serif;
+      letter-spacing: -0.02em;
+    }
+    svg text {
+      font-family: "Financier Text", Georgia, "Palatino Linotype", Palatino, serif;
+    }
+    .book { max-width: 1180px; margin: 0 auto; padding: 20px 20px 72px; }
+    .topic {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 22px 24px;
+      margin: 16px 0;
+    }
+    h1 { margin: 0 0 8px; font-size: 1.75rem; letter-spacing: -0.03em; }
+    .elast, .words { display: flex; flex-wrap: wrap; gap: 8px; }
+    .elast { margin: 0; }
+    .words { margin: 8px 0 12px; }
+    .lead { margin: 0 0 14px; }
+    .play {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.9fr);
+      gap: 18px;
+      align-items: start;
+    }
+    .chart-col, .panel { min-width: 0; }
+    .elast button, .words button, .save-row button {
+      font: inherit; font-weight: 700; cursor: pointer;
+      background: #fff; color: var(--accent);
+      border: 1px solid #e4b8c4; border-radius: 8px;
+      padding: 8px 14px;
+    }
+    .elast button:hover, .words button:hover, .save-row button:hover { background: var(--accent-soft); }
+    .elast button[aria-pressed="true"],
+    .words button[aria-pressed="true"] {
+      background: var(--accent); color: #fffaf3; border-color: var(--accent);
+    }
+    button:focus-visible, a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .chart-wrap {
+      background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 8px 8px 4px;
+    }
+    svg.chart { display: block; width: 100%; height: auto; }
+    svg[data-show="expenditure"] .gain-label { opacity: 0; }
+    .layer { opacity: 0; }
+    svg[data-show="shift"] .layer-shift,
+    svg[data-show="prices"] .layer-prices,
+    svg[data-show="quantity"] .layer-quantity,
+    svg[data-show="consumers"] .layer-consumers,
+    svg[data-show="producers"] .layer-producers,
+    svg[data-show="expenditure"] .layer-expenditure,
+    svg[data-show="loss"] .layer-loss,
+    svg[data-show="evaluation"] .layer-evaluation { opacity: 1; }
+    .explain {
+      background: var(--formula); border-radius: 8px; padding: 12px 16px; margin: 12px 0 0;
+      min-height: 7.5em;
+    }
+    .explain h2 { margin: 0 0 6px; font-size: 1.05rem; }
+    .explain p { margin: 0 0 8px; }
+    .explain p:last-child, .explain ul:last-child { margin-bottom: 0; }
+    .explain ul { margin: 4px 0 0; padding-left: 1.2em; }
+    .explain li { margin: 3px 0; }
+    .chart-note { margin: 4px 8px 8px; color: var(--muted); font-size: 0.88rem; }
+    .save-row { margin: 10px 0 0; }
+    @media (min-width: 861px) {
+      .chart-col { position: sticky; top: 16px; }
+    }
+    @media (max-width: 860px) {
+      .play { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="book">
+    <article class="topic">
+      <h1>Subsidies</h1>
+      <p class="meta"><a href="../micro-diagrams.html">Back to interactive games</a></p>
+      <p class="lead">A subsidy is a payment from the government to producers for each unit they sell. It lowers their costs, so supply shifts right. Press Elastic or Inelastic to set the slope of demand, then press a word to highlight that part of the diagram.</p>
+      <div class="play">
+      <div class="chart-col">
+      <div class="chart-wrap">
+        <svg class="chart" id="chart" viewBox="0 0 760 540" role="img" aria-labelledby="chart-title chart-note">
+          <title id="chart-title">Subsidy diagram</title>
+          <defs>
+            <marker id="ax" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0,0 L9,4.5 L0,9 Z" fill="#1c1915" />
+            </marker>
+            <marker id="hl-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+              <path d="M0,0 L10,5 L0,10 Z" fill="#9a3412" />
+            </marker>
+            <marker id="hl-s1" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+              <path d="M0,0 L10,5 L0,10 Z" fill="#166534" />
+            </marker>
+          </defs>
+          <g class="axes">
+            <line x1="64" y1="40" x2="64" y2="470" stroke="#1c1915" stroke-width="2" />
+            <polygon points="64,28 59,42 69,42" fill="#1c1915" />
+            <line x1="64" y1="470" x2="710" y2="470" stroke="#1c1915" stroke-width="2" />
+            <polygon points="722,470 708,465 708,475" fill="#1c1915" />
+            <text x="76" y="36" fill="#5c5348" font-size="15" font-family="Financier Text, Georgia, Palatino Linotype, Palatino, serif">Price</text>
+            <text x="630" y="458" fill="#5c5348" font-size="15" font-family="Financier Text, Georgia, Palatino Linotype, Palatino, serif">Quantity</text>
+          </g>
+          <g id="scene"></g>
+        </svg>
+        <p class="chart-note" id="chart-note">S is supply before the subsidy. S1 is supply after the subsidy. D is demand. P and Q are the original equilibrium.</p>
+      </div>
+      <div class="save-row">
+        <button type="button" id="save-diagram">Save diagram</button>
+      </div>
+      </div>
+      <div class="panel">
+      <div class="elast" role="group" aria-label="Demand elasticity">
+        <button type="button" data-elast="elastic" aria-pressed="true">Elastic</button>
+        <button type="button" data-elast="inelastic" aria-pressed="false">Inelastic</button>
+      </div>
+      <div class="words" role="group" aria-label="Subsidy diagram points">
+        <button type="button" data-mode="shift" aria-pressed="false">Shift</button>
+        <button type="button" data-mode="prices" aria-pressed="false">Prices</button>
+        <button type="button" data-mode="quantity" aria-pressed="false">Quantity</button>
+        <button type="button" data-mode="consumers" aria-pressed="false">Consumers</button>
+        <button type="button" data-mode="producers" aria-pressed="false">Producers</button>
+        <button type="button" data-mode="expenditure" aria-pressed="false">Expenditure</button>
+        <button type="button" data-mode="loss" aria-pressed="false">Deadweight</button>
+        <button type="button" data-mode="evaluation" aria-pressed="false">Evaluation</button>
+      </div>
+      <div class="explain" id="explain" aria-live="polite">
+        <p>Press Elastic or Inelastic, then press a word. The supply shift stays the same. The demand curve changes, and so does each highlight.</p>
+      </div>
+      </div>
+      </div>
+    </article>
+  </div>
+  <script>
+    (function () {
+      var SVGNS = "http://www.w3.org/2000/svg";
+      var FONT = "Financier Text, Georgia, Palatino Linotype, Palatino, serif";
+      var DISPLAY = "Financier Display, Georgia, Palatino Linotype, Palatino, serif";
+      var chart = document.getElementById("chart");
+      var scene = document.getElementById("scene");
+      var explain = document.getElementById("explain");
+      var note = document.getElementById("chart-note");
+      var words = Array.prototype.slice.call(document.querySelectorAll(".words button"));
+      var elastBtns = Array.prototype.slice.call(document.querySelectorAll(".elast button"));
+      var OX = 64;
+      var OY = 470;
+      var E = { x: 300, y: 190 };
+      var MS = -0.5;
+      var SUB = 150;
+      var BOX = { l: 96, r: 680, t: 48, b: 448 };
+      var INK = "#1c1915";
+      var MUTED = "#5c5348";
+      var DEMAND = "#183a66";
+      var SUPPLY = "#9a3412";
+      var SUPPLY1 = "#166534";
+      var LOSS = "#9f1239";
+      var elast = "elastic";
+      var mode = "";
+
+      var copy = {
+        elastic: {
+          shift: "<h2>The supply curve shifts</h2><p>A subsidy reduces producers’ costs, so supply shifts right, from <strong>S</strong> to <strong>S1</strong>. Drawn this way, that is also a downward shift. The arrow is the subsidy per unit.</p><p>Demand is <strong>elastic</strong>, so D is flat. The size of the shift does not change with elasticity. What changes is where S1 meets D.</p>",
+          prices: "<h2>Two prices</h2><p>Buyers pay <strong>P1</strong> at Y. Sellers receive <strong>V</strong> at W. P is the original price. The government pays <strong>V − P1</strong>.</p><p>Demand is elastic, so the price buyers pay falls only a little. Most of the subsidy goes to sellers: V is well above P.</p>",
+          quantity: "<h2>Quantity increases</h2><p>Quantity rises from <strong>Q</strong> to <strong>Q1</strong>.</p><p>Demand is elastic, so buyers respond strongly. The rise from Q to Q1 is large. Compare this with the inelastic diagram, where Q1 sits close to Q.</p>",
+          consumers: "<h2>Consumer surplus increases</h2><p>The shaded consumer gain is the area between P and P1, up to the demand curve.</p><p>Demand is elastic, so the price fall is small and the shaded area is shallow. It does stretch out to the much larger Q1.</p>",
+          producers: "<h2>Producer surplus increases</h2><p>The shaded producer gain sits above the original supply curve and below the price sellers receive, out to Q1.</p><p>Demand is elastic, so sellers receive a much higher price and sell many more units. The producer gain is the larger of the two gains.</p>",
+          expenditure: "<h2>Government expenditure</h2><p>Government cost = subsidy per unit × <strong>Q1</strong>. The height of the rectangle is the gap between V and P1. That height is the same on both diagrams, because the subsidy per unit has not changed.</p><p>Demand is elastic, so Q1 is much larger. The rectangle is wider and the government spends more.</p>",
+          loss: "<h2>Deadweight loss</h2><p>The shaded triangle has corners <strong>Pe</strong>, <strong>W</strong> and <strong>Y</strong>. Pe is the original equilibrium. W is the original supply curve at Q1. Y is demand at Q1. <strong>X</strong> sits on the line from W to Y, at the original price P.</p><p>The textbook consumer-gain rectangle runs from P to the price buyers pay, out to X and Y. The slice of that rectangle above the demand curve is the lower triangle <strong>Pe–X–Y</strong>. Buyers do not value those units at P, so that slice is not consumer gain. It is part of this deadweight loss. The upper slice <strong>Pe–W–X</strong> is the part of the producer-price rectangle that lies below the supply curve. That is not producer gain either.</p><p>Demand is elastic, so the triangle is wide. Quantity rises a long way past the free-market level.</p>",
+          evaluation: "<h2>Efficiency and evaluation</h2><p>Demand is elastic. Q1 is far to the right of Q.</p><ul><li>A subsidy can correct under-consumption. With elastic demand it does raise quantity a lot.</li><li>Producers keep most of the benefit, because the price buyers pay hardly falls.</li><li>The government rectangle is wide, so the budget cost is high.</li><li>Many of the extra units would not have been bought at the market price. If the subsidy is poorly targeted, that spending is hard to justify.</li><li>With no externality, the wide triangle between S, D and Q1 is a large deadweight loss.</li></ul>"
+        },
+        inelastic: {
+          shift: "<h2>The supply curve shifts</h2><p>A subsidy reduces producers’ costs, so supply shifts right, from <strong>S</strong> to <strong>S1</strong>. The arrow is the same subsidy per unit as on the elastic diagram.</p><p>Demand is <strong>inelastic</strong>, so D is steep. The supply shift itself has not changed. The new meeting point of S1 and D has.</p>",
+          prices: "<h2>Two prices</h2><p>Buyers pay <strong>P1</strong> at Y. Sellers receive <strong>V</strong> at W. P is the original price. The government pays <strong>V − P1</strong>.</p><p>Demand is inelastic, so the price buyers pay falls a long way. V is only a little above P. Consumers take most of the subsidy.</p>",
+          quantity: "<h2>Quantity increases</h2><p>Quantity rises from <strong>Q</strong> to <strong>Q1</strong>.</p><p>Demand is inelastic, so buyers hardly respond. Q1 sits close to Q. Compare this with the elastic diagram, where the same subsidy pushes quantity much further right.</p>",
+          consumers: "<h2>Consumer surplus increases</h2><p>The shaded consumer gain is the area between P and P1, up to the demand curve.</p><p>Demand is inelastic, so the price fall is large and the shaded area is deep. It stops soon after Q, because quantity hardly rises. Consumers gain more here than when demand is elastic.</p>",
+          producers: "<h2>Producer surplus increases</h2><p>The shaded producer gain sits above the original supply curve and below the price sellers receive, out to Q1.</p><p>Demand is inelastic, so the price sellers receive rises only a little, and they sell little extra. The producer gain is small.</p>",
+          expenditure: "<h2>Government expenditure</h2><p>Government cost = subsidy per unit × <strong>Q1</strong>. The height of the rectangle is the same as on the elastic diagram.</p><p>Demand is inelastic, so Q1 is only a little above Q. The rectangle is narrower and the government spends less. Most of that spending still pays for units buyers would have purchased at P.</p>",
+          loss: "<h2>Deadweight loss</h2><p>The shaded triangle has corners <strong>Pe</strong>, <strong>W</strong> and <strong>Y</strong>. Pe is the original equilibrium. W is the original supply curve at Q1. Y is demand at Q1. <strong>X</strong> sits on the line from W to Y, at the original price P. This is the narrow triangle on the inelastic textbook diagram.</p><p>The textbook consumer-gain rectangle runs from P to the price buyers pay, out to X and Y. The slice above the demand curve is the lower triangle <strong>Pe–X–Y</strong>. That slice is not consumer gain. The upper slice <strong>Pe–W–X</strong> is not producer gain. Together they are the deadweight loss.</p><p>Demand is inelastic, so the triangle is narrow. Quantity rises only a little, and the welfare loss from over-production is smaller than when demand is elastic.</p>",
+          evaluation: "<h2>Efficiency and evaluation</h2><p>Demand is inelastic. Q1 is close to Q.</p><ul><li>If the aim is to correct under-consumption, a subsidy does little: buyers do not take much extra.</li><li>Consumers keep most of the benefit as a lower price.</li><li>The government rectangle is narrower than when demand is elastic, so the total bill is smaller.</li><li>It is poorly targeted. Most of the money lowers the price of units that would have been bought anyway.</li><li>The deadweight-loss triangle is narrow, because output barely rises past the free-market quantity.</li></ul>"
+        }
+      };
+      var intro = "<p>Press Elastic or Inelastic, then press a word. The supply shift stays the same. The demand curve changes, and so does each highlight.</p>";
+
+      function node(name, attrs, parent) {
+        var n = document.createElementNS(SVGNS, name);
+        if (attrs) {
+          Object.keys(attrs).forEach(function (k) { n.setAttribute(k, attrs[k]); });
+        }
+        if (parent) parent.appendChild(n);
+        return n;
+      }
+      function text(parent, x, y, str, extra) {
+        var attrs = { x: x, y: y, fill: INK, "font-size": "16", "font-weight": "700", "font-family": FONT };
+        if (extra) Object.keys(extra).forEach(function (k) { attrs[k] = extra[k]; });
+        var t = node("text", attrs, parent);
+        t.textContent = str;
+        return t;
+      }
+      function clip(px, py, slope) {
+        var hits = [];
+        function push(x, y) {
+          if (x < BOX.l - 0.01 || x > BOX.r + 0.01 || y < BOX.t - 0.01 || y > BOX.b + 0.01) return;
+          for (var i = 0; i < hits.length; i++) {
+            if (Math.abs(hits[i].x - x) < 0.6 && Math.abs(hits[i].y - y) < 0.6) return;
+          }
+          hits.push({ x: x, y: y });
+        }
+        push(BOX.l, py + slope * (BOX.l - px));
+        push(BOX.r, py + slope * (BOX.r - px));
+        if (Math.abs(slope) > 1e-6) {
+          push(px + (BOX.t - py) / slope, BOX.t);
+          push(px + (BOX.b - py) / slope, BOX.b);
+        }
+        hits.sort(function (a, b) { return a.x - b.x; });
+        return hits.length >= 2 ? [hits[0], hits[hits.length - 1]] : null;
+      }
+      function curve(parent, px, py, slope, stroke, width) {
+        var seg = clip(px, py, slope);
+        if (!seg) return;
+        node("line", {
+          x1: seg[0].x, y1: seg[0].y, x2: seg[1].x, y2: seg[1].y,
+          stroke: stroke, "stroke-width": width
+        }, parent);
+        return seg;
+      }
+      function layout(kind) {
+        var mD = kind === "elastic" ? 0.25 : 2.1;
+        var dx = SUB / (mD - MS);
+        var q1 = E.x + dx;
+        var p1 = E.y + mD * dx;
+        var v = E.y + MS * dx;
+        return { kind: kind, mD: mD, q1: q1, p1: p1, v: v, s1y: E.y + SUB };
+      }
+      function guides(parent, g, stroke, width) {
+        node("line", { x1: OX, y1: g.v, x2: g.q1, y2: g.v, stroke: stroke, "stroke-width": width, "stroke-dasharray": width > 2 ? "0" : "5 4" }, parent);
+        node("line", { x1: OX, y1: E.y, x2: g.q1, y2: E.y, stroke: stroke, "stroke-width": width, "stroke-dasharray": "5 4" }, parent);
+        node("line", { x1: OX, y1: g.p1, x2: g.q1, y2: g.p1, stroke: stroke, "stroke-width": width, "stroke-dasharray": width > 2 ? "0" : "5 4" }, parent);
+        node("line", { x1: E.x, y1: E.y, x2: E.x, y2: OY, stroke: stroke, "stroke-width": width, "stroke-dasharray": "5 4" }, parent);
+        node("line", { x1: g.q1, y1: g.v, x2: g.q1, y2: OY, stroke: stroke, "stroke-width": width, "stroke-dasharray": "5 4" }, parent);
+      }
+      function priceLabels(parent, g, vFill, pFill, p1Fill) {
+        text(parent, 56, g.v + 5, "V", { "text-anchor": "end", fill: vFill });
+        text(parent, 56, E.y + 5, "P", { "text-anchor": "end", fill: pFill });
+        text(parent, 56, g.p1 + 5, "P1", { "text-anchor": "end", fill: p1Fill });
+      }
+      function qtyLabels(parent, g, fill, size, q1Fill) {
+        text(parent, E.x, 492, "Q", { "text-anchor": "middle", fill: fill, "font-size": size || "16" });
+        text(parent, g.q1, 492, "Q1", { "text-anchor": "middle", fill: q1Fill || fill, "font-size": size || "16" });
+      }
+      function draw() {
+        var g = layout(elast);
+        while (scene.firstChild) scene.removeChild(scene.firstChild);
+        var base = node("g", { class: "quiet" }, scene);
+        guides(base, g, MUTED, 1.4);
+        priceLabels(base, g, INK, INK, INK);
+        qtyLabels(base, g, INK);
+        text(base, g.q1 - 14, g.v - 6, "W", { "text-anchor": "end" });
+        text(base, g.q1 - 14, E.y - 8, "X", { "text-anchor": "end" });
+        text(base, g.q1 - 16, g.p1 - 8, "Y", { "text-anchor": "end" });
+        var prodX = (E.y - g.v) < 42 ? 84 : 150;
+        var prodY = (E.y - g.v) < 42 ? g.v - 16 : g.v + 38;
+        var consY = (E.y + g.p1) / 2 + 5;
+        text(base, prodX, prodY, "Producer gain", { fill: SUPPLY, "font-size": "15", class: "gain-label" });
+        text(base, 84, consY, "Consumer gain", { fill: DEMAND, "font-size": "15", class: "gain-label" });
+        var sSeg = curve(base, E.x, E.y, MS, SUPPLY, 3);
+        var s1Seg = curve(base, E.x, g.s1y, MS, SUPPLY1, 3);
+        var dSeg = curve(base, E.x, E.y, g.mD, DEMAND, 3);
+        if (sSeg) text(base, sSeg[1].x + 8, sSeg[1].y + 4, "S", { fill: SUPPLY, "font-size": "18", "font-family": DISPLAY });
+        if (s1Seg) text(base, s1Seg[1].x + 8, s1Seg[1].y + 4, "S1", { fill: SUPPLY1, "font-size": "18", "font-family": DISPLAY });
+        if (dSeg) text(base, dSeg[1].x + 8, dSeg[1].y - 6, "D", { fill: DEMAND, "font-size": "18", "font-family": DISPLAY });
+
+        var shift = node("g", { class: "layer layer-shift" }, scene);
+        curve(shift, E.x, E.y, MS, SUPPLY, 3.5);
+        curve(shift, E.x, g.s1y, MS, SUPPLY1, 4);
+        var ax = Math.min(430, g.q1 + 80);
+        var ay1 = E.y + MS * (ax - E.x) + 12;
+        var ay2 = g.s1y + MS * (ax - E.x) - 14;
+        node("line", { x1: ax, y1: ay1, x2: ax, y2: ay2, stroke: SUPPLY1, "stroke-width": "2.5", "marker-end": "url(#hl-s1)" }, shift);
+        text(shift, ax + 8, (ay1 + ay2) / 2, "subsidy", { fill: SUPPLY1, "font-size": "14" });
+        if (sSeg) text(shift, sSeg[1].x + 8, sSeg[1].y + 4, "S", { fill: SUPPLY, "font-size": "18", "font-family": DISPLAY });
+        if (s1Seg) text(shift, s1Seg[1].x + 8, s1Seg[1].y + 4, "S1", { fill: SUPPLY1, "font-size": "18", "font-family": DISPLAY });
+
+        var prices = node("g", { class: "layer layer-prices" }, scene);
+        node("line", { x1: OX, y1: g.v, x2: g.q1 + 36, y2: g.v, stroke: SUPPLY, "stroke-width": "2.5" }, prices);
+        node("line", { x1: OX, y1: g.p1, x2: g.q1 + 36, y2: g.p1, stroke: DEMAND, "stroke-width": "2.5" }, prices);
+        var wedge = g.q1 + 46;
+        node("line", { x1: wedge, y1: g.v + 12, x2: wedge, y2: g.p1 - 12, stroke: SUPPLY, "stroke-width": "2" }, prices);
+        node("polygon", { points: wedge + "," + g.v + " " + (wedge - 5) + "," + (g.v + 14) + " " + (wedge + 5) + "," + (g.v + 14), fill: SUPPLY }, prices);
+        node("polygon", { points: wedge + "," + g.p1 + " " + (wedge - 5) + "," + (g.p1 - 14) + " " + (wedge + 5) + "," + (g.p1 - 14), fill: DEMAND }, prices);
+        node("circle", { cx: g.q1, cy: g.v, r: 5, fill: SUPPLY }, prices);
+        node("circle", { cx: g.q1, cy: g.p1, r: 5, fill: DEMAND }, prices);
+        priceLabels(prices, g, SUPPLY, INK, DEMAND);
+        text(prices, g.q1 - 14, g.v - 6, "W", { "text-anchor": "end", fill: SUPPLY });
+        text(prices, g.q1 - 16, g.p1 - 8, "Y", { "text-anchor": "end", fill: DEMAND });
+        text(prices, g.q1 + 56, g.v + 18, "sellers receive", { fill: SUPPLY, "font-size": "14" });
+        text(prices, g.q1 + 56, g.p1 + 18, "buyers pay", { fill: DEMAND, "font-size": "14" });
+        text(prices, 80, E.y - 12, "original price", { fill: INK, "font-size": "13" });
+
+        var quantity = node("g", { class: "layer layer-quantity" }, scene);
+        node("line", { x1: E.x, y1: E.y, x2: E.x, y2: OY, stroke: SUPPLY, "stroke-width": "2.5", "stroke-dasharray": "5 4" }, quantity);
+        node("line", { x1: g.q1, y1: g.v, x2: g.q1, y2: OY, stroke: SUPPLY1, "stroke-width": "2.5", "stroke-dasharray": "5 4" }, quantity);
+        node("line", { x1: E.x + 14, y1: 516, x2: Math.max(E.x + 36, g.q1 - 16), y2: 516, stroke: SUPPLY, "stroke-width": "2.5", "marker-end": "url(#hl-arrow)" }, quantity);
+        node("circle", { cx: E.x, cy: E.y, r: 5, fill: SUPPLY }, quantity);
+        node("circle", { cx: g.q1, cy: g.p1, r: 5, fill: SUPPLY1 }, quantity);
+        qtyLabels(quantity, g, SUPPLY, "18", SUPPLY1);
+
+        var consumers = node("g", { class: "layer layer-consumers" }, scene);
+        node("polygon", { points: [OX, g.p1, OX, E.y, E.x, E.y, g.q1, g.p1].join(" "), fill: DEMAND, opacity: "0.18" }, consumers);
+        curve(consumers, E.x, E.y, g.mD, DEMAND, 3.5);
+        node("line", { x1: OX, y1: E.y, x2: E.x, y2: E.y, stroke: DEMAND, "stroke-width": "2.5" }, consumers);
+        node("line", { x1: OX, y1: g.p1, x2: g.q1, y2: g.p1, stroke: DEMAND, "stroke-width": "2.5" }, consumers);
+        text(consumers, 84, consY, "Consumer gain", { fill: DEMAND, "font-size": "15", stroke: "#fff", "stroke-width": "4", "paint-order": "stroke" });
+        text(consumers, 56, E.y + 5, "P", { "text-anchor": "end", fill: DEMAND });
+        text(consumers, 56, g.p1 + 5, "P1", { "text-anchor": "end", fill: DEMAND });
+        if (dSeg) text(consumers, dSeg[1].x + 8, dSeg[1].y - 6, "D", { fill: DEMAND, "font-size": "18", "font-family": DISPLAY });
+
+        var producers = node("g", { class: "layer layer-producers" }, scene);
+        node("polygon", { points: [OX, E.y, OX, g.v, g.q1, g.v, E.x, E.y].join(" "), fill: SUPPLY, opacity: "0.2" }, producers);
+        curve(producers, E.x, E.y, MS, SUPPLY, 3.5);
+        node("line", { x1: OX, y1: g.v, x2: g.q1, y2: g.v, stroke: SUPPLY, "stroke-width": "2.5" }, producers);
+        node("line", { x1: OX, y1: E.y, x2: E.x, y2: E.y, stroke: SUPPLY, "stroke-width": "2.5" }, producers);
+        text(producers, prodX, prodY, "Producer gain", { fill: SUPPLY, "font-size": "15", stroke: "#fff", "stroke-width": "4", "paint-order": "stroke" });
+        text(producers, 56, g.v + 5, "V", { "text-anchor": "end", fill: SUPPLY });
+        text(producers, 56, E.y + 5, "P", { "text-anchor": "end", fill: SUPPLY });
+        if (sSeg) text(producers, sSeg[1].x + 8, sSeg[1].y + 4, "S", { fill: SUPPLY, "font-size": "18", "font-family": DISPLAY });
+
+        var spend = node("g", { class: "layer layer-expenditure" }, scene);
+        node("polygon", { points: [OX, g.v, g.q1, g.v, g.q1, g.p1, OX, g.p1].join(" "), fill: SUPPLY, opacity: "0.16" }, spend);
+        node("line", { x1: OX, y1: g.v, x2: g.q1, y2: g.v, stroke: SUPPLY, "stroke-width": "2.5" }, spend);
+        node("line", { x1: OX, y1: g.p1, x2: g.q1, y2: g.p1, stroke: DEMAND, "stroke-width": "2.5" }, spend);
+        node("line", { x1: g.q1, y1: g.v, x2: g.q1, y2: g.p1, stroke: SUPPLY, "stroke-width": "2.5" }, spend);
+        var costY = (E.y - g.v) > (g.p1 - E.y) ? g.v + 28 : g.p1 - 26;
+        text(spend, 84, costY, "Government cost", { fill: SUPPLY, "font-size": "15", stroke: "#fff", "stroke-width": "4", "paint-order": "stroke" });
+        text(spend, 56, g.v + 5, "V", { "text-anchor": "end", fill: SUPPLY });
+        text(spend, 56, g.p1 + 5, "P1", { "text-anchor": "end", fill: DEMAND });
+        text(spend, g.q1, 492, "Q1", { "text-anchor": "middle", fill: SUPPLY1 });
+
+        var loss = node("g", { class: "layer layer-loss" }, scene);
+        node("polygon", { points: [E.x, E.y, g.q1, g.v, g.q1, E.y].join(" "), fill: LOSS, opacity: "0.22" }, loss);
+        node("polygon", { points: [E.x, E.y, g.q1, E.y, g.q1, g.p1].join(" "), fill: LOSS, opacity: "0.35" }, loss);
+        node("line", { x1: E.x, y1: E.y, x2: g.q1, y2: g.v, stroke: LOSS, "stroke-width": "3.5" }, loss);
+        node("line", { x1: E.x, y1: E.y, x2: g.q1, y2: g.p1, stroke: LOSS, "stroke-width": "3.5" }, loss);
+        node("line", { x1: E.x, y1: E.y, x2: g.q1, y2: E.y, stroke: LOSS, "stroke-width": "2" }, loss);
+        node("line", { x1: g.q1, y1: g.v, x2: g.q1, y2: g.p1, stroke: LOSS, "stroke-width": "2.5" }, loss);
+        node("circle", { cx: E.x, cy: E.y, r: 5, fill: LOSS }, loss);
+        node("circle", { cx: g.q1, cy: g.v, r: 4.5, fill: LOSS }, loss);
+        node("circle", { cx: g.q1, cy: E.y, r: 4.5, fill: LOSS }, loss);
+        node("circle", { cx: g.q1, cy: g.p1, r: 4.5, fill: LOSS }, loss);
+        text(loss, E.x - 10, E.y - 12, "Pe", { "text-anchor": "end", fill: LOSS });
+        text(loss, g.q1 - 14, g.v - 6, "W", { "text-anchor": "end", fill: LOSS });
+        text(loss, g.q1 - 14, E.y - 8, "X", { "text-anchor": "end", fill: LOSS });
+        text(loss, g.q1 - 16, g.p1 - 8, "Y", { "text-anchor": "end", fill: LOSS });
+        if (g.q1 - E.x < 110) {
+          text(loss, g.q1 + 14, (g.v + g.p1) / 2, "Deadweight loss", { fill: LOSS, "font-size": "14", stroke: "#fff", "stroke-width": "4", "paint-order": "stroke" });
+        } else {
+          text(loss, E.x + 28, (E.y + g.v) / 2 + 8, "Deadweight loss", { fill: LOSS, "font-size": "14", stroke: "#fff", "stroke-width": "4", "paint-order": "stroke" });
+        }
+        text(loss, g.q1, 492, "Q1", { "text-anchor": "middle", fill: LOSS });
+        text(loss, E.x, 492, "Q", { "text-anchor": "middle", fill: LOSS });
+
+        var evaluation = node("g", { class: "layer layer-evaluation" }, scene);
+        node("line", { x1: E.x, y1: E.y, x2: E.x, y2: OY, stroke: SUPPLY, "stroke-width": "2.5" }, evaluation);
+        node("line", { x1: g.q1, y1: g.v, x2: g.q1, y2: OY, stroke: SUPPLY1, "stroke-width": "2.5" }, evaluation);
+        node("line", { x1: E.x + 14, y1: 516, x2: Math.max(E.x + 36, g.q1 - 16), y2: 516, stroke: SUPPLY, "stroke-width": "2.5", "marker-end": "url(#hl-arrow)" }, evaluation);
+        qtyLabels(evaluation, g, SUPPLY, "16", SUPPLY1);
+
+        note.textContent = elast === "elastic"
+          ? "Elastic demand: D is flat. S shifts to S1 by the same subsidy on both diagrams. Buyers respond strongly, so Q1 is far to the right of Q and producers keep most of the subsidy."
+          : "Inelastic demand: D is steep. S shifts to S1 by the same subsidy. Buyers hardly respond, so Q1 stays close to Q and consumers keep most of the subsidy as a lower price.";
+      }
+      function showExplain() {
+        explain.innerHTML = mode ? copy[elast][mode] : intro;
+      }
+      elastBtns.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          elast = btn.getAttribute("data-elast");
+          elastBtns.forEach(function (b) {
+            b.setAttribute("aria-pressed", b === btn ? "true" : "false");
+          });
+          draw();
+          showExplain();
+        });
+      });
+      words.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var next = btn.getAttribute("data-mode");
+          var on = btn.getAttribute("aria-pressed") === "true";
+          words.forEach(function (b) { b.setAttribute("aria-pressed", "false"); });
+          if (on) {
+            mode = "";
+            chart.removeAttribute("data-show");
+            showExplain();
+            return;
+          }
+          mode = next;
+          btn.setAttribute("aria-pressed", "true");
+          chart.setAttribute("data-show", mode);
+          showExplain();
+        });
+      });
+      function download(blob, name) {
+        var link = document.createElement("a");
+        var url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = name;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      }
+      function saveDiagram() {
+        var vb = (chart.getAttribute("viewBox") || "0 0 760 540").split(/[\s,]+/).map(Number);
+        var w = vb[2] || 760;
+        var h = vb[3] || 540;
+        var clone = chart.cloneNode(true);
+        var show = chart.getAttribute("data-show");
+        Array.prototype.forEach.call(clone.querySelectorAll(".layer"), function (layer) {
+          if (!show || !layer.classList.contains("layer-" + show)) layer.remove();
+        });
+        if (show === "expenditure") {
+          Array.prototype.forEach.call(clone.querySelectorAll(".gain-label"), function (label) {
+            label.remove();
+          });
+        }
+        clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        clone.setAttribute("width", String(w));
+        clone.setAttribute("height", String(h));
+        var xml = new XMLSerializer().serializeToString(clone);
+        var svgBlob = new Blob([xml], { type: "image/svg+xml;charset=utf-8" });
+        var url = URL.createObjectURL(svgBlob);
+        var image = new Image();
+        var file = "subsidy-" + elast + (mode ? "-" + (mode === "loss" ? "deadweight" : mode) : "") + ".png";
+        image.onload = function () {
+          var scale = 2;
+          var canvas = document.createElement("canvas");
+          canvas.width = w * scale;
+          canvas.height = h * scale;
+          var ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          canvas.toBlob(function (png) {
+            if (png) download(png, file);
+            else download(svgBlob, file.replace(/\.png$/, ".svg"));
+          }, "image/png");
+        };
+        image.onerror = function () {
+          URL.revokeObjectURL(url);
+          download(svgBlob, file.replace(/\.png$/, ".svg"));
+        };
+        image.src = url;
+      }
+      document.getElementById("save-diagram").addEventListener("click", saveDiagram);
+      draw();
+    })();
+  </script>
+</body>
+</html>

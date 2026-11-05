@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Who has the power</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #f0dce2;
+      --paper: #fffaf3;
+      --card: #fffaf3;
+      --bg: #fef7f9;
+      --formula: #f8e8ec;
+      --accent: #9a3412;
+      --accent-soft: #f8e8ec;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Financier Text", Georgia, "Palatino Linotype", Palatino, serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .book { max-width: 1400px; margin: 0 auto; padding: 20px 20px 72px; }
+    .topic {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 22px 24px;
+      margin: 16px 0;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-family: "Financier Display", Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+    .prompt { color: var(--muted); font-size: 0.92rem; margin: 0 0 12px; }
+    .prompt strong { font-weight: 700; color: var(--ink); }
+    .status { min-height: 1.4em; margin: 0 0 8px; color: var(--accent); font-weight: 700; }
+    .table-wrap { overflow-x: auto; margin: 8px 0 12px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      background: #fff;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      background: var(--formula);
+      color: var(--accent);
+      font-size: 0.86rem;
+    }
+    tbody th {
+      background: #fff;
+      color: var(--ink);
+      font-size: 0.92rem;
+      white-space: nowrap;
+    }
+    th .heading {
+      display: block;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-weight: 700;
+      text-align: left;
+      cursor: pointer;
+    }
+    thead th.selected,
+    tbody th.selected {
+      background: var(--accent-soft);
+      box-shadow: inset 0 0 0 2px var(--accent);
+    }
+    td {
+      min-width: 7.5rem;
+      height: 4.4rem;
+    }
+    td.ready {
+      background: var(--accent-soft);
+      box-shadow: inset 0 0 0 2px var(--accent);
+    }
+    td.filled { background: #fff; }
+    td.reject { background: #fde8e8; }
+    .bank {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .bank[hidden] { display: none; }
+    .chip {
+      margin: 0;
+      padding: 6px 10px;
+      border: 1px solid #e4c8d0;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.92rem;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+    }
+    .bank.is-locked .chip {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .chip.is-dragging { opacity: 0.35; }
+    .ghost {
+      position: fixed;
+      z-index: 5;
+      margin: 0;
+      padding: 6px 10px;
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.92rem;
+      pointer-events: none;
+      box-shadow: 0 8px 20px rgba(154, 52, 18, 0.12);
+    }
+    .profit-row { margin-top: 18px; }
+    .profit-row[hidden] { display: none; }
+    .profit-row td,
+    .profit-row th { height: auto; }
+    td.profit-cell { padding: 0; }
+    td.profit-cell button {
+      display: block;
+      width: 100%;
+      margin: 0;
+      padding: 8px 10px;
+      border: 0;
+      background: transparent;
+      color: var(--accent);
+      font: inherit;
+      font-weight: 700;
+      text-align: left;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+    }
+    td.profit-cell button:hover { background: var(--accent-soft); }
+    td.profit-cell button[aria-pressed="true"] {
+      background: var(--accent-soft);
+      box-shadow: inset 0 0 0 2px var(--accent);
+    }
+    .profit-diagram { max-width: 720px; margin: 12px 0 0; }
+    .profit-diagram[hidden] { display: none; }
+    .profit-diagram img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+  </style>
+  <link rel="stylesheet" href="diagram-economist.css" />
+</head>
+<body>
+  <div class="book">
+    <article class="topic">
+      <h1>Who has the power</h1>
+      <p class="prompt"><a href="micro-diagrams.html">Back to interactive games</a></p>
+      <p class="prompt"><strong>Press a row heading and a column heading, then drag a phrase into that cell.</strong></p>
+      <p class="status" id="status" aria-live="polite"></p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th><button type="button" class="heading" data-col="demand" aria-pressed="true">Demand curve</button></th>
+              <th><button type="button" class="heading" data-col="mr" aria-pressed="false">Marginal revenue curve</button></th>
+              <th><button type="button" class="heading" data-col="pricing" aria-pressed="false">Pricing power</button></th>
+              <th><button type="button" class="heading" data-col="profit" aria-pressed="false">Long run profit</button></th>
+              <th><button type="button" class="heading" data-col="dwl" aria-pressed="false">Deadweight loss</button></th>
+              <th><button type="button" class="heading" data-col="barriers" aria-pressed="false">Entry barriers</button></th>
+              <th><button type="button" class="heading" data-col="differentiation" aria-pressed="false">Role of differentiation</button></th>
+              <th><button type="button" class="heading" data-col="efficiency" aria-pressed="false">Efficiency</button></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row"><button type="button" class="heading" data-row="monopoly" aria-pressed="true">Monopoly</button></th>
+              <td data-row="monopoly" data-col="demand"></td>
+              <td data-row="monopoly" data-col="mr"></td>
+              <td data-row="monopoly" data-col="pricing"></td>
+              <td data-row="monopoly" data-col="profit"></td>
+              <td data-row="monopoly" data-col="dwl"></td>
+              <td data-row="monopoly" data-col="barriers"></td>
+              <td data-row="monopoly" data-col="differentiation"></td>
+              <td data-row="monopoly" data-col="efficiency"></td>
+            </tr>
+            <tr>
+              <th scope="row"><button type="button" class="heading" data-row="monopoly-power" aria-pressed="false">Monopoly power</button></th>
+              <td data-row="monopoly-power" data-col="demand"></td>
+              <td data-row="monopoly-power" data-col="mr"></td>
+              <td data-row="monopoly-power" data-col="pricing"></td>
+              <td data-row="monopoly-power" data-col="profit"></td>
+              <td data-row="monopoly-power" data-col="dwl"></td>
+              <td data-row="monopoly-power" data-col="barriers"></td>
+              <td data-row="monopoly-power" data-col="differentiation"></td>
+              <td data-row="monopoly-power" data-col="efficiency"></td>
+            </tr>
+            <tr>
+              <th scope="row"><button type="button" class="heading" data-row="monopolistic" aria-pressed="false">Monopolistic competition</button></th>
+              <td data-row="monopolistic" data-col="demand"></td>
+              <td data-row="monopolistic" data-col="mr"></td>
+              <td data-row="monopolistic" data-col="pricing"></td>
+              <td data-row="monopolistic" data-col="profit"></td>
+              <td data-row="monopolistic" data-col="dwl"></td>
+              <td data-row="monopolistic" data-col="barriers"></td>
+              <td data-row="monopolistic" data-col="differentiation"></td>
+              <td data-row="monopolistic" data-col="efficiency"></td>
+            </tr>
+            <tr>
+              <th scope="row"><button type="button" class="heading" data-row="perfect" aria-pressed="false">Perfect competition</button></th>
+              <td data-row="perfect" data-col="demand"></td>
+              <td data-row="perfect" data-col="mr"></td>
+              <td data-row="perfect" data-col="pricing"></td>
+              <td data-row="perfect" data-col="profit"></td>
+              <td data-row="perfect" data-col="dwl"></td>
+              <td data-row="perfect" data-col="barriers"></td>
+              <td data-row="perfect" data-col="differentiation"></td>
+              <td data-row="perfect" data-col="efficiency"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="profit-row" id="profit-row" hidden>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>Monopoly</th>
+                <th>Monopoly power</th>
+                <th>Monopolistic competition</th>
+                <th>Perfect competition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Profit maximisation</th>
+                <td class="profit-cell"><button type="button" data-profit="monopoly" aria-pressed="false">MR = MC → high price, low output</button></td>
+                <td class="profit-cell"><button type="button" data-profit="monopoly-power" aria-pressed="false">P &gt; MC</button></td>
+                <td class="profit-cell"><button type="button" data-profit="monopolistic" aria-pressed="false">MR = MC → moderate price/output</button></td>
+                <td class="profit-cell"><button type="button" data-profit="perfect" aria-pressed="false">P = MC → efficient output</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <figure class="profit-diagram" id="profit-diagram" hidden>
+          <img id="profit-image" alt="">
+        </figure>
+      </div>
+
+      <div class="bank is-locked" id="bank"></div>
+    </article>
+  </div>
+  <script>
+    (function () {
+      var ANSWERS = {
+        monopoly: {
+          demand: "Downward sloping steep",
+          mr: "MR below D",
+          pricing: "Very high",
+          profit: "Positive",
+          dwl: "Large",
+          barriers: "High",
+          differentiation: "Not needed",
+          efficiency: "Allocatively inefficient"
+        },
+        "monopoly-power": {
+          demand: "Downward-sloping",
+          mr: "Below demand",
+          pricing: "Can increase price without losing many customers",
+          profit: "Can stay positive",
+          dwl: "Present when P > MC",
+          barriers: "Needed to keep the power",
+          differentiation: "One source of the power",
+          efficiency: "Allocatively inefficient"
+        },
+        monopolistic: {
+          demand: "Downward-sloping (more elastic)",
+          mr: "Below demand but closer",
+          pricing: "Some power",
+          profit: "Zero",
+          dwl: "Small",
+          barriers: "Low",
+          differentiation: "Essential",
+          efficiency: "Some inefficiency"
+        },
+        perfect: {
+          demand: "Perfectly elastic",
+          mr: "MR = P",
+          pricing: "None",
+          profit: "Zero",
+          dwl: "None",
+          barriers: "None",
+          differentiation: "None",
+          efficiency: "Fully efficient"
+        }
+      };
+
+      var selectedRow = "monopoly";
+      var selectedCol = "demand";
+      var bank = document.getElementById("bank");
+      var status = document.getElementById("status");
+      var drag = null;
+
+      function phrases() {
+        var list = [];
+        Object.keys(ANSWERS).forEach(function (row) {
+          Object.keys(ANSWERS[row]).forEach(function (col) {
+            list.push(ANSWERS[row][col]);
+          });
+        });
+        for (var i = list.length - 1; i > 0; i -= 1) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var swap = list[i];
+          list[i] = list[j];
+          list[j] = swap;
+        }
+        return list;
+      }
+
+      function cell(row, col) {
+        return document.querySelector('td[data-row="' + row + '"][data-col="' + col + '"]');
+      }
+
+      function targetCell() {
+        if (!selectedRow || !selectedCol) return null;
+        return cell(selectedRow, selectedCol);
+      }
+
+      function setStatus(message) {
+        status.textContent = message;
+      }
+
+      function refresh() {
+        document.querySelectorAll("[data-row].heading").forEach(function (button) {
+          var on = button.getAttribute("data-row") === selectedRow;
+          button.setAttribute("aria-pressed", on ? "true" : "false");
+          button.parentElement.classList.toggle("selected", on);
+        });
+        document.querySelectorAll("[data-col].heading").forEach(function (button) {
+          var on = button.getAttribute("data-col") === selectedCol;
+          button.setAttribute("aria-pressed", on ? "true" : "false");
+          button.parentElement.classList.toggle("selected", on);
+        });
+        document.querySelectorAll("td[data-row]").forEach(function (item) {
+          var active = item.getAttribute("data-row") === selectedRow && item.getAttribute("data-col") === selectedCol;
+          item.classList.toggle("ready", active && !item.classList.contains("filled"));
+        });
+        var target = targetCell();
+        var open = target && !target.classList.contains("filled");
+        bank.classList.toggle("is-locked", !open);
+        var cells = document.querySelectorAll("td[data-row]");
+        var done = document.querySelectorAll("td[data-row].filled").length === cells.length && cells.length > 0;
+        document.getElementById("profit-row").hidden = !done;
+        bank.hidden = done;
+      }
+
+      function choose(button) {
+        if (button.hasAttribute("data-row")) {
+          var row = button.getAttribute("data-row");
+          selectedRow = selectedRow === row ? "" : row;
+        }
+        if (button.hasAttribute("data-col")) {
+          var col = button.getAttribute("data-col");
+          selectedCol = selectedCol === col ? "" : col;
+        }
+        setStatus("");
+        refresh();
+      }
+
+      function pointHits(x, y, rect) {
+        var slop = 28;
+        return x >= rect.left - slop && x <= rect.right + slop && y >= rect.top - slop && y <= rect.bottom + slop;
+      }
+
+      function placeGhost(event) {
+        if (!drag) return;
+        var ghost = drag.ghost;
+        ghost.style.left = (event.clientX - ghost.offsetWidth / 2) + "px";
+        ghost.style.top = (event.clientY - ghost.offsetHeight / 2) + "px";
+        drag.lastX = event.clientX;
+        drag.lastY = event.clientY;
+      }
+
+      function releasedOnCell(event, target) {
+        var rect = target.getBoundingClientRect();
+        if (pointHits(event.clientX, event.clientY, rect)) return true;
+        if (pointHits(drag.lastX, drag.lastY, rect)) return true;
+        var ghost = drag.ghost;
+        if (!ghost) return false;
+        var box = ghost.getBoundingClientRect();
+        return box.left < rect.right && box.right > rect.left && box.top < rect.bottom && box.bottom > rect.top;
+      }
+
+      function endDrag(event) {
+        if (!drag) return;
+        var chip = drag.chip;
+        var ghost = drag.ghost;
+        var target = targetCell();
+        var onCell = target && !target.classList.contains("filled") && releasedOnCell(event, target);
+        chip.classList.remove("is-dragging");
+        if (ghost) ghost.remove();
+        window.removeEventListener("pointermove", placeGhost);
+        window.removeEventListener("pointerup", endDrag);
+        window.removeEventListener("pointercancel", endDrag);
+        if (onCell) {
+          var expected = ANSWERS[selectedRow][selectedCol];
+          if (chip.textContent === expected) {
+            target.textContent = expected;
+            target.classList.remove("reject");
+            target.classList.add("filled");
+            target.classList.remove("ready");
+            chip.remove();
+            setStatus("");
+          } else {
+            target.classList.add("reject");
+            window.setTimeout(function () { target.classList.remove("reject"); }, 450);
+            setStatus("That phrase does not belong in this cell.");
+          }
+        }
+        drag = null;
+        refresh();
+      }
+
+      function startDrag(event, chip) {
+        var target = targetCell();
+        if (!selectedRow || !selectedCol) {
+          setStatus("Press a row heading and a column heading first.");
+          return;
+        }
+        if (target.classList.contains("filled")) {
+          setStatus("That cell is already complete.");
+          return;
+        }
+        event.preventDefault();
+        try { chip.setPointerCapture(event.pointerId); } catch (err) {}
+        chip.classList.add("is-dragging");
+        var ghost = document.createElement("div");
+        ghost.className = "ghost";
+        ghost.textContent = chip.textContent;
+        document.body.appendChild(ghost);
+        drag = { chip: chip, ghost: ghost, lastX: event.clientX, lastY: event.clientY };
+        placeGhost(event);
+        window.addEventListener("pointermove", placeGhost);
+        window.addEventListener("pointerup", endDrag);
+        window.addEventListener("pointercancel", endDrag);
+        setStatus("");
+      }
+
+      phrases().forEach(function (text) {
+        var chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "chip";
+        chip.textContent = text;
+        chip.addEventListener("pointerdown", function (event) {
+          if (event.button !== 0) return;
+          startDrag(event, chip);
+        });
+        bank.appendChild(chip);
+      });
+
+      document.querySelectorAll(".heading").forEach(function (button) {
+        button.addEventListener("click", function () { choose(button); });
+      });
+
+      refresh();
+
+      var PROFIT = {
+        monopoly: {
+          src: "monopoly-profit-maximisation.png",
+          alt: "Monopoly profit maximisation diagram: price and output, with demand, marginal revenue, marginal cost and average cost. Profit is maximised where marginal cost equals marginal revenue."
+        },
+        "monopoly-power": {
+          src: "monopoly-power-profit-maximisation.png?v=20261005",
+          alt: "Monopoly power profit maximisation diagram: price and output, with demand, marginal revenue, marginal cost and average cost. Profit is maximised where marginal cost equals marginal revenue."
+        },
+        monopolistic: {
+          src: "monopolistic-profit-maximisation.png",
+          alt: "Monopolistic competition profit maximisation diagram: price and output, with demand, marginal revenue, marginal cost and average cost. Profit is maximised where marginal cost equals marginal revenue."
+        },
+        perfect: {
+          src: "perfect-profit-maximisation.png?v=20261005c",
+          alt: "Perfect competition short-run profit maximisation diagram. The industry sets the price. The firm makes short-term supernormal profit where marginal cost equals that price and price is above average cost."
+        }
+      };
+
+      document.querySelectorAll("[data-profit]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          var diagram = PROFIT[button.getAttribute("data-profit")];
+          var figure = document.getElementById("profit-diagram");
+          var img = document.getElementById("profit-image");
+          document.querySelectorAll("[data-profit]").forEach(function (item) {
+            item.setAttribute("aria-pressed", item === button ? "true" : "false");
+          });
+          img.src = diagram.src;
+          img.alt = diagram.alt;
+          figure.hidden = false;
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

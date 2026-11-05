@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Indirect taxes</title>
+  <link rel="stylesheet" href="../diagram-economist.css" />
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #e4d9c8;
+      --paper: #f7f1e8;
+      --card: #fffaf3;
+      --bg: #fef7f9;
+      --formula: #f8e8ec;
+      --accent: #9a3412;
+      --accent-soft: #f3e2d4;
+      --demand: #183a66;
+      --supply: #9a3412;
+      --supply1: #166534;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+      font-size: 1.05rem;
+    }
+    h1, h2, h3 { letter-spacing: -0.02em; }
+    .book { max-width: 880px; margin: 0 auto; padding: 20px 16px 72px; }
+    .topic {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 22px 20px;
+      margin: 16px 0;
+    }
+    h1 { margin: 0 0 8px; font-size: 1.75rem; letter-spacing: -0.03em; }
+    h2 { margin: 0 0 8px; font-size: 1.2rem; }
+    a { color: var(--accent); font-weight: 700; }
+    .meta { color: var(--muted); font-size: 0.95rem; }
+    .lead { margin: 0 0 12px; }
+    .rules {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 0;
+    }
+    .rule {
+      border-radius: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+    }
+    .rule b { display: block; margin-bottom: 2px; }
+    .rule span { display: block; font-size: 0.92rem; }
+    .rule.up { background: #f3faf5; border-color: #b7d7c0; }
+    .rule.gap { background: #f4f7fb; border-color: #c5d0e0; }
+    .rule.who { background: var(--accent-soft); border-color: #e4b8c4; }
+    .products, .steps, .answer-row, .nav-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0 12px;
+    }
+    .choice-btn {
+      font-family: inherit;
+      cursor: pointer;
+      border: 1px solid #e4b8c4;
+      background: #fff;
+      color: var(--accent);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .choice-btn:hover { background: var(--accent-soft); }
+    .choice-btn:disabled { opacity: 0.45; cursor: default; }
+    .choice-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .choice-btn.on { background: var(--accent); color: #fffaf3; border-color: var(--accent); }
+    .choice-btn.ok { background: #f3faf5; border-color: #b7d7c0; color: #166534; }
+    .choice-btn.bad { background: #fde8ec; border-color: #f3b4c0; color: #9f1239; }
+    .choice-btn.next-step {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 0 3px #f0dce2;
+      animation: pulse 1.1s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 3px #f0dce2; }
+      50% { box-shadow: 0 0 0 6px #e4b8c4; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .choice-btn.next-step { animation: none; }
+    }
+    .product-btn { text-align: left; flex: 1 1 220px; min-height: 64px; }
+    .steps .choice-btn { flex: 1 1 140px; }
+    .verdict {
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin: 0 0 12px;
+      border: 1px solid var(--line);
+      background: var(--accent-soft);
+    }
+    .verdict h3 { margin: 0 0 4px; font-size: 1.28rem; }
+    .verdict p { margin: 0; }
+    .verdict.buyers,
+    .verdict.sellers,
+    .verdict.before { background: var(--accent-soft); border-color: var(--line); }
+    .verdict.start { margin: 12px 0 0; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin: 0 0 12px;
+    }
+    .stat {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 10px;
+    }
+    .stat span { display: block; color: var(--muted); font-size: 0.78rem; font-weight: 700; }
+    .stat b { font-size: 1.15rem; }
+    .split { margin: 0 0 12px; }
+    .split-bar {
+      display: flex;
+      height: 42px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+    .part {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+      min-width: 4.2em;
+    }
+    .part.buyer { background: var(--demand); }
+    .part.seller { background: var(--supply); }
+    .split p { margin: 6px 0 0; font-size: 0.92rem; }
+    .chart-wrap {
+      background: #fffaf3;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px;
+      margin: 0 0 8px;
+    }
+    .chart-wrap svg { display: block; width: 100%; height: auto; }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0 0 8px; font-size: 0.92rem; font-weight: 700; }
+    .swatch { display: inline-block; width: 1.1em; height: 0.35em; border-radius: 99px; margin-right: 4px; vertical-align: middle; }
+    .swatch.d { background: var(--demand); }
+    .swatch.s { background: var(--supply); }
+    .swatch.s1 { background: var(--supply1); }
+    .caption { margin: 0 0 12px; }
+    table.cmp { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+    table.cmp th, table.cmp td { border-bottom: 1px solid var(--line); padding: 7px 8px; text-align: left; }
+    table.cmp th.num { text-align: right; }
+    table.cmp td.num { padding: 0; text-align: right; }
+    table.cmp .here { background: var(--accent-soft); }
+    table.cmp button.cell {
+      display: block;
+      width: 100%;
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--accent);
+      font: inherit;
+      font-weight: 700;
+      text-align: right;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      cursor: pointer;
+      padding: 8px;
+    }
+    table.cmp button.cell:hover { background: var(--accent-soft); }
+    table.cmp button.cell.on { background: var(--accent); color: #fffaf3; text-decoration: none; }
+    table.cmp button.cell:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+    .task-story { font-size: 1.12rem; margin: 0 0 10px; }
+    .score { color: var(--muted); font-size: 0.92rem; margin: 0 0 8px; }
+    .msg { min-height: 1.4em; margin: 8px 0 0; font-weight: 700; }
+    .msg.ok { color: #166534; }
+    .msg.bad { color: #9f1239; }
+    .answer-row .choice-btn { flex: 1 1 220px; text-align: left; }
+    @media (max-width: 720px) {
+      .rules, .stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="book">
+    <article class="topic">
+      <h1>Indirect taxes</h1>
+      <p class="meta"><a href="../micro-diagrams.html">Back to interactive games</a></p>
+      <p class="meta">A simpler way to see a specific tax. <a href="Indirect taxes.html">Original version</a></p>
+      <p class="lead">An indirect tax is a tax on spending. The firm pays the government, so the firm’s costs rise.</p>
+      <div class="rules">
+        <div class="rule up"><b>£2 Tax introduced</b><span>The tax is £2 on every unit. Supply curve shifts. Price moves up the Demand curve.</span></div>
+        <div class="rule gap"><b>Two prices</b><span>Buyers pay more than sellers receive. The gap between those prices is the tax.</span></div>
+        <div class="rule who"><b>Who pays the £2</b><span>Inelastic demand: buyers pay more of it. Elastic demand: sellers pay more of it.</span></div>
+      </div>
+    </article>
+
+    <article class="topic">
+      <h2>1. Press a cell</h2>
+      <p>Both markets start at a price of £6 and a quantity of 100. Press a figure under Petrol or A brand of crisps. The diagram shows that cell.</p>
+      <div class="products" id="markets"></div>
+      <table class="cmp" id="cmp"></table>
+      <div class="verdict" id="verdict" aria-live="polite">
+        <h3 id="verdict-title">No tax yet</h3>
+        <p id="verdict-text"></p>
+      </div>
+      <div class="stats" id="stats"></div>
+      <div class="split" id="split" hidden>
+        <div class="split-bar" id="split-bar"></div>
+        <p>Blue is the part of the £2 that buyers pay. Brown is the part sellers pay.</p>
+      </div>
+      <div class="chart-wrap">
+        <svg id="chart" viewBox="0 0 760 490" role="img" aria-label="Demand and supply before a tax. Price is £6 and quantity is 100."></svg>
+      </div>
+      <p class="legend"><span class="swatch d"></span>D demand <span class="swatch s"></span>S supply before the tax <span class="swatch s1"></span>S1 supply after the tax</p>
+      <p class="caption" id="caption"></p>
+      <p><button type="button" class="choice-btn" id="save-diagram">Save diagram</button></p>
+      <div class="verdict before start" id="below" hidden>
+        <h3 id="below-title"></h3>
+        <p id="below-text"></p>
+      </div>
+    </article>
+
+    <article class="topic">
+      <h2>2. Check the idea</h2>
+      <p class="score" id="quiz-score"></p>
+      <p class="task-story" id="quiz-story"></p>
+      <div class="answer-row" id="quiz-options"></div>
+      <p class="msg" id="quiz-msg" aria-live="polite"></p>
+      <p><button type="button" class="choice-btn" id="quiz-next" hidden>Next question</button></p>
+    </article>
+  </div>
+  <script>
+    (function () {
+      var TAX = 2;
+      var Q0 = 100;
+      var P0 = 6;
+      var markets = [
+        {
+          id: "petrol",
+          name: "Petrol",
+          kind: "inelastic",
+          why: "Drivers have few substitutes, so demand is inelastic. The demand curve is steep.",
+          q1: 90
+        },
+        {
+          id: "crisps",
+          name: "A brand of crisps",
+          kind: "elastic",
+          why: "Shoppers can switch to another snack, so demand is elastic. The demand curve is flat.",
+          q1: 70
+        }
+      ];
+      var focus = "before";
+      var wantScroll = false;
+      var quizItems = [
+        {
+          story: "The government puts a tax on each unit firms sell. What happens to the diagram?",
+          choices: [
+            { text: "Supply shifts up. The firm’s costs have risen.", correct: true, why: "The firm pays the tax, so it needs a higher price to supply the same quantity. Demand does not shift." },
+            { text: "Demand shifts up, because buyers pay the tax.", why: "Buyers do not move the demand curve. The tax is a cost of production, so supply shifts up." },
+            { text: "Supply shifts down, so firms sell more.", why: "A tax raises costs. Supply shifts up, and the quantity sold falls." }
+          ]
+        },
+        {
+          story: "Petrol has inelastic demand. A £2 tax is added. Who pays more of the £2?",
+          choices: [
+            { text: "Buyers pay £1.50. Sellers pay £0.50.", correct: true, why: "Buyers still need petrol, so the price they pay rises from £6 to £7.50. Sellers receive £5.50." },
+            { text: "Sellers pay £1.50. Buyers pay £0.50.", why: "That is the crisps result. Petrol demand is steep, so buyers cannot easily walk away." },
+            { text: "They split the £2 equally, £1 each.", why: "An equal split is not the usual result. It depends on how steep demand is." }
+          ]
+        },
+        {
+          story: "Crisps have elastic demand. The same £2 tax is added. Who pays more of the £2?",
+          choices: [
+            { text: "Sellers pay £1.50. Buyers pay £0.50.", correct: true, why: "Buyers can switch snacks, so the price they pay only rises from £6 to £6.50. Sellers receive £4.50." },
+            { text: "Buyers pay £1.50. Sellers pay £0.50.", why: "That happens when demand is steep. Crisp demand is flat." },
+            { text: "Buyers pay the whole £2.", why: "Buyers pay only part of a £2 tax unless demand is perfectly inelastic." }
+          ]
+        },
+        {
+          story: "How does the government work out its tax revenue?",
+          choices: [
+            { text: "£2 times the quantity sold after the tax.", correct: true, why: "The government collects £2 on each unit that is still sold. For petrol that is £2 × 90 = £180." },
+            { text: "£2 times the quantity sold before the tax.", why: "The units that are no longer sold do not raise tax. Use the new quantity, Q1." },
+            { text: "Only the rise in the price buyers pay.", why: "That rise is the buyers’ share of the tax per unit. Revenue uses the whole £2, times Q1." }
+          ]
+        },
+        {
+          story: "The same £2 tax raises more government revenue when demand is inelastic. Why?",
+          choices: [
+            { text: "Quantity falls only a little, so the £2 is collected on more units.", correct: true, why: "Petrol falls from 100 to 90, so revenue is £180. Crisps fall from 100 to 70, so revenue is £140." },
+            { text: "The price buyers pay rises by more, and revenue is that price rise.", why: "Revenue is the whole tax per unit times Q1, not only the buyers’ share." }
+          ]
+        },
+        {
+          story: "Deadweight loss is the surplus lost on units that are no longer bought or sold. When is it larger?",
+          choices: [
+            { text: "When demand is elastic, because quantity falls further.", correct: true, why: "Crisps lose 30 units and the deadweight loss is £30. Petrol loses 10 units and it is £10. Half × £2 × the fall in quantity." },
+            { text: "When demand is inelastic, because the price rise is bigger.", why: "A bigger price rise is not a bigger waste. The waste is larger when more trades disappear." }
+          ]
+        }
+      ];
+
+      var market = markets[0];
+      var taxOn = false;
+      var step = "shift";
+      var quizIndex = 0;
+      var quizScore = 0;
+      var quizLocked = false;
+
+      function supplyPounds(q) { return (100 + 5 * q) / 100; }
+      function facts(item) {
+        var seller = supplyPounds(item.q1);
+        var buyer = seller + TAX;
+        return {
+          seller: seller,
+          buyer: buyer,
+          buyerShare: Math.round((buyer - P0) * 100) / 100,
+          sellerShare: Math.round((P0 - seller) * 100) / 100,
+          revenue: TAX * item.q1,
+          dwl: 0.5 * TAX * (Q0 - item.q1),
+          fall: Q0 - item.q1
+        };
+      }
+      function money(n) {
+        var cents = Math.round(n * 100);
+        if (cents % 100 === 0) return "£" + (cents / 100);
+        return "£" + (cents / 100).toFixed(2);
+      }
+
+      var marketBox = document.getElementById("markets");
+      markets.forEach(function (item) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "choice-btn product-btn";
+        btn.dataset.id = item.id;
+        btn.textContent = item.name;
+        btn.addEventListener("click", function () {
+          market = item;
+          wantScroll = true;
+          render();
+        });
+        marketBox.appendChild(btn);
+      });
+      function openCell(item, nextFocus) {
+        var views = {
+          before: { tax: false },
+          demand: { tax: false },
+          shift: { tax: true, step: "shift" },
+          buyer: { tax: true, step: "who" },
+          seller: { tax: true, step: "who" },
+          quantity: { tax: true, step: "quantity" },
+          revenue: { tax: true, step: "revenue" },
+          waste: { tax: true, step: "waste" }
+        };
+        var view = views[nextFocus];
+        market = item;
+        focus = nextFocus;
+        taxOn = view.tax;
+        if (view.step) step = view.step;
+        wantScroll = true;
+        render();
+      }
+
+      function render() {
+        var f = facts(market);
+        marketBox.querySelectorAll("button").forEach(function (btn) {
+          btn.classList.toggle("on", btn.dataset.id === market.id);
+        });
+        var title = document.getElementById("verdict-title");
+        var text = document.getElementById("verdict-text");
+        var verdict = document.getElementById("verdict");
+        var below = document.getElementById("below");
+        var belowTitle = document.getElementById("below-title");
+        var belowText = document.getElementById("below-text");
+        var caption = document.getElementById("caption");
+        verdict.className = "verdict";
+        verdict.hidden = false;
+        below.hidden = true;
+        below.className = "verdict start buyers";
+        if (focus === "demand") {
+          verdict.hidden = true;
+          below.hidden = false;
+          belowTitle.textContent = market.kind === "inelastic" ? "Demand is steep" : "Demand is flat";
+          belowText.textContent = market.why + " The price is still £6 and the quantity is still 100.";
+          caption.textContent = "No tax yet. D is demand for " + market.name.toLowerCase() + ".";
+        } else if (!taxOn) {
+          verdict.hidden = true;
+          below.hidden = false;
+          belowTitle.textContent = "Price before the tax: £6";
+          belowText.textContent = "Buyers pay £6 and sellers receive £6. Quantity is 100. This is the same starting point for petrol and for crisps.";
+          caption.textContent = "D and S cross at £6 and 100 units. Nothing has shifted.";
+        } else if (step === "shift") {
+          verdict.hidden = true;
+          below.hidden = false;
+          belowTitle.textContent = "£2 Tax introduced";
+          belowText.textContent = "S1 is supply after the tax. It is £2 above S at every quantity, so the curves are parallel. This is a specific tax: the same amount on every unit. Demand does not move.";
+          caption.textContent = "The arrow is the £2 tax. The new equilibrium is where D crosses S1.";
+        } else if (step === "who") {
+          verdict.hidden = true;
+          below.hidden = false;
+          belowTitle.textContent = f.buyerShare > f.sellerShare ? "Buyers pay more of the £2" : "Sellers pay more of the £2";
+          belowText.textContent = "The price before the tax was £6. Buyers now pay " + money(f.buyer) + ", which is £6 plus " + money(f.buyerShare) + ". Sellers now receive " + money(f.seller) + ", which is £6 minus " + money(f.sellerShare) + ".";
+          caption.textContent = market.kind === "inelastic"
+            ? "Demand is steep, so buyers cannot easily stop buying. The blue band is taller than the brown band."
+            : "Demand is flat, so buyers switch away. The brown band is taller than the blue band.";
+        } else if (step === "quantity") {
+          verdict.hidden = true;
+          below.hidden = false;
+          belowTitle.textContent = "Quantity falls from 100 to " + market.q1;
+          belowText.textContent = "The fall is " + f.fall + " units. " + (market.kind === "inelastic"
+            ? "Demand is inelastic, so the fall is small."
+            : "Demand is elastic, so the fall is large.");
+          caption.textContent = "The dashed lines mark 100 and the new quantity, " + market.q1 + ".";
+        } else if (step === "revenue") {
+          verdict.hidden = true;
+          below.hidden = false;
+          belowTitle.textContent = "The government receives " + money(f.revenue);
+          belowText.textContent = "Tax revenue = £2 × " + market.q1 + " = " + money(f.revenue) + ". The £2 is collected only on units that are still sold.";
+          caption.textContent = "The shaded rectangle is £2 high and " + market.q1 + " units wide.";
+        } else {
+          verdict.hidden = true;
+          below.hidden = false;
+          belowTitle.textContent = "Deadweight loss is " + money(f.dwl);
+          belowText.textContent = "The " + f.fall + " units are the quantity that is no longer sold, from 100 down to " + market.q1 + ". The shaded triangle has a height of £2, the tax, and a base of " + f.fall + " units. Its area is ½ × £2 × " + f.fall + " = " + money(f.dwl) + ". That " + money(f.dwl) + " is surplus buyers and sellers lose, and the government does not collect it as tax.";
+          caption.textContent = "The shaded triangle is that lost surplus. It is not part of government revenue.";
+        }
+
+        var stats = document.getElementById("stats");
+        stats.replaceChildren();
+        [
+          ["Buyers pay", taxOn ? money(f.buyer) : "£6"],
+          ["Sellers receive", taxOn ? money(f.seller) : "£6"],
+          ["Quantity", taxOn ? "100 → " + market.q1 : "100"],
+          ["Tax revenue", taxOn ? money(f.revenue) : "—"],
+          ["Deadweight loss", taxOn ? money(f.dwl) : "—"]
+        ].forEach(function (pair) {
+          var box = document.createElement("div");
+          box.className = "stat";
+          var s = document.createElement("span");
+          s.textContent = pair[0];
+          var b = document.createElement("b");
+          b.textContent = pair[1];
+          box.appendChild(s);
+          box.appendChild(b);
+          stats.appendChild(box);
+        });
+
+        var split = document.getElementById("split");
+        var bar = document.getElementById("split-bar");
+        split.hidden = !taxOn;
+        bar.replaceChildren();
+        if (taxOn) {
+          var buyerPart = document.createElement("div");
+          buyerPart.className = "part buyer";
+          buyerPart.style.flex = f.buyerShare + " 1 0";
+          buyerPart.textContent = money(f.buyerShare);
+          var sellerPart = document.createElement("div");
+          sellerPart.className = "part seller";
+          sellerPart.style.flex = f.sellerShare + " 1 0";
+          sellerPart.textContent = money(f.sellerShare);
+          bar.appendChild(buyerPart);
+          bar.appendChild(sellerPart);
+        }
+        renderTable();
+        draw(f);
+        if (wantScroll) {
+          wantScroll = false;
+          document.getElementById("chart").scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+
+      function renderTable() {
+        var table = document.getElementById("cmp");
+        table.replaceChildren();
+        var head = document.createElement("thead");
+        var hr = document.createElement("tr");
+        ["", "Petrol", "A brand of crisps"].forEach(function (name, i) {
+          var cell = document.createElement("th");
+          cell.textContent = name;
+          if (i > 0) cell.className = "num" + (markets[i - 1].id === market.id ? " here" : "");
+          hr.appendChild(cell);
+        });
+        head.appendChild(hr);
+        table.appendChild(head);
+        var body = document.createElement("tbody");
+        var petrol = facts(markets[0]);
+        var crisps = facts(markets[1]);
+        var rows = [
+          { focus: "before", label: "Price before the tax", values: ["£6", "£6"] },
+          { focus: "demand", label: "Demand", values: ["Inelastic, steep", "Elastic, flat"] },
+          { focus: "shift", label: "£2 Tax introduced", values: ["Up by £2", "Up by £2"] },
+          { focus: "buyer", label: "Buyers pay after the tax", values: [money(petrol.buyer) + " = £6 + " + money(petrol.buyerShare), money(crisps.buyer) + " = £6 + " + money(crisps.buyerShare)] },
+          { focus: "seller", label: "Sellers receive after the tax", values: [money(petrol.seller) + " = £6 − " + money(petrol.sellerShare), money(crisps.seller) + " = £6 − " + money(crisps.sellerShare)] },
+          { focus: "quantity", label: "Quantity", values: ["100 → 90", "100 → 70"] },
+          { focus: "revenue", label: "Tax revenue", values: [money(petrol.revenue), money(crisps.revenue)] },
+          { focus: "waste", label: "Deadweight loss", values: [money(petrol.dwl), money(crisps.dwl)] }
+        ];
+        rows.forEach(function (row) {
+          var tr = document.createElement("tr");
+          var label = document.createElement("td");
+          label.textContent = row.label;
+          tr.appendChild(label);
+          markets.forEach(function (item, i) {
+            var cell = document.createElement("td");
+            var chosen = item.id === market.id;
+            cell.className = "num" + (chosen ? " here" : "");
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "cell" + (chosen && focus === row.focus ? " on" : "");
+            btn.textContent = row.values[i];
+            btn.setAttribute("aria-pressed", chosen && focus === row.focus ? "true" : "false");
+            btn.addEventListener("click", function () { openCell(item, row.focus); });
+            cell.appendChild(btn);
+            tr.appendChild(cell);
+          });
+          body.appendChild(tr);
+        });
+        table.appendChild(body);
+      }
+
+      function draw(f) {
+        var INK = "#1c1915";
+        var MUTED = "#5c5348";
+        var DEMAND = "#183a66";
+        var SUPPLY = "#9a3412";
+        var SUPPLY1 = "#166534";
+        var LOSS = "#9f1239";
+        var TEXT = "Financier Text, Georgia, Palatino Linotype, Palatino, serif";
+        var DISPLAY = "Financier Display, Georgia, Palatino Linotype, Palatino, serif";
+        var svg = document.getElementById("chart");
+        var NS = "http://www.w3.org/2000/svg";
+        svg.replaceChildren();
+        var defs = document.createElementNS(NS, "defs");
+        var marker = document.createElementNS(NS, "marker");
+        marker.setAttribute("id", "tax-arrow");
+        marker.setAttribute("markerWidth", "10");
+        marker.setAttribute("markerHeight", "10");
+        marker.setAttribute("refX", "8");
+        marker.setAttribute("refY", "5");
+        marker.setAttribute("orient", "auto");
+        var head = document.createElementNS(NS, "path");
+        head.setAttribute("d", "M0,0 L10,5 L0,10 Z");
+        head.setAttribute("fill", SUPPLY1);
+        marker.appendChild(head);
+        defs.appendChild(marker);
+        svg.appendChild(defs);
+        var BOX = { l: 78, r: 690, t: 32, b: 400 };
+        var QMAX = 150;
+        var PMAX = 10;
+        function el(name, attrs, text) {
+          var node = document.createElementNS(NS, name);
+          Object.keys(attrs).forEach(function (key) { node.setAttribute(key, attrs[key]); });
+          if (text) node.textContent = text;
+          svg.appendChild(node);
+          return node;
+        }
+        function xOf(q) { return BOX.l + (q / QMAX) * (BOX.r - BOX.l); }
+        function yOf(p) { return BOX.b - (p / PMAX) * (BOX.b - BOX.t); }
+        function label(x, y, str, fill, size, anchor, family) {
+          el("text", {
+            x: x, y: y, fill: fill || INK,
+            "font-size": size || "14", "font-weight": "700",
+            "font-family": family || TEXT,
+            "text-anchor": anchor || "start",
+            stroke: "#fffaf3", "stroke-width": "4", "paint-order": "stroke"
+          }, str);
+        }
+        function clip(px, py, slope) {
+          var hits = [];
+          function push(x, y) {
+            if (x < BOX.l - 0.01 || x > BOX.r + 0.01 || y < BOX.t - 0.01 || y > BOX.b + 0.01) return;
+            for (var i = 0; i < hits.length; i++) {
+              if (Math.abs(hits[i].x - x) < 0.6 && Math.abs(hits[i].y - y) < 0.6) return;
+            }
+            hits.push({ x: x, y: y });
+          }
+          push(BOX.l, py + slope * (BOX.l - px));
+          push(BOX.r, py + slope * (BOX.r - px));
+          if (Math.abs(slope) > 1e-6) {
+            push(px + (BOX.t - py) / slope, BOX.t);
+            push(px + (BOX.b - py) / slope, BOX.b);
+          }
+          hits.sort(function (a, b) { return a.x - b.x; });
+          return hits.length >= 2 ? [hits[0], hits[hits.length - 1]] : null;
+        }
+        function through(qA, pA, qB, pB, stroke, width) {
+          var xA = xOf(qA);
+          var yA = yOf(pA);
+          var slope = (yOf(pB) - yA) / (xOf(qB) - xA);
+          var seg = clip(xA, yA, slope);
+          if (!seg) return null;
+          el("line", {
+            x1: seg[0].x, y1: seg[0].y, x2: seg[1].x, y2: seg[1].y,
+            stroke: stroke, "stroke-width": width, "stroke-linecap": "round"
+          });
+          return seg;
+        }
+        function curveName(seg, str, fill) {
+          if (!seg) return;
+          var end = seg[1];
+          var x = end.x - 18;
+          var y = end.y - 8;
+          if (end.y > BOX.b - 24) { y = end.y - 26; x = end.x - 28; }
+          if (end.y < BOX.t + 20) y = end.y + 18;
+          label(x, y, str, fill, "18", "start", DISPLAY);
+        }
+
+        el("line", { x1: BOX.l, y1: BOX.t - 8, x2: BOX.l, y2: BOX.b, stroke: INK, "stroke-width": "2" });
+        el("line", { x1: BOX.l, y1: BOX.b, x2: BOX.r + 12, y2: BOX.b, stroke: INK, "stroke-width": "2" });
+        el("polygon", { points: BOX.l + "," + (BOX.t - 8) + " " + (BOX.l - 5) + "," + BOX.t + " " + (BOX.l + 5) + "," + BOX.t, fill: INK });
+        el("polygon", { points: (BOX.r + 12) + "," + BOX.b + " " + BOX.r + "," + (BOX.b - 5) + " " + BOX.r + "," + (BOX.b + 5), fill: INK });
+        label(18, 210, "Price (£)", MUTED, "14", "middle");
+        svg.lastChild.setAttribute("transform", "rotate(-90 18 210)");
+        label((BOX.l + BOX.r) / 2, 474, "Quantity", MUTED, "14", "middle");
+
+        var dSeg = through(Q0, P0, market.q1, f.buyer, DEMAND, focus === "demand" ? 5.5 : 3.4);
+        var sSeg = through(0, supplyPounds(0), Q0, P0, SUPPLY, 3.4);
+        var s1Seg = null;
+        if (taxOn) s1Seg = through(0, supplyPounds(0) + TAX, Q0, P0 + TAX, SUPPLY1, 3.4);
+        curveName(dSeg, "D", DEMAND);
+        curveName(sSeg, "S", SUPPLY);
+        if (s1Seg) curveName(s1Seg, "S1", SUPPLY1);
+
+        function dot(q, p, fill) {
+          el("circle", { cx: xOf(q), cy: yOf(p), r: "6", fill: fill, stroke: "#fff", "stroke-width": "2" });
+        }
+        function hLine(p, x2, stroke) {
+          el("line", {
+            x1: BOX.l, y1: yOf(p), x2: x2, y2: yOf(p),
+            stroke: stroke, "stroke-width": "1.6", "stroke-dasharray": "5 4"
+          });
+        }
+        function vLine(q, y1, stroke) {
+          el("line", {
+            x1: xOf(q), y1: y1, x2: xOf(q), y2: BOX.b,
+            stroke: stroke, "stroke-width": "1.6", "stroke-dasharray": "5 4"
+          });
+        }
+
+        function taxArrow() {
+          var ax = xOf(132);
+          var yS = yOf(supplyPounds(132));
+          var yS1 = yOf(supplyPounds(132) + TAX);
+          el("line", {
+            x1: ax, y1: yS - 4, x2: ax, y2: yS1 + 12,
+            stroke: SUPPLY1, "stroke-width": "2.4", "marker-end": "url(#tax-arrow)"
+          });
+          label(ax + 8, (yS + yS1) / 2 + 4, "£2 tax", SUPPLY1, "14", "start");
+        }
+
+        if (!taxOn) {
+          hLine(P0, xOf(Q0), MUTED);
+          vLine(Q0, yOf(P0), MUTED);
+          dot(Q0, P0, SUPPLY);
+          label(BOX.l - 8, yOf(P0) + 4, "£6", SUPPLY, "14", "end");
+          label(xOf(Q0) - 12, BOX.b + 22, "100", SUPPLY, "14", "middle");
+        } else if (step === "shift") {
+          hLine(P0, xOf(Q0), MUTED);
+          hLine(f.buyer, xOf(market.q1), SUPPLY1);
+          vLine(Q0, yOf(P0), MUTED);
+          vLine(market.q1, yOf(f.buyer), SUPPLY1);
+          dot(Q0, P0, MUTED);
+          dot(market.q1, f.buyer, SUPPLY1);
+          var yOld = yOf(P0) + 4;
+          var yNew = yOf(f.buyer) + 4;
+          if (yOld - yNew < 22) {
+            var midY = (yOld + yNew) / 2;
+            yNew = midY - 11;
+            yOld = midY + 11;
+          }
+          label(BOX.l - 8, yNew, money(f.buyer), SUPPLY1, "14", "end");
+          label(BOX.l - 8, yOld, "£6", MUTED, "14", "end");
+          var xOld = xOf(Q0);
+          var xNew = xOf(market.q1);
+          var yArrow = BOX.b - 16;
+          var toward = xNew < xOld ? -1 : 1;
+          el("line", {
+            x1: xOld, y1: yArrow, x2: xNew - toward * 9, y2: yArrow,
+            stroke: SUPPLY1, "stroke-width": "2.4", "marker-end": "url(#tax-arrow)"
+          });
+          label((xOld + xNew) / 2, yArrow - 10, "falls by " + f.fall, SUPPLY1, "14", "middle");
+          label(xNew - 6, BOX.b + 20, String(market.q1), SUPPLY1, "14", "end");
+          label(xOld + 6, BOX.b + 20, "100", MUTED, "14", "start");
+        } else if (step === "who") {
+          el("polygon", {
+            points: [BOX.l, yOf(f.buyer), xOf(market.q1), yOf(f.buyer), xOf(market.q1), yOf(P0), BOX.l, yOf(P0)].join(" "),
+            fill: DEMAND, opacity: "0.22"
+          });
+          el("polygon", {
+            points: [BOX.l, yOf(P0), xOf(market.q1), yOf(P0), xOf(market.q1), yOf(f.seller), BOX.l, yOf(f.seller)].join(" "),
+            fill: SUPPLY, opacity: "0.18"
+          });
+          hLine(f.buyer, xOf(market.q1), DEMAND);
+          hLine(P0, xOf(market.q1), MUTED);
+          hLine(f.seller, xOf(market.q1), SUPPLY);
+          var slope = (f.buyer - P0) / (market.q1 - Q0);
+          var qAtSeller = Q0 + (f.seller - P0) / slope;
+          var bx = xOf(market.q1) + 16;
+          if (qAtSeller > market.q1 && qAtSeller < 145) bx = xOf(qAtSeller) + 16;
+          el("line", { x1: bx, y1: yOf(f.buyer), x2: bx, y2: yOf(f.seller), stroke: INK, "stroke-width": "2.4" });
+          label(bx + 8, (yOf(f.buyer) + yOf(f.seller)) / 2 + 4, "£2", INK, "14", "start");
+          var tags = [
+            { p: f.buyer, text: "Buyers pay " + money(f.buyer), fill: SUPPLY1 },
+            { p: P0, text: "Before £6", fill: MUTED },
+            { p: f.seller, text: "Sellers receive " + money(f.seller), fill: SUPPLY }
+          ].sort(function (a, b) { return b.p - a.p; });
+          var ys = tags.map(function (tag) { return yOf(tag.p); });
+          for (var i = 1; i < ys.length; i++) {
+            if (ys[i] < ys[i - 1] + 22) ys[i] = ys[i - 1] + 22;
+          }
+          tags.forEach(function (tag, n) {
+            label(BOX.l + 10, ys[n] + 4, tag.text, tag.fill, "14", "start");
+          });
+          dot(market.q1, f.buyer, SUPPLY1);
+          dot(market.q1, f.seller, SUPPLY);
+          dot(Q0, P0, MUTED);
+        } else if (step === "quantity") {
+          hLine(P0, xOf(Q0), MUTED);
+          hLine(f.buyer, xOf(market.q1), SUPPLY1);
+          vLine(Q0, yOf(P0), MUTED);
+          vLine(market.q1, yOf(f.buyer), SUPPLY1);
+          dot(Q0, P0, MUTED);
+          dot(market.q1, f.buyer, SUPPLY1);
+          var yOld = yOf(P0) + 4;
+          var yNew = yOf(f.buyer) + 4;
+          if (yOld - yNew < 22) {
+            var priceMid = (yOld + yNew) / 2;
+            yNew = priceMid - 11;
+            yOld = priceMid + 11;
+          }
+          label(BOX.l - 8, yNew, money(f.buyer), SUPPLY1, "14", "end");
+          label(BOX.l - 8, yOld, "£6", MUTED, "14", "end");
+          var xOld = xOf(Q0);
+          var xNew = xOf(market.q1);
+          var yArrow = BOX.b - 16;
+          var toward = xNew < xOld ? -1 : 1;
+          el("line", {
+            x1: xOld, y1: yArrow, x2: xNew - toward * 9, y2: yArrow,
+            stroke: SUPPLY1, "stroke-width": "2.4", "marker-end": "url(#tax-arrow)"
+          });
+          label((xOld + xNew) / 2, yArrow - 10, "falls by " + f.fall, SUPPLY1, "14", "middle");
+          label(xNew - 6, BOX.b + 20, String(market.q1), SUPPLY1, "14", "end");
+          label(xOld + 6, BOX.b + 20, "100", MUTED, "14", "start");
+        } else if (step === "revenue") {
+          el("polygon", {
+            points: [BOX.l, yOf(f.buyer), xOf(market.q1), yOf(f.buyer), xOf(market.q1), yOf(f.seller), BOX.l, yOf(f.seller)].join(" "),
+            fill: SUPPLY1, opacity: "0.2"
+          });
+          el("rect", {
+            x: BOX.l, y: yOf(f.buyer), width: xOf(market.q1) - BOX.l, height: yOf(f.seller) - yOf(f.buyer),
+            fill: "none", stroke: SUPPLY1, "stroke-width": "2"
+          });
+          label(xOf(market.q1) + 10, (yOf(f.buyer) + yOf(f.seller)) / 2, "£2 × " + market.q1 + " = " + money(f.revenue), SUPPLY1, "14", "start");
+          dot(market.q1, f.buyer, SUPPLY1);
+          dot(market.q1, f.seller, SUPPLY);
+          label(BOX.l - 8, yOf(f.buyer) + 4, money(f.buyer), SUPPLY1, "13", "end");
+          label(BOX.l - 8, yOf(f.seller) + 4, money(f.seller), SUPPLY, "13", "end");
+          label(xOf(market.q1), BOX.b + 22, String(market.q1), SUPPLY1, "14", "middle");
+        } else {
+          el("polygon", {
+            points: [xOf(Q0), yOf(P0), xOf(market.q1), yOf(f.buyer), xOf(market.q1), yOf(f.seller)].join(" "),
+            fill: LOSS, opacity: "0.35"
+          });
+          el("line", { x1: xOf(Q0), y1: yOf(P0), x2: xOf(market.q1), y2: yOf(f.buyer), stroke: LOSS, "stroke-width": "2.4" });
+          el("line", { x1: xOf(Q0), y1: yOf(P0), x2: xOf(market.q1), y2: yOf(f.seller), stroke: LOSS, "stroke-width": "2.4" });
+          hLine(f.buyer, xOf(market.q1), SUPPLY1);
+          hLine(P0, xOf(Q0), MUTED);
+          hLine(f.seller, xOf(market.q1), SUPPLY);
+          vLine(Q0, yOf(P0), MUTED);
+          vLine(market.q1, yOf(f.buyer), SUPPLY1);
+          dot(Q0, P0, MUTED);
+          dot(market.q1, f.buyer, SUPPLY1);
+          dot(market.q1, f.seller, SUPPLY);
+          var priceTags = [
+            { p: f.buyer, text: money(f.buyer), fill: SUPPLY1 },
+            { p: P0, text: "£6", fill: MUTED },
+            { p: f.seller, text: money(f.seller), fill: SUPPLY }
+          ].sort(function (a, b) { return b.p - a.p; });
+          var priceYs = priceTags.map(function (tag) { return yOf(tag.p) + 4; });
+          for (var n = 1; n < priceYs.length; n++) {
+            if (priceYs[n] < priceYs[n - 1] + 22) priceYs[n] = priceYs[n - 1] + 22;
+          }
+          priceTags.forEach(function (tag, n) {
+            label(BOX.l - 8, priceYs[n], tag.text, tag.fill, "14", "end");
+          });
+          label(xOf(Q0) + 12, yOf(P0) - 16, money(f.dwl), LOSS, "14", "start");
+          var xOld = xOf(Q0);
+          var xNew = xOf(market.q1);
+          var yArrow = BOX.b - 16;
+          var toward = xNew < xOld ? -1 : 1;
+          el("line", {
+            x1: xOld, y1: yArrow, x2: xNew - toward * 9, y2: yArrow,
+            stroke: SUPPLY1, "stroke-width": "2.4", "marker-end": "url(#tax-arrow)"
+          });
+          label((xOld + xNew) / 2, yArrow - 10, "falls by " + f.fall, SUPPLY1, "14", "middle");
+          label(xNew - 6, BOX.b + 20, String(market.q1), SUPPLY1, "14", "end");
+          label(xOld + 6, BOX.b + 20, "100", MUTED, "14", "start");
+        }
+
+        if (taxOn) taxArrow();
+
+        var show = !taxOn ? "No tax. Demand and supply cross at a price of £6 and a quantity of 100."
+          : "Market: " + market.name + ". " + document.getElementById("verdict-text").textContent;
+        svg.setAttribute("aria-label", show);
+      }
+
+      function renderQuiz() {
+        var score = document.getElementById("quiz-score");
+        var story = document.getElementById("quiz-story");
+        var options = document.getElementById("quiz-options");
+        var msg = document.getElementById("quiz-msg");
+        var next = document.getElementById("quiz-next");
+        msg.textContent = "";
+        msg.className = "msg";
+        next.hidden = true;
+        if (quizIndex >= quizItems.length) {
+          score.textContent = "Score: " + quizScore + " of " + quizItems.length;
+          story.textContent = "You have finished the questions.";
+          options.replaceChildren();
+          msg.className = "msg ok";
+          msg.textContent = "Supply shifts up by the tax. Buyers pay more of it when demand is steep. Sellers pay more of it when demand is flat. Tax revenue is £2 times the quantity still sold. Deadweight loss is larger when quantity falls further.";
+          next.hidden = false;
+          next.textContent = "Try these questions again";
+          return;
+        }
+        var item = quizItems[quizIndex];
+        quizLocked = false;
+        score.textContent = "Question " + (quizIndex + 1) + " of " + quizItems.length + ". Score: " + quizScore;
+        story.textContent = item.story;
+        options.replaceChildren();
+        next.textContent = "Next question";
+        item.choices.forEach(function (choice) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "choice-btn";
+          btn.textContent = choice.text;
+          btn.addEventListener("click", function () {
+            if (quizLocked) return;
+            quizLocked = true;
+            btn.classList.add(choice.correct ? "ok" : "bad");
+            options.querySelectorAll("button").forEach(function (el) { el.disabled = true; });
+            if (choice.correct) {
+              quizScore += 1;
+              score.textContent = "Question " + (quizIndex + 1) + " of " + quizItems.length + ". Score: " + quizScore;
+              msg.className = "msg ok";
+            } else {
+              msg.className = "msg bad";
+            }
+            msg.textContent = choice.why;
+            next.hidden = false;
+          });
+          options.appendChild(btn);
+        });
+      }
+      document.getElementById("quiz-next").addEventListener("click", function () {
+        if (quizIndex >= quizItems.length) {
+          quizIndex = 0;
+          quizScore = 0;
+        } else {
+          quizIndex += 1;
+        }
+        renderQuiz();
+      });
+
+      function downloadFile(blob, name) {
+        var link = document.createElement("a");
+        var url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = name;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      }
+      function saveDiagram() {
+        var chart = document.getElementById("chart");
+        var vb = (chart.getAttribute("viewBox") || "0 0 760 490").split(/[\s,]+/).map(Number);
+        var w = vb[2] || 760;
+        var h = vb[3] || 490;
+        var clone = chart.cloneNode(true);
+        clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        clone.setAttribute("width", String(w));
+        clone.setAttribute("height", String(h));
+        var xml = new XMLSerializer().serializeToString(clone);
+        var svgBlob = new Blob([xml], { type: "image/svg+xml;charset=utf-8" });
+        var url = URL.createObjectURL(svgBlob);
+        var image = new Image();
+        var part = focus === "waste" ? "deadweight" : focus;
+        var file = "indirect-tax-" + market.id + "-" + part + ".png";
+        image.onload = function () {
+          var scale = 2;
+          var canvas = document.createElement("canvas");
+          canvas.width = w * scale;
+          canvas.height = h * scale;
+          var ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          canvas.toBlob(function (png) {
+            if (png) downloadFile(png, file);
+            else downloadFile(svgBlob, file.replace(/\.png$/, ".svg"));
+          }, "image/png");
+        };
+        image.onerror = function () {
+          URL.revokeObjectURL(url);
+          downloadFile(svgBlob, file.replace(/\.png$/, ".svg"));
+        };
+        image.src = url;
+      }
+      document.getElementById("save-diagram").addEventListener("click", saveDiagram);
+
+      render();
+      renderQuiz();
+    })();
+  </script>
+</body>
+</html>

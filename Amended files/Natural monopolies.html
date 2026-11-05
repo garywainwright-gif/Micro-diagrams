@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Natural monopolies</title>
+  <link rel="stylesheet" href="../diagram-economist.css" />
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #f0dce2;
+      --paper: #fffaf3;
+      --bg: #fef7f9;
+      --formula: #f8e8ec;
+      --accent: #9a3412;
+      --accent-soft: #f8e8ec;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Financier Text", Georgia, "Palatino Linotype", Palatino, serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+      font-size: 1.05rem;
+    }
+    h1, h2 {
+      font-family: "Financier Display", Georgia, "Palatino Linotype", Palatino, serif;
+      letter-spacing: -0.02em;
+    }
+    svg text {
+      font-family: "Financier Text", Georgia, "Palatino Linotype", Palatino, serif;
+    }
+    .book { max-width: 860px; margin: 0 auto; padding: 20px 20px 72px; }
+    .topic {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 22px 24px;
+      margin: 16px 0;
+    }
+    h1 { margin: 0 0 8px; font-size: 1.75rem; }
+    h2 { margin: 0 0 8px; font-size: 1.2rem; }
+    p { margin: 0 0 10px; }
+    .ask { font-weight: 800; margin: 0 0 12px; }
+    .opts { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+    button.choice {
+      width: 100%;
+      text-align: left;
+      white-space: normal;
+      font: inherit;
+      font-weight: 700;
+      line-height: 1.35;
+      color: var(--accent);
+      background: #fff;
+      border: 2px solid var(--accent);
+      border-radius: 8px;
+      padding: 12px 14px;
+      cursor: pointer;
+    }
+    button.choice:hover:not(:disabled) { background: var(--accent-soft); }
+    button.choice:disabled { cursor: default; }
+    button.choice.ok { background: #dcfce7; border-color: #166534; color: #166534; }
+    button.choice.bad { background: #ffe4e6; border-color: #9f1239; color: #9f1239; }
+    .feedback { margin: 12px 0 0; min-height: 1.4em; }
+    .feedback.ok { color: #166534; }
+    .feedback.bad { color: #9f1239; }
+    .diagram {
+      margin-top: 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 8px 4px;
+    }
+    .diagram[hidden] { display: none; }
+    .diagram svg { display: block; width: 100%; height: auto; }
+    .diagram p { margin: 4px 8px 10px; color: var(--muted); font-size: 0.92rem; }
+    .clue { margin-top: 22px; }
+    .clue[hidden] { display: none; }
+    .diagram-tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 8px 12px; }
+    .diagram-tools button {
+      font: inherit;
+      font-weight: 700;
+      border-radius: 8px;
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+    .diagram-tools .save-diagram { color: #fffaf3; background: var(--accent); border: 0; }
+    .diagram-tools .reset-puzzle { color: var(--accent); background: #fff; border: 1px solid var(--line); }
+  </style>
+</head>
+<body>
+  <div class="book">
+    <article class="topic">
+      <h1>Natural monopolies</h1>
+      <p class="meta"><a href="../micro-diagrams.html">Back to interactive games</a></p>
+      <p><strong>Use the following questions and answers to build your understanding of the Natural monopoly diagram.</strong></p>
+
+      <h2>Clue 1</h2>
+      <p class="ask" id="q1">Why is the demand curve and the marginal revenue curve downward sloping for a natural monopoly?</p>
+      <div class="opts" id="opts" role="group" aria-labelledby="q1"></div>
+      <p class="feedback" id="feedback" aria-live="polite"></p>
+
+      <figure class="diagram" id="diagram1" hidden>
+        <svg viewBox="0 0 760 420" role="img" aria-label="Price and output diagram. Demand, also average revenue, slopes down. Marginal revenue slopes down more steeply and ends at a lower output.">
+          <line x1="78" y1="348" x2="78" y2="36" stroke="#1c1915" stroke-width="2.5" />
+          <polygon points="78,22 70,40 86,40" fill="#1c1915" />
+          <line x1="78" y1="348" x2="700" y2="348" stroke="#1c1915" stroke-width="2.5" />
+          <polygon points="716,348 696,340 696,356" fill="#1c1915" />
+          <text x="46" y="168" fill="#5c5348" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" text-anchor="middle" transform="rotate(-90 46 168)">Price</text>
+          <text x="668" y="386" fill="#5c5348" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif">Output</text>
+          <line x1="128" y1="58" x2="628" y2="292" stroke="#183a66" stroke-width="3" stroke-linecap="round" />
+          <line x1="128" y1="112" x2="392" y2="286" stroke="#183a66" stroke-width="3" stroke-linecap="round" />
+          <text x="404" y="298" fill="#183a66" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">MR</text>
+          <text x="640" y="286" fill="#183a66" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">D (AR)</text>
+        </svg>
+        <figcaption>
+          <p>The firm supplies the whole market, so it faces the market demand curve. To sell more it must lower the price. Demand is also average revenue, so D (AR) slopes down. Marginal revenue slopes down more steeply and lies below demand.</p>
+        </figcaption>
+        <div class="diagram-tools">
+          <button type="button" class="save-diagram" data-file="natural-monopoly-demand-mr.png">Save the diagram</button>
+          <button type="button" class="reset-puzzle">Reset</button>
+        </div>
+      </figure>
+
+      <section class="clue" id="clue2" hidden>
+        <h2>Clue 2</h2>
+        <p class="ask" id="q2">In monopolistic competition the average cost curve is U-shaped because costs rise after diminishing returns. Why is the AC curve different for a natural monopoly?</p>
+        <div class="opts" id="opts2" role="group" aria-labelledby="q2"></div>
+        <p class="feedback" id="feedback2" aria-live="polite"></p>
+      </section>
+
+      <figure class="diagram" id="diagram2" hidden>
+        <svg viewBox="0 0 760 420" role="img" aria-label="Price and output diagram. Demand and marginal revenue slope down. Average cost falls across the market and turns up only at a high output.">
+          <line x1="78" y1="348" x2="78" y2="36" stroke="#1c1915" stroke-width="2.5" />
+          <polygon points="78,22 70,40 86,40" fill="#1c1915" />
+          <line x1="78" y1="348" x2="700" y2="348" stroke="#1c1915" stroke-width="2.5" />
+          <polygon points="716,348 696,340 696,356" fill="#1c1915" />
+          <text x="46" y="168" fill="#5c5348" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" text-anchor="middle" transform="rotate(-90 46 168)">Price</text>
+          <text x="668" y="386" fill="#5c5348" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif">Output</text>
+          <path d="M220 69 C221.2 71.3 224.5 78.7 227 83 C229.5 87.3 232.5 91.2 235 95 C237.5 98.8 238.3 100.8 242 106 C245.7 111.2 252 119.8 257 126 C262 132.2 267 137.8 272 143 C277 148.2 282 152.5 287 157 C292 161.5 297.2 166 302 170 C306.8 174 311.2 177.5 316 181 C320.8 184.5 326 187.8 331 191 C336 194.2 341 197.3 346 200 C351 202.7 356 204.8 361 207 C366 209.2 371 211 376 213 C381 215 386.2 217.2 391 219 C395.8 220.8 400.2 222.5 405 224 C409.8 225.5 415 226.7 420 228 C425 229.3 430 231 435 232 C440 233 445 233.2 450 234 C455 234.8 460 236.2 465 237 C470 237.8 475.2 238.5 480 239 C484.8 239.5 489.2 239.7 494 240 C498.8 240.3 504 240.7 509 241 C514 241.3 517.8 242 524 242 C530.2 242 538.5 241.2 546 241 C553.5 240.8 561.5 241.3 569 241 C576.5 240.7 584.8 239.5 591 239 C597.2 238.5 601 238.5 606 238 C611 237.5 618.5 236.3 621 236" fill="none" stroke="#9a3412" stroke-width="3" stroke-linecap="round" />
+          <text x="632" y="228" fill="#9a3412" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">AC</text>
+          <line x1="128" y1="58" x2="628" y2="292" stroke="#183a66" stroke-width="3" stroke-linecap="round" />
+          <line x1="128" y1="112" x2="392" y2="286" stroke="#183a66" stroke-width="3" stroke-linecap="round" />
+          <text x="404" y="298" fill="#183a66" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">MR</text>
+          <text x="640" y="286" fill="#183a66" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">D (AR)</text>
+        </svg>
+        <figcaption>
+          <p>Huge fixed costs are spread over more units, and economies of scale continue across the market. Average cost falls over the outputs the market will buy, and it only turns up beyond that range.</p>
+        </figcaption>
+        <div class="diagram-tools">
+          <button type="button" class="save-diagram" data-file="natural-monopoly-average-cost.png">Save the diagram</button>
+          <button type="button" class="reset-puzzle">Reset</button>
+        </div>
+      </figure>
+
+      <section class="clue" id="clue3" hidden>
+        <h2>Clue 3</h2>
+        <p class="ask" id="q3">Why does the marginal cost curve never rise to cross AC in a natural monopoly?</p>
+        <div class="opts" id="opts3" role="group" aria-labelledby="q3"></div>
+        <p class="feedback" id="feedback3" aria-live="polite"></p>
+      </section>
+
+      <figure class="diagram" id="diagram3" hidden>
+        <svg viewBox="0 0 760 420" role="img" aria-label="Price and output diagram. Average cost falls across the market. Marginal cost stays below average cost and turns up without meeting it.">
+          <line x1="78" y1="348" x2="78" y2="36" stroke="#1c1915" stroke-width="2.5" />
+          <polygon points="78,22 70,40 86,40" fill="#1c1915" />
+          <line x1="78" y1="348" x2="700" y2="348" stroke="#1c1915" stroke-width="2.5" />
+          <polygon points="716,348 696,340 696,356" fill="#1c1915" />
+          <text x="46" y="168" fill="#5c5348" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" text-anchor="middle" transform="rotate(-90 46 168)">Price</text>
+          <text x="668" y="386" fill="#5c5348" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif">Output</text>
+          <path d="M220 69 C221.2 71.3 224.5 78.7 227 83 C229.5 87.3 232.5 91.2 235 95 C237.5 98.8 238.3 100.8 242 106 C245.7 111.2 252 119.8 257 126 C262 132.2 267 137.8 272 143 C277 148.2 282 152.5 287 157 C292 161.5 297.2 166 302 170 C306.8 174 311.2 177.5 316 181 C320.8 184.5 326 187.8 331 191 C336 194.2 341 197.3 346 200 C351 202.7 356 204.8 361 207 C366 209.2 371 211 376 213 C381 215 386.2 217.2 391 219 C395.8 220.8 400.2 222.5 405 224 C409.8 225.5 415 226.7 420 228 C425 229.3 430 231 435 232 C440 233 445 233.2 450 234 C455 234.8 460 236.2 465 237 C470 237.8 475.2 238.5 480 239 C484.8 239.5 489.2 239.7 494 240 C498.8 240.3 504 240.7 509 241 C514 241.3 517.8 242 524 242 C530.2 242 538.5 241.2 546 241 C553.5 240.8 561.5 241.3 569 241 C576.5 240.7 584.8 239.5 591 239 C597.2 238.5 601 238.5 606 238 C611 237.5 618.5 236.3 621 236" fill="none" stroke="#9a3412" stroke-width="3" stroke-linecap="round" />
+          <text x="632" y="228" fill="#9a3412" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">AC</text>
+          <path d="M130.8 128.5 C133.3 131.3 140.6 139.8 145.6 145.1 C150.5 150.4 155.6 155.5 160.5 160.4 C165.4 165.3 170.4 169.9 175.3 174.3 C180.2 178.7 185.2 183 190.2 187 C195.1 191 200.1 194.6 205 198.3 C209.9 202 214.8 205.6 219.8 208.9 C224.8 212.2 229.8 215.2 234.7 218.2 C239.6 221.2 244.6 224.1 249.5 226.9 C254.4 229.7 259.4 232.4 264.4 234.8 C269.3 237.2 274.3 239.3 279.2 241.5 C284.1 243.7 289 246.1 294 248.1 C299 250.1 304 251.6 308.9 253.4 C313.8 255.2 318.8 257.2 323.7 258.8 C328.6 260.4 333.7 261.5 338.6 262.8 C343.6 264.1 348.4 265.5 353.4 266.7 C358.3 267.9 363.4 269.1 368.3 270.1 C373.2 271.1 378.2 271.9 383.1 272.7 C388 273.5 390.5 273.8 397.9 274.7 C405.3 275.6 417.7 277.2 427.6 278 C437.5 278.8 447.4 279.2 457.3 279.4 C467.2 279.6 478.3 279.6 487 279.4 C495.7 279.2 501.9 278.4 509.3 278 C516.7 277.6 524.1 277.3 531.5 276.7 C538.9 276 547.6 274.9 553.8 274.1 C560 273.3 562.4 273 568.6 272.1 C574.8 271.2 584.7 269.7 590.9 268.7 C597.1 267.7 600.8 267 605.7 266.1 C610.7 265.2 618.1 263.8 620.6 263.4" fill="none" stroke="#9a3412" stroke-width="3" stroke-linecap="round" />
+          <text x="632" y="256" fill="#9a3412" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">MC</text>
+          <line x1="128" y1="58" x2="628" y2="292" stroke="#183a66" stroke-width="3" stroke-linecap="round" />
+          <line x1="128" y1="112" x2="392" y2="286" stroke="#183a66" stroke-width="3" stroke-linecap="round" />
+          <text x="404" y="298" fill="#183a66" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">MR</text>
+          <text x="640" y="286" fill="#183a66" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">D (AR)</text>
+        </svg>
+        <figcaption>
+          <p>Economies of scale continue across the market, so average cost keeps falling. Marginal cost stays below average cost. It turns up, but it does not rise far enough to meet AC.</p>
+        </figcaption>
+        <div class="diagram-tools">
+          <button type="button" class="save-diagram" data-file="natural-monopoly-marginal-cost.png">Save the diagram</button>
+          <button type="button" class="reset-puzzle">Reset</button>
+        </div>
+      </figure>
+
+      <section class="clue" id="clue4" hidden>
+        <h2>Clue 4</h2>
+        <p class="ask" id="q4">Because of its huge fixed costs and tiny marginal costs, what objective is a natural monopoly likely to follow?</p>
+        <div class="opts" id="opts4" role="group" aria-labelledby="q4"></div>
+        <p class="feedback" id="feedback4" aria-live="polite"></p>
+      </section>
+
+      <section class="clue" id="clue5" hidden>
+        <h2>Clue 5</h2>
+        <p class="ask" id="q5">Why does an objective of profit maximisation for a natural monopoly result in restricted output?</p>
+        <div class="opts" id="opts5" role="group" aria-labelledby="q5"></div>
+        <p class="feedback" id="feedback5" aria-live="polite"></p>
+      </section>
+
+      <figure class="diagram" id="diagram4" hidden>
+        <svg viewBox="0 0 760 420" role="img" aria-label="Price and output diagram. Profit is maximised where marginal revenue meets marginal cost, at a low quantity Qm. A dashed line marks that price as Ps.">
+          <line x1="78" y1="348" x2="78" y2="36" stroke="#1c1915" stroke-width="2.5" />
+          <polygon points="78,22 70,40 86,40" fill="#1c1915" />
+          <line x1="78" y1="348" x2="700" y2="348" stroke="#1c1915" stroke-width="2.5" />
+          <polygon points="716,348 696,340 696,356" fill="#1c1915" />
+          <text x="46" y="168" fill="#5c5348" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" text-anchor="middle" transform="rotate(-90 46 168)">Price</text>
+          <text x="668" y="386" fill="#5c5348" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif">Output</text>
+          <path d="M220 69 C221.2 71.3 224.5 78.7 227 83 C229.5 87.3 232.5 91.2 235 95 C237.5 98.8 238.3 100.8 242 106 C245.7 111.2 252 119.8 257 126 C262 132.2 267 137.8 272 143 C277 148.2 282 152.5 287 157 C292 161.5 297.2 166 302 170 C306.8 174 311.2 177.5 316 181 C320.8 184.5 326 187.8 331 191 C336 194.2 341 197.3 346 200 C351 202.7 356 204.8 361 207 C366 209.2 371 211 376 213 C381 215 386.2 217.2 391 219 C395.8 220.8 400.2 222.5 405 224 C409.8 225.5 415 226.7 420 228 C425 229.3 430 231 435 232 C440 233 445 233.2 450 234 C455 234.8 460 236.2 465 237 C470 237.8 475.2 238.5 480 239 C484.8 239.5 489.2 239.7 494 240 C498.8 240.3 504 240.7 509 241 C514 241.3 517.8 242 524 242 C530.2 242 538.5 241.2 546 241 C553.5 240.8 561.5 241.3 569 241 C576.5 240.7 584.8 239.5 591 239 C597.2 238.5 601 238.5 606 238 C611 237.5 618.5 236.3 621 236" fill="none" stroke="#9a3412" stroke-width="3" stroke-linecap="round" />
+          <text x="632" y="228" fill="#9a3412" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">AC</text>
+          <path d="M130.8 128.5 C133.3 131.3 140.6 139.8 145.6 145.1 C150.5 150.4 155.6 155.5 160.5 160.4 C165.4 165.3 170.4 169.9 175.3 174.3 C180.2 178.7 185.2 183 190.2 187 C195.1 191 200.1 194.6 205 198.3 C209.9 202 214.8 205.6 219.8 208.9 C224.8 212.2 229.8 215.2 234.7 218.2 C239.6 221.2 244.6 224.1 249.5 226.9 C254.4 229.7 259.4 232.4 264.4 234.8 C269.3 237.2 274.3 239.3 279.2 241.5 C284.1 243.7 289 246.1 294 248.1 C299 250.1 304 251.6 308.9 253.4 C313.8 255.2 318.8 257.2 323.7 258.8 C328.6 260.4 333.7 261.5 338.6 262.8 C343.6 264.1 348.4 265.5 353.4 266.7 C358.3 267.9 363.4 269.1 368.3 270.1 C373.2 271.1 378.2 271.9 383.1 272.7 C388 273.5 390.5 273.8 397.9 274.7 C405.3 275.6 417.7 277.2 427.6 278 C437.5 278.8 447.4 279.2 457.3 279.4 C467.2 279.6 478.3 279.6 487 279.4 C495.7 279.2 501.9 278.4 509.3 278 C516.7 277.6 524.1 277.3 531.5 276.7 C538.9 276 547.6 274.9 553.8 274.1 C560 273.3 562.4 273 568.6 272.1 C574.8 271.2 584.7 269.7 590.9 268.7 C597.1 267.7 600.8 267 605.7 266.1 C610.7 265.2 618.1 263.8 620.6 263.4" fill="none" stroke="#9a3412" stroke-width="3" stroke-linecap="round" />
+          <text x="632" y="256" fill="#9a3412" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">MC</text>
+          <line x1="128" y1="58" x2="628" y2="292" stroke="#183a66" stroke-width="3" stroke-linecap="round" />
+          <line x1="128" y1="112" x2="392" y2="286" stroke="#183a66" stroke-width="3" stroke-linecap="round" />
+          <line x1="78" y1="270" x2="368" y2="270" stroke="#5c5348" stroke-width="2" stroke-dasharray="7 6" />
+          <line x1="368" y1="270" x2="368" y2="348" stroke="#5c5348" stroke-width="2" stroke-dasharray="7 6" />
+          <circle cx="368" cy="270" r="7" fill="#9f1239" />
+          <text x="70" y="276" fill="#1c1915" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="end">P<tspan font-size="14" dy="6">s</tspan></text>
+          <text x="368" y="378" fill="#1c1915" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="middle">Q<tspan font-size="14" dy="6">m</tspan></text>
+          <text x="404" y="298" fill="#183a66" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">MR</text>
+          <text x="640" y="286" fill="#183a66" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">D (AR)</text>
+        </svg>
+        <figcaption>
+          <p>Profit is maximised where marginal revenue meets marginal cost. That meeting point is at a low quantity, Qm. The dashed line marks Ps at that point, so output is restricted.</p>
+        </figcaption>
+        <div class="diagram-tools">
+          <button type="button" class="save-diagram" data-file="natural-monopoly-restricted-output.png">Save the diagram</button>
+          <button type="button" class="reset-puzzle">Reset</button>
+        </div>
+      </figure>
+
+      <section class="clue" id="clue6" hidden>
+        <h2>Clue 6</h2>
+        <p class="ask" id="q6">What is the result of the profit-maximising objective at this point for customers?</p>
+        <div class="opts" id="opts6" role="group" aria-labelledby="q6"></div>
+        <p class="feedback" id="feedback6" aria-live="polite"></p>
+      </section>
+
+      <figure class="diagram" id="diagram6" hidden>
+        <svg viewBox="0 0 760 440" role="img" aria-label="Price and output diagram. At the restricted output Qm the firm charges Pm, above average cost Acm. Customers pay more and buy less than at Qs.">
+          <line x1="78" y1="348" x2="78" y2="36" stroke="#1c1915" stroke-width="2.5" />
+          <polygon points="78,22 70,40 86,40" fill="#1c1915" />
+          <line x1="78" y1="348" x2="700" y2="348" stroke="#1c1915" stroke-width="2.5" />
+          <polygon points="716,348 696,340 696,356" fill="#1c1915" />
+          <text x="28" y="100" fill="#5c5348" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" text-anchor="middle" transform="rotate(-90 28 100)">Price</text>
+          <text x="668" y="400" fill="#5c5348" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif">Output</text>
+          <rect x="78" y="170" width="290" height="40" fill="#9a3412" fill-opacity="0.16" />
+          <path d="M220 69 C221.2 71.3 224.5 78.7 227 83 C229.5 87.3 232.5 91.2 235 95 C237.5 98.8 238.3 100.8 242 106 C245.7 111.2 252 119.8 257 126 C262 132.2 267 137.8 272 143 C277 148.2 282 152.5 287 157 C292 161.5 297.2 166 302 170 C306.8 174 311.2 177.5 316 181 C320.8 184.5 326 187.8 331 191 C336 194.2 341 197.3 346 200 C351 202.7 356 204.8 361 207 C366 209.2 371 211 376 213 C381 215 386.2 217.2 391 219 C395.8 220.8 400.2 222.5 405 224 C409.8 225.5 415 226.7 420 228 C425 229.3 430 231 435 232 C440 233 445 233.2 450 234 C455 234.8 460 236.2 465 237 C470 237.8 475.2 238.5 480 239 C484.8 239.5 489.2 239.7 494 240 C498.8 240.3 504 240.7 509 241 C514 241.3 517.8 242 524 242 C530.2 242 538.5 241.2 546 241 C553.5 240.8 561.5 241.3 569 241 C576.5 240.7 584.8 239.5 591 239 C597.2 238.5 601 238.5 606 238 C611 237.5 618.5 236.3 621 236" fill="none" stroke="#9a3412" stroke-width="3" stroke-linecap="round" />
+          <text x="632" y="228" fill="#9a3412" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">AC</text>
+          <path d="M130.8 128.5 C133.3 131.3 140.6 139.8 145.6 145.1 C150.5 150.4 155.6 155.5 160.5 160.4 C165.4 165.3 170.4 169.9 175.3 174.3 C180.2 178.7 185.2 183 190.2 187 C195.1 191 200.1 194.6 205 198.3 C209.9 202 214.8 205.6 219.8 208.9 C224.8 212.2 229.8 215.2 234.7 218.2 C239.6 221.2 244.6 224.1 249.5 226.9 C254.4 229.7 259.4 232.4 264.4 234.8 C269.3 237.2 274.3 239.3 279.2 241.5 C284.1 243.7 289 246.1 294 248.1 C299 250.1 304 251.6 308.9 253.4 C313.8 255.2 318.8 257.2 323.7 258.8 C328.6 260.4 333.7 261.5 338.6 262.8 C343.6 264.1 348.4 265.5 353.4 266.7 C358.3 267.9 363.4 269.1 368.3 270.1 C373.2 271.1 378.2 271.9 383.1 272.7 C388 273.5 390.5 273.8 397.9 274.7 C405.3 275.6 417.7 277.2 427.6 278 C437.5 278.8 447.4 279.2 457.3 279.4 C467.2 279.6 478.3 279.6 487 279.4 C495.7 279.2 501.9 278.4 509.3 278 C516.7 277.6 524.1 277.3 531.5 276.7 C538.9 276 547.6 274.9 553.8 274.1 C560 273.3 562.4 273 568.6 272.1 C574.8 271.2 584.7 269.7 590.9 268.7 C597.1 267.7 600.8 267 605.7 266.1 C610.7 265.2 618.1 263.8 620.6 263.4" fill="none" stroke="#9a3412" stroke-width="3" stroke-linecap="round" />
+          <text x="632" y="256" fill="#9a3412" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">MC</text>
+          <line x1="128" y1="58" x2="628" y2="292" stroke="#183a66" stroke-width="3" stroke-linecap="round" />
+          <line x1="128" y1="112" x2="392" y2="286" stroke="#183a66" stroke-width="3" stroke-linecap="round" />
+          <line x1="78" y1="170" x2="368" y2="170" stroke="#5c5348" stroke-width="2" stroke-dasharray="7 6" />
+          <line x1="78" y1="210" x2="368" y2="210" stroke="#5c5348" stroke-width="2" stroke-dasharray="7 6" />
+          <line x1="78" y1="270" x2="368" y2="270" stroke="#5c5348" stroke-width="2" stroke-dasharray="7 6" />
+          <line x1="368" y1="170" x2="368" y2="348" stroke="#5c5348" stroke-width="2" stroke-dasharray="7 6" />
+          <circle cx="368" cy="170" r="7" fill="#9a3412" />
+          <circle cx="368" cy="270" r="7" fill="#9f1239" />
+          <line x1="418" y1="148" x2="380" y2="164" stroke="#1c1915" stroke-width="2" />
+          <polygon points="380,164 394,156 386,148" fill="#1c1915" />
+          <text x="428" y="118" fill="#1c1915" font-size="16" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">Profit maximising at</text>
+          <text x="428" y="140" fill="#1c1915" font-size="16" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">restricted output</text>
+          <text x="70" y="176" fill="#1c1915" font-size="18" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="end">P<tspan font-size="12" dy="5">m</tspan></text>
+          <text x="70" y="216" fill="#1c1915" font-size="18" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="end">Ac<tspan font-size="12" dy="5">m</tspan></text>
+          <text x="70" y="276" fill="#1c1915" font-size="18" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="end">P<tspan font-size="12" dy="5">s</tspan></text>
+          <text x="368" y="392" fill="#1c1915" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="middle">Q<tspan font-size="14" dy="6">m</tspan></text>
+          <text x="581" y="392" fill="#1c1915" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="middle">Q<tspan font-size="14" dy="6">s</tspan></text>
+          <text x="404" y="298" fill="#183a66" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">MR</text>
+          <text x="640" y="286" fill="#183a66" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">D (AR)</text>
+        </svg>
+        <figcaption>
+          <p>At the restricted output Qm the firm charges Pm, above average cost Acm. Customers pay that higher price and buy less than they would at Qs.</p>
+        </figcaption>
+        <div class="diagram-tools">
+          <button type="button" class="save-diagram" data-file="natural-monopoly-customer-price.png">Save the diagram</button>
+          <button type="button" class="reset-puzzle">Reset</button>
+        </div>
+      </figure>
+
+      <section class="clue" id="clue7" hidden>
+        <h2>Clue 7</h2>
+        <p class="ask" id="q7">Restricted output from a natural monopoly leads to allocative inefficiency, higher prices, lower output, and deadweight loss. The government sees this as:</p>
+        <div class="opts" id="opts7" role="group" aria-labelledby="q7"></div>
+        <p class="feedback" id="feedback7" aria-live="polite"></p>
+      </section>
+
+      <section class="clue" id="clue8" hidden>
+        <h2>Clue 8</h2>
+        <p class="ask" id="q8">Subsidy is the favourite reaction by government to restricted output in a natural monopoly because:</p>
+        <div class="opts" id="opts8" role="group" aria-labelledby="q8"></div>
+        <p class="feedback" id="feedback8" aria-live="polite"></p>
+      </section>
+
+      <figure class="diagram" id="diagram5" hidden>
+        <svg viewBox="0 0 760 420" role="img" aria-label="Price and output diagram. A subsidy holds price at Ps and raises output from Qm, where marginal revenue meets marginal cost, to Qs, where price equals marginal cost.">
+          <line x1="78" y1="348" x2="78" y2="36" stroke="#1c1915" stroke-width="2.5" />
+          <polygon points="78,22 70,40 86,40" fill="#1c1915" />
+          <line x1="78" y1="348" x2="700" y2="348" stroke="#1c1915" stroke-width="2.5" />
+          <polygon points="716,348 696,340 696,356" fill="#1c1915" />
+          <text x="46" y="168" fill="#5c5348" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" text-anchor="middle" transform="rotate(-90 46 168)">Price</text>
+          <text x="668" y="386" fill="#5c5348" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif">Output</text>
+          <path d="M220 69 C221.2 71.3 224.5 78.7 227 83 C229.5 87.3 232.5 91.2 235 95 C237.5 98.8 238.3 100.8 242 106 C245.7 111.2 252 119.8 257 126 C262 132.2 267 137.8 272 143 C277 148.2 282 152.5 287 157 C292 161.5 297.2 166 302 170 C306.8 174 311.2 177.5 316 181 C320.8 184.5 326 187.8 331 191 C336 194.2 341 197.3 346 200 C351 202.7 356 204.8 361 207 C366 209.2 371 211 376 213 C381 215 386.2 217.2 391 219 C395.8 220.8 400.2 222.5 405 224 C409.8 225.5 415 226.7 420 228 C425 229.3 430 231 435 232 C440 233 445 233.2 450 234 C455 234.8 460 236.2 465 237 C470 237.8 475.2 238.5 480 239 C484.8 239.5 489.2 239.7 494 240 C498.8 240.3 504 240.7 509 241 C514 241.3 517.8 242 524 242 C530.2 242 538.5 241.2 546 241 C553.5 240.8 561.5 241.3 569 241 C576.5 240.7 584.8 239.5 591 239 C597.2 238.5 601 238.5 606 238 C611 237.5 618.5 236.3 621 236" fill="none" stroke="#9a3412" stroke-width="3" stroke-linecap="round" />
+          <text x="632" y="228" fill="#9a3412" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">AC</text>
+          <path d="M130.8 128.5 C133.3 131.3 140.6 139.8 145.6 145.1 C150.5 150.4 155.6 155.5 160.5 160.4 C165.4 165.3 170.4 169.9 175.3 174.3 C180.2 178.7 185.2 183 190.2 187 C195.1 191 200.1 194.6 205 198.3 C209.9 202 214.8 205.6 219.8 208.9 C224.8 212.2 229.8 215.2 234.7 218.2 C239.6 221.2 244.6 224.1 249.5 226.9 C254.4 229.7 259.4 232.4 264.4 234.8 C269.3 237.2 274.3 239.3 279.2 241.5 C284.1 243.7 289 246.1 294 248.1 C299 250.1 304 251.6 308.9 253.4 C313.8 255.2 318.8 257.2 323.7 258.8 C328.6 260.4 333.7 261.5 338.6 262.8 C343.6 264.1 348.4 265.5 353.4 266.7 C358.3 267.9 363.4 269.1 368.3 270.1 C373.2 271.1 378.2 271.9 383.1 272.7 C388 273.5 390.5 273.8 397.9 274.7 C405.3 275.6 417.7 277.2 427.6 278 C437.5 278.8 447.4 279.2 457.3 279.4 C467.2 279.6 478.3 279.6 487 279.4 C495.7 279.2 501.9 278.4 509.3 278 C516.7 277.6 524.1 277.3 531.5 276.7 C538.9 276 547.6 274.9 553.8 274.1 C560 273.3 562.4 273 568.6 272.1 C574.8 271.2 584.7 269.7 590.9 268.7 C597.1 267.7 600.8 267 605.7 266.1 C610.7 265.2 618.1 263.8 620.6 263.4" fill="none" stroke="#9a3412" stroke-width="3" stroke-linecap="round" />
+          <text x="632" y="256" fill="#9a3412" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">MC</text>
+          <line x1="128" y1="58" x2="628" y2="292" stroke="#183a66" stroke-width="3" stroke-linecap="round" />
+          <line x1="128" y1="112" x2="392" y2="286" stroke="#183a66" stroke-width="3" stroke-linecap="round" />
+          <line x1="78" y1="270" x2="581" y2="270" stroke="#5c5348" stroke-width="2" stroke-dasharray="7 6" />
+          <line x1="368" y1="270" x2="368" y2="348" stroke="#5c5348" stroke-width="2" stroke-dasharray="7 6" />
+          <line x1="581" y1="270" x2="581" y2="348" stroke="#5c5348" stroke-width="2" stroke-dasharray="7 6" />
+          <circle cx="368" cy="270" r="7" fill="#9f1239" />
+          <circle cx="581" cy="270" r="7" fill="#183a66" />
+          <text x="70" y="276" fill="#1c1915" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="end">P<tspan font-size="14" dy="6">s</tspan></text>
+          <text x="368" y="378" fill="#1c1915" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="middle">Q<tspan font-size="14" dy="6">m</tspan></text>
+          <text x="581" y="378" fill="#1c1915" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="middle">Q<tspan font-size="14" dy="6">s</tspan></text>
+          <text x="404" y="298" fill="#183a66" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">MR</text>
+          <text x="640" y="286" fill="#183a66" font-size="22" font-family="system-ui, Segoe UI, Arial, sans-serif" font-weight="700">D (AR)</text>
+        </svg>
+        <figcaption>
+          <p>The subsidy holds the price at Ps and raises output from Qm to Qs. At Qs, price equals marginal cost, so the outcome is allocatively efficient and the firm can still cover its costs.</p>
+        </figcaption>
+        <div class="diagram-tools">
+          <button type="button" class="save-diagram" data-file="natural-monopoly-subsidy.png">Save the diagram</button>
+          <button type="button" class="reset-puzzle">Reset</button>
+        </div>
+      </figure>
+    </article>
+  </div>
+  <script>
+    var choices = [
+      {
+        id: "diff",
+        text: "A natural monopoly has market power because of product differentiation.",
+        correct: false,
+        why: "Product differentiation gives market power in monopolistic competition, and it can be used as a strategic barrier. A natural monopoly’s market power comes from its cost structure."
+      },
+      {
+        id: "cost",
+        text: "A natural monopoly has market power because of its cost structure.",
+        correct: true,
+        why: "High fixed costs and falling average cost mean one firm can supply the market more cheaply than two. That firm faces the market demand curve, so demand and marginal revenue slope down."
+      },
+      {
+        id: "patent",
+        text: "A natural monopoly has market power because the government has granted it a patent.",
+        correct: false,
+        why: "A patent is a legal barrier. It can create a monopoly, but it does not make that monopoly natural. A natural monopoly’s market power comes from its cost structure."
+      },
+      {
+        id: "raw",
+        text: "A natural monopoly has market power because it controls a scarce raw material.",
+        correct: false,
+        why: "Control of a scarce raw material is a different barrier to entry. A natural monopoly’s market power comes from its cost structure: one firm can supply the market at a lower average cost than two."
+      }
+    ];
+
+    var choices2 = [
+      {
+        id: "diminish",
+        text: "Because diminishing returns set in early, so average cost rises over most of the market.",
+        correct: false,
+        why: "That is why average cost is U-shaped in monopolistic competition. In a natural monopoly, economies of scale continue across the market, so average cost is still falling where the market buys."
+      },
+      {
+        id: "scale",
+        text: "Because huge fixed costs and economies of scale make average cost fall over the whole market.",
+        correct: true,
+        why: "The fixed cost of the network is spread over more output, and economies of scale continue across market demand. Average cost keeps falling over the outputs the market will buy."
+      },
+      {
+        id: "brand",
+        text: "Because product differentiation makes it cost more to win each extra customer, so average cost slopes up.",
+        correct: false,
+        why: "Product differentiation is a feature of monopolistic competition. It is not what shapes average cost for a natural monopoly. Huge fixed costs and economies of scale make average cost fall over the market."
+      },
+      {
+        id: "flat",
+        text: "Because a natural monopoly has no fixed costs, so average cost stays the same at every output.",
+        correct: false,
+        why: "A natural monopoly has very high fixed costs. Spreading those costs over more output is what pulls average cost down across the market."
+      }
+    ];
+
+    var choices3 = [
+      {
+        id: "cut",
+        text: "Because diminishing returns set in, so marginal cost rises and cuts AC at its lowest point.",
+        correct: false,
+        why: "That is the usual U-shaped cost diagram. In a natural monopoly, economies of scale persist, so AC keeps falling and marginal cost does not rise far enough to cross it."
+      },
+      {
+        id: "persist",
+        text: "Because economies of scale persist across the entire output range, keeping AC falling and preventing MC from ever rising enough to meet it.",
+        correct: true,
+        why: "Economies of scale continue across the market, so average cost is still falling. Marginal cost stays below average cost. It can turn up, but it does not rise far enough to meet AC."
+      },
+      {
+        id: "same",
+        text: "Because a natural monopoly has no fixed costs, so marginal cost and average cost are the same line.",
+        correct: false,
+        why: "A natural monopoly has very high fixed costs. Marginal cost lies below average cost while those fixed costs are still being spread over more output."
+      },
+      {
+        id: "brandmc",
+        text: "Because product differentiation keeps marginal cost below average cost at every output.",
+        correct: false,
+        why: "Product differentiation is a feature of monopolistic competition. Economies of scale keep AC falling, so marginal cost does not rise far enough to meet it."
+      }
+    ];
+
+    var choices4 = [
+      {
+        id: "sales",
+        text: "Sales maximisation",
+        correct: false,
+        why: "Selling the largest possible output would mean producing well past the point where marginal revenue equals marginal cost. Huge fixed costs do not push the firm to do that. The likely objective is profit maximisation."
+      },
+      {
+        id: "profit",
+        text: "Profit maximisation",
+        correct: true,
+        why: "The firm can cover its huge fixed costs and still add profit on each extra unit while marginal revenue is above its tiny marginal cost. It stops where MR equals MC. That objective is profit maximisation."
+      },
+      {
+        id: "revenue",
+        text: "Revenue maximisation",
+        correct: false,
+        why: "Revenue is highest where marginal revenue is zero. Tiny marginal costs do not make that the firm’s objective. It still stops where MR equals MC, which is profit maximisation."
+      },
+      {
+        id: "alloc",
+        text: "Allocative efficiency",
+        correct: false,
+        why: "Price equal to marginal cost would be allocatively efficient, and with tiny marginal costs that output would be high. The firm is likely to follow profit maximisation instead."
+      }
+    ];
+
+    var choices5 = [
+      {
+        id: "acut",
+        text: "Because marginal cost cuts average cost at a low output, so the firm stops producing there.",
+        correct: false,
+        why: "Marginal cost stays below average cost in a natural monopoly. The firm does not stop where those curves meet. It stops where MR meets MC, and that quantity is low."
+      },
+      {
+        id: "lowq",
+        text: "MR hits MC at a low quantity, so profit maximisation forces restricted output.",
+        correct: true,
+        why: "Marginal revenue falls and meets marginal cost while output is still low. Profit maximisation means stopping at that quantity, so output is restricted."
+      },
+      {
+        id: "pmc",
+        text: "Because the firm sets price equal to marginal cost, and that quantity is small.",
+        correct: false,
+        why: "Setting price equal to marginal cost would mean a higher output, further along the demand curve. Profit maximisation stops earlier, where MR meets MC."
+      },
+      {
+        id: "cannot",
+        text: "Because huge fixed costs make any output above that quantity impossible.",
+        correct: false,
+        why: "The firm can produce more. Profit maximisation stops at a low quantity because that is where MR meets MC, not because a higher output is impossible."
+      }
+    ];
+
+    var choices6 = [
+      {
+        id: "efficient",
+        text: "Customers pay a price equal to marginal cost, so they can buy the higher quantity Qs.",
+        correct: false,
+        why: "Price equal to marginal cost would be the higher output Qs. Profit maximisation stops at Qm and charges Pm, so customers pay more and consume less."
+      },
+      {
+        id: "customers",
+        text: "Profit maximisation results in restricted output, and that restricted output is the reason customers face higher prices and lower consumption in a natural monopoly.",
+        correct: true,
+        why: "The firm stops at Qm, where MR meets MC, and charges Pm on the demand curve. That price is above marginal cost and above average cost, so customers pay more and consume less than at Qs."
+      },
+      {
+        id: "passed",
+        text: "Customers face lower prices because the tiny marginal costs are passed on in full.",
+        correct: false,
+        why: "Tiny marginal costs are not passed on as a low price. The price is read from the demand curve at Qm, which is Pm, above both marginal cost and average cost."
+      },
+      {
+        id: "salesmax",
+        text: "Customers buy more because the firm maximises sales rather than profit.",
+        correct: false,
+        why: "The firm is not maximising sales. It maximises profit at Qm, so customers face a higher price and lower consumption."
+      }
+    ];
+
+    var choices7 = [
+      {
+        id: "externality",
+        text: "A negative externality",
+        correct: false,
+        why: "A negative externality is a cost imposed on third parties, such as pollution. Restricted output from a natural monopoly is not that. The government sees it as market failure."
+      },
+      {
+        id: "failure",
+        text: "Market failure",
+        correct: true,
+        why: "Price is above marginal cost, too little is produced, and there is a deadweight loss. The government sees that restricted output as market failure."
+      },
+      {
+        id: "govfail",
+        text: "Government failure",
+        correct: false,
+        why: "Government failure is when intervention itself makes the outcome worse. This restricted output comes from the firm. The government sees the problem as market failure."
+      },
+      {
+        id: "public",
+        text: "A public good",
+        correct: false,
+        why: "A public good is non-rival and non-excludable. That is not what this restricted output describes. The government sees it as market failure."
+      }
+    ];
+
+    var choices8 = [
+      {
+        id: "back",
+        text: "It moves output back to Qm, where marginal revenue equals marginal cost.",
+        correct: false,
+        why: "Qm is the profit-maximising output the firm already chooses. A subsidy is used to move output beyond Qm, to where price equals marginal cost."
+      },
+      {
+        id: "subsidy",
+        text: "It allows the government to achieve allocative efficiency (P = MC) while keeping the firm solvent and avoiding full nationalisation.",
+        correct: true,
+        why: "The subsidy covers the loss when price is set equal to marginal cost. Output rises from Qm to Qs, the firm can still cover its costs, and the industry stays in private hands."
+      },
+      {
+        id: "national",
+        text: "It nationalises the firm, so the government no longer needs the private monopoly.",
+        correct: false,
+        why: "Nationalisation would mean the government owns the firm. A subsidy is used instead, so the firm stays private while output rises to where price equals marginal cost."
+      },
+      {
+        id: "raise",
+        text: "It raises the price above Ps, which removes the allocative inefficiency.",
+        correct: false,
+        why: "A higher price would move the firm further from price equals marginal cost. The subsidy holds the price at Ps and raises output to Qs, where price equals marginal cost."
+      }
+    ];
+
+    function shuffle(list) {
+      var order = list.slice();
+      for (var i = order.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var swap = order[i];
+        order[i] = order[j];
+        order[j] = swap;
+      }
+      return order;
+    }
+
+    function mountChoices(list, box, note, onCorrect) {
+      shuffle(list).forEach(function (choice) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "choice";
+        btn.textContent = choice.text;
+        btn.addEventListener("click", function () {
+          if (choice.correct) {
+            Array.prototype.forEach.call(box.querySelectorAll("button"), function (b) { b.disabled = true; });
+            btn.classList.add("ok");
+            note.className = "feedback ok";
+            note.textContent = choice.why;
+            onCorrect();
+            return;
+          }
+          btn.classList.add("bad");
+          btn.disabled = true;
+          note.className = "feedback bad";
+          note.textContent = choice.why;
+        });
+        box.appendChild(btn);
+      });
+    }
+
+    mountChoices(choices, document.getElementById("opts"), document.getElementById("feedback"), function () {
+      document.getElementById("diagram1").hidden = false;
+      document.getElementById("clue2").hidden = false;
+    });
+    mountChoices(choices2, document.getElementById("opts2"), document.getElementById("feedback2"), function () {
+      document.getElementById("diagram2").hidden = false;
+      document.getElementById("clue3").hidden = false;
+    });
+    mountChoices(choices3, document.getElementById("opts3"), document.getElementById("feedback3"), function () {
+      document.getElementById("diagram3").hidden = false;
+      document.getElementById("clue4").hidden = false;
+    });
+    mountChoices(choices4, document.getElementById("opts4"), document.getElementById("feedback4"), function () {
+      document.getElementById("clue5").hidden = false;
+    });
+    mountChoices(choices5, document.getElementById("opts5"), document.getElementById("feedback5"), function () {
+      document.getElementById("diagram4").hidden = false;
+      document.getElementById("clue6").hidden = false;
+    });
+    mountChoices(choices6, document.getElementById("opts6"), document.getElementById("feedback6"), function () {
+      document.getElementById("diagram6").hidden = false;
+      document.getElementById("clue7").hidden = false;
+    });
+    mountChoices(choices7, document.getElementById("opts7"), document.getElementById("feedback7"), function () {
+      document.getElementById("clue8").hidden = false;
+    });
+    mountChoices(choices8, document.getElementById("opts8"), document.getElementById("feedback8"), function () {
+      document.getElementById("diagram5").hidden = false;
+    });
+
+    function downloadFile(blob, name) {
+      var link = document.createElement("a");
+      var url = URL.createObjectURL(blob);
+      link.href = url;
+      link.download = name;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    }
+
+    function saveDiagram(svg, name) {
+      var box = svg.viewBox.baseVal;
+      var w = box && box.width ? box.width : 760;
+      var h = box && box.height ? box.height : 420;
+      var clone = svg.cloneNode(true);
+      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      clone.setAttribute("width", String(w));
+      clone.setAttribute("height", String(h));
+      var xml = new XMLSerializer().serializeToString(clone);
+      var svgBlob = new Blob([xml], { type: "image/svg+xml;charset=utf-8" });
+      var url = URL.createObjectURL(svgBlob);
+      var image = new Image();
+      image.onload = function () {
+        var scale = 2;
+        var canvas = document.createElement("canvas");
+        canvas.width = w * scale;
+        canvas.height = h * scale;
+        var ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        canvas.toBlob(function (png) {
+          if (png) downloadFile(png, name);
+          else downloadFile(svgBlob, name.replace(/\.png$/, ".svg"));
+        }, "image/png");
+      };
+      image.onerror = function () {
+        URL.revokeObjectURL(url);
+        downloadFile(svgBlob, name.replace(/\.png$/, ".svg"));
+      };
+      image.src = url;
+    }
+
+    function resetPuzzle() {
+      Array.prototype.forEach.call(document.querySelectorAll(".diagram, .clue"), function (el) {
+        el.hidden = true;
+      });
+      Array.prototype.forEach.call(document.querySelectorAll(".feedback"), function (el) {
+        el.textContent = "";
+        el.className = "feedback";
+      });
+      Array.prototype.forEach.call(document.querySelectorAll("button.choice"), function (btn) {
+        btn.disabled = false;
+        btn.classList.remove("ok");
+        btn.classList.remove("bad");
+      });
+      window.scrollTo(0, 0);
+    }
+
+    document.querySelector(".topic").addEventListener("click", function (event) {
+      var save = event.target.closest(".save-diagram");
+      if (save) {
+        var figure = save.closest("figure");
+        saveDiagram(figure.querySelector("svg"), save.getAttribute("data-file") || "natural-monopoly.png");
+        return;
+      }
+      if (event.target.closest(".reset-puzzle")) resetPuzzle();
+    });
+  </script>
+</body>
+</html>

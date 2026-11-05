@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cross elasticity of demand — diagram builder</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #f0dce2;
+      --paper: #fef7f9;
+      --card: #fffaf3;
+      --formula: #f8e8ec;
+      --accent: #9a3412;
+      --accent-soft: #f8e8ec;
+      --demand: #183a66;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Financier Text", Georgia, "Palatino Linotype", Palatino, serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .book { max-width: 860px; margin: 0 auto; padding: 20px 16px 72px; }
+
+    /* Copy #xed-builder when embedding in a word cloud */
+    #xed-builder {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 22px 24px;
+      margin-top: 12px;
+    }
+    #xed-builder h3 {
+      margin: 0 0 8px;
+      font-family: "Financier Display", Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    #xed-builder h4, #xed-builder h5 {
+      font-family: "Financier Display", Georgia, "Palatino Linotype", Palatino, serif;
+      letter-spacing: -0.02em;
+    }
+    #xed-builder .xed-intro {
+      background: #f3e2d4;
+      border: 1px solid #e4b8c4;
+      border-radius: 10px;
+      padding: 16px 18px 14px;
+      margin: 0;
+    }
+    #xed-builder .xed-intro h3 { margin: 0 0 8px; }
+    #xed-builder .xed-lead { margin: 0; color: var(--ink); font-size: 1.05rem; }
+    #xed-builder .xed-choose {
+      margin: 1.5em 0 1em;
+      font-weight: 700;
+      color: var(--ink);
+      font-size: 1.05rem;
+    }
+    #xed-builder .xed-steps { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+    #xed-builder .xed-step {
+      font-size: 0.86rem; font-weight: 700; padding: 6px 10px; border-radius: 8px;
+      background: var(--card); border: 1px solid #e4b8c4; color: var(--accent);
+    }
+    #xed-builder .xed-step.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+    #xed-builder .xed-step.done { background: var(--accent-soft); color: var(--accent); border-color: #e4b8c4; }
+    #xed-builder label { display: block; margin: 10px 0 4px; font-size: 0.92rem; font-weight: 700; }
+    #xed-builder .xed-hint { font-weight: 500; color: var(--muted); }
+    #xed-builder .xed-cat { margin: 8px 0 4px; }
+    #xed-builder #xed-productGroup {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 28px;
+      align-items: start;
+    }
+    #xed-builder #xed-productGroup .btn-group {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    #xed-builder #xed-productGroup .btn-group button { text-align: left; }
+    @media (max-width: 640px) {
+      #xed-builder #xed-productGroup { grid-template-columns: 1fr; }
+    }
+    #xed-builder .xed-cat-title {
+      margin: 0 0 6px; font-size: 0.98rem; font-weight: 700; color: var(--accent);
+      font-family: "Financier Display", Georgia, "Palatino Linotype", Palatino, serif;
+    }
+    #xed-builder .xed-pct-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    #xed-builder .xed-pct-lead {
+      margin: 0;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--ink);
+    }
+    #xed-builder .btn-group { display: flex; flex-wrap: wrap; gap: 6px; }
+    #xed-builder .btn-group button {
+      font-family: inherit; cursor: pointer;
+      background: var(--card); color: var(--accent); border: 1px solid #e4b8c4;
+      border-radius: 8px; padding: 8px 10px; font-size: 0.92rem; font-weight: 700;
+    }
+    #xed-builder .btn-group button.chosen {
+      background: var(--accent); color: #fff; border-color: var(--accent); outline: none;
+    }
+    #xed-builder button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    #xed-builder .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    #xed-builder .primary, #xed-builder .secondary, #xed-builder .reset {
+      font-family: inherit; cursor: pointer; border-radius: 8px; padding: 8px 12px;
+      font-size: 0.95rem; font-weight: 700;
+    }
+    #xed-builder .primary { background: var(--accent); color: #fff; border: 0; }
+    #xed-builder .primary:disabled { opacity: 0.45; cursor: not-allowed; }
+    #xed-builder .secondary, #xed-builder .reset {
+      background: var(--card); color: var(--accent); border: 1px solid #e4b8c4;
+    }
+    #xed-builder .secondary:hover, #xed-builder .reset:hover,
+    #xed-builder .btn-group button:hover { background: var(--accent-soft); }
+    #xed-builder .btn-group button.chosen:hover,
+    #xed-builder .primary:hover { background: var(--accent); color: #fff; }
+    #xed-builder .xed-error { color: var(--accent); min-height: 1.2em; margin: 8px 0 0; font-size: 0.92rem; font-weight: 700; }
+    #xed-builder .xed-result {
+      margin-top: 12px; background: var(--formula); border: 1px solid #e4b8c4;
+      border-radius: 8px; padding: 12px 16px; font-size: 0.95rem;
+    }
+    #xed-builder .xed-result p { margin: 0 0 8px; }
+    #xed-builder .xed-result p:last-child { margin-bottom: 0; }
+    #xed-builder .xed-fig { margin-top: 12px; }
+    #xed-builder .xed-shift-note {
+      margin: 0 0 10px; font-size: 0.95rem; color: var(--ink); line-height: 1.5;
+    }
+    #xed-builder .xed-shift-note p { margin: 0 0 8px; }
+    #xed-builder .xed-shift-note p:last-child { margin-bottom: 0; }
+    #xed-builder .xed-fig canvas {
+      display: block; width: 100%; height: auto; background: #fff;
+      border: 1px solid var(--line); border-radius: 10px;
+    }
+    #xed-builder .xed-caption { margin: 6px 0 0; font-size: 0.92rem; color: var(--muted); }
+    #xed-builder .xed-save-row { margin: 10px 0 0; }
+    #xed-builder .xed-save {
+      font-family: inherit; cursor: pointer; border-radius: 8px; padding: 8px 12px;
+      font-size: 0.95rem; font-weight: 700;
+      background: var(--card); color: var(--accent); border: 1px solid #e4b8c4;
+    }
+    #xed-builder .xed-save:disabled { opacity: 0.45; cursor: not-allowed; }
+    #xed-builder .xed-save:hover:not(:disabled) { background: var(--accent-soft); }
+    #xed-builder .xed-caption.xed-explain { font-weight: 700; color: var(--ink); }
+    #xed-builder .xed-factors {
+      margin-top: 12px; background: var(--formula); border: 1px solid #e4b8c4;
+      border-radius: 8px; padding: 12px 16px; font-size: 0.95rem;
+    }
+    #xed-builder .xed-factors h4 { margin: 10px 0 4px; font-size: 1.05rem; color: var(--accent); }
+    #xed-builder .xed-factors h4:first-child { margin-top: 0; }
+    #xed-builder .xed-factors p { margin: 0 0 8px; color: var(--muted); font-size: 0.95rem; }
+    #xed-builder .xed-factors .xed-factor-lead { color: var(--ink); font-size: 0.95rem; }
+    #xed-builder .xed-factors ul { margin: 0 0 10px; padding-left: 1.2em; }
+    #xed-builder .xed-factors li { margin: 4px 0; }
+    #xed-builder .xed-factors li ul { margin: 4px 0 6px; }
+    #xed-builder .xed-factors li li { margin: 2px 0; }
+    #xed-builder .xed-factors h5 { margin: 6px 0 4px; font-size: 0.98rem; color: var(--ink); }
+  </style>
+  <link rel="stylesheet" href="../../diagram-economist.css" />
+</head>
+<body>
+  <div class="book">
+    <div id="xed-builder">
+      <header class="xed-intro">
+        <h3>Cross elasticity of demand</h3>
+        <p class="meta"><a href="../../micro-diagrams.html">Back to interactive games</a></p>
+        <p class="xed-lead">XED = %ΔQ<sub>A</sub> ÷ %ΔP<sub>B</sub>. Cross elasticity of demand (XED) measures how much the quantity demanded of one good changes when the price of another good changes. It tells you whether two goods are substitutes, complements, or unrelated, and how strongly they are connected.</p>
+      </header>
+      <p class="xed-choose">Choose two products that are either substitutes or complements for each other.</p>
+      <div class="xed-steps" aria-hidden="true">
+        <span class="xed-step on" data-step="1">Step 1 Pair of goods</span>
+        <span class="xed-step" data-step="2">Step 2 Price of B</span>
+        <span class="xed-step" data-step="3">Step 3 Quantity of A</span>
+        <span class="xed-step" data-step="4">Step 4 Change in P<sub>B</sub></span>
+        <span class="xed-step" data-step="5">5 Calculate</span>
+      </div>
+
+      <label>Step 1. Pair of goods <span class="xed-hint" id="xed-prod-hint">(A = quantity we track; B = the other good whose price changes)</span></label>
+      <div id="xed-productGroup">
+        <div class="xed-cat">
+          <p class="xed-cat-title">Substitutes</p>
+          <div class="btn-group">
+            <button type="button" class="x-but" data-eps="0.80" data-a="Butter" data-b="margarine" data-unit="per tub of margarine" data-prices="1.20,1.60,2.00" data-q-unit="tubs of butter per month" data-qtys="2,4,6">A Butter / B Margarine</button>
+            <button type="button" class="x-cola" data-eps="0.70" data-a="Cola" data-b="Pepsi" data-unit="per can of Pepsi" data-prices="0.80,1.10,1.40" data-q-unit="cans of cola per week" data-qtys="6,10,14">A Cola / B Pepsi</button>
+            <button type="button" class="x-bus" data-eps="0.50" data-a="Bus travel" data-b="train tickets" data-unit="per train journey" data-prices="8,12,16" data-q-unit="bus journeys per month" data-qtys="8,16,24">A Bus travel / B Train tickets</button>
+            <button type="button" class="x-tea" data-eps="0.40" data-a="Tea" data-b="coffee" data-unit="per jar of coffee" data-prices="3.00,4.50,6.00" data-q-unit="boxes of tea per month" data-qtys="2,4,6">A Tea / B Coffee</button>
+            <button type="button" class="x-phone" data-eps="0.60" data-a="Android phones" data-b="iPhones" data-unit="per iPhone" data-prices="400,800,1200" data-q-unit="Android phones per year" data-qtys="1,2,3">A Android phones / B iPhones</button>
+          </div>
+        </div>
+        <div class="xed-cat">
+          <p class="xed-cat-title">Complements</p>
+          <div class="btn-group">
+            <button type="button" class="x-car" data-eps="-0.50" data-a="Petrol cars" data-b="petrol" data-unit="per litre of petrol" data-prices="1.35,1.45,1.55" data-q-unit="car journeys per week" data-qtys="8,14,20">A Petrol cars / B Petrol</button>
+            <button type="button" class="x-print" data-eps="-0.80" data-a="Printers" data-b="ink cartridges" data-unit="per ink cartridge" data-prices="12,18,24" data-q-unit="printers bought per year" data-qtys="1,2,3">A Printers / B Ink cartridges</button>
+            <button type="button" class="x-console" data-eps="-0.70" data-a="Games consoles" data-b="video games" data-unit="per game" data-prices="40,50,70" data-q-unit="consoles per 5 years" data-qtys="1,2,3">A Games consoles / B Video games</button>
+            <button type="button" class="x-berry" data-eps="-0.40" data-a="Strawberries" data-b="cream" data-unit="per pot of cream" data-prices="1.00,1.40,1.80" data-q-unit="punnets per month" data-qtys="2,4,6">A Strawberries / B Cream</button>
+            <button type="button" class="x-game" data-eps="-0.30" data-a="Smartphones" data-b="mobile apps" data-unit="per paid app" data-prices="2,5,10" data-q-unit="phones per year" data-qtys="1,2,3">A Smartphones / B Mobile apps</button>
+          </div>
+        </div>
+      </div>
+
+      <label>Step 2. Initial price of good B, P<sub>B1</sub> <span class="xed-hint" id="xed-pb-hint">(£ — choose a pair first)</span></label>
+      <div class="btn-group" id="xed-pbGroup"></div>
+
+      <label>Step 3. Initial quantity of good A demanded, Q<sub>A1</sub> <span class="xed-hint" id="xed-qa-hint">(choose a pair first)</span></label>
+      <div class="btn-group" id="xed-qaGroup"></div>
+
+      <label>Step 4. Change in the price of good B (this sets P<sub>B2</sub>)</label>
+      <div id="xed-pb2Group">
+        <div class="xed-pct-row">
+          <p class="xed-pct-lead">Increase in price of <span id="xed-b-up">good B</span> by.</p>
+          <div class="btn-group">
+            <button type="button" class="up-btn" data-pct="0.05">+5%</button>
+            <button type="button" class="up-btn" data-pct="0.10">+10%</button>
+            <button type="button" class="up-btn" data-pct="0.15">+15%</button>
+            <button type="button" class="up-btn" data-pct="0.20">+20%</button>
+          </div>
+        </div>
+        <div class="xed-pct-row">
+          <p class="xed-pct-lead">Decrease in price of <span id="xed-b-down">good B</span> by.</p>
+          <div class="btn-group">
+            <button type="button" class="down-btn" data-pct="-0.05">−5%</button>
+            <button type="button" class="down-btn" data-pct="-0.10">−10%</button>
+            <button type="button" class="down-btn" data-pct="-0.15">−15%</button>
+            <button type="button" class="down-btn" data-pct="-0.20">−20%</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button type="button" class="primary" id="xed-calc">Calculate XED</button>
+        <button type="button" class="secondary" id="xed-working" hidden>Show exam working</button>
+        <button type="button" class="reset" id="xed-reset">Reset</button>
+      </div>
+      <p class="xed-error" id="xed-error" role="status"></p>
+      <div class="xed-result" id="xed-output" hidden></div>
+      <div class="xed-fig">
+        <div class="xed-shift-note" id="xed-shift-note" hidden>
+          <p>A movement along a demand curve happens only when the good’s own price changes.</p>
+          <p>Here, the price of good A stays the same — it’s the price of good B that changes.</p>
+          <p>So consumers aren’t reacting to A becoming cheaper or dearer; they’re reacting to B becoming more expensive. That’s an external factor, which causes a shift of the entire demand curve.</p>
+        </div>
+        <canvas id="xed-diagram" width="700" height="440" aria-label="Demand for good A shifting when the price of good B changes."></canvas>
+        <p class="xed-caption" id="xed-caption">The diagram appears once all four choices are made.</p>
+        <p class="xed-save-row"><button type="button" class="xed-save" id="xed-save" disabled>Save diagram</button></p>
+      </div>
+      <div class="xed-factors" id="xed-factors" hidden></div>
+    </div>
+  </div>
+
+  <script>
+    function initXedBuilder() {
+      const root = document.getElementById("xed-builder");
+      if (!root || root.getAttribute("data-ready") === "1") return;
+      root.setAttribute("data-ready", "1");
+
+      const state = {
+        eps: null, a: "", b: "", PB1: null, QA1: null, PB2: null, PB2pct: null,
+        qUnit: "", pbUnit: "", diagram: null, results: null
+      };
+      const fmt = function (n) { return Number(n).toFixed(2); };
+      const abs = function (n) { return Math.abs(n); };
+      const picked = function (n) { return n !== null && n !== undefined && isFinite(n); };
+      function moneyLabel(n) {
+        if (Math.abs(n - Math.round(n)) < 0.001) return String(Math.round(n));
+        return Number(n).toFixed(2);
+      }
+      function setChosen(group, btn) {
+        group.querySelectorAll("button").forEach(function (b) { b.classList.remove("chosen"); });
+        if (btn) btn.classList.add("chosen");
+      }
+      function setError(text) {
+        document.getElementById("xed-error").textContent = text || "";
+      }
+      function fillButtons(groupId, attr, css, values, labels) {
+        const group = document.getElementById(groupId);
+        group.innerHTML = "";
+        values.forEach(function (v, i) {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = css;
+          b.setAttribute(attr, String(v));
+          b.textContent = labels[i];
+          group.appendChild(b);
+        });
+      }
+      function setPairButtons(productBtn) {
+        const pbHint = document.getElementById("xed-pb-hint");
+        const qaHint = document.getElementById("xed-qa-hint");
+        state.PB1 = null;
+        state.QA1 = null;
+        document.getElementById("xed-pbGroup").innerHTML = "";
+        document.getElementById("xed-qaGroup").innerHTML = "";
+        state.qUnit = "";
+        state.pbUnit = "";
+        if (!productBtn) {
+          pbHint.textContent = "(£ — choose a pair first)";
+          qaHint.textContent = "(choose a pair first)";
+          return;
+        }
+        const unit = productBtn.getAttribute("data-unit") || "";
+        const qUnit = productBtn.getAttribute("data-q-unit") || "";
+        state.pbUnit = unit;
+        state.qUnit = qUnit;
+        pbHint.textContent = unit ? "(£ " + unit + ")" : "(£)";
+        qaHint.textContent = qUnit ? "(" + qUnit + ")" : "";
+        const prices = (productBtn.getAttribute("data-prices") || "").split(",").map(function (s) {
+          return parseFloat(s.trim());
+        }).filter(function (n) { return isFinite(n) && n > 0; });
+        fillButtons("xed-pbGroup", "data-pb1", "price-btn", prices, prices.map(moneyLabel));
+        const qtys = (productBtn.getAttribute("data-qtys") || "").split(",").map(function (s) {
+          return parseFloat(s.trim());
+        }).filter(function (n) { return isFinite(n) && n > 0; });
+        fillButtons("xed-qaGroup", "data-qa1", "qty-btn", qtys, qtys.map(function (q) { return String(Math.round(q)); }));
+      }
+      const XED_FACTORS = {
+        "Butter": { custom: "butter" },
+        "Cola": { custom: "cola" },
+        "Bus travel": { custom: "bus" },
+        "Tea": { custom: "tea" },
+        "Android phones": { custom: "android" },
+        "Petrol cars": { custom: "petrolcars" },
+        "Printers": { custom: "printers" },
+        "Games consoles": { custom: "consoles" },
+        "Strawberries": { custom: "strawberries" },
+        "Smartphones": { custom: "smartphones" }
+      };
+      function classify(xed) {
+        if (xed > 0.05) {
+          return {
+            short: "substitutes",
+            line: "Positive XED: competitive demand (substitutes). A rise in the price of B switches demand toward A, so demand for A shifts right."
+          };
+        }
+        if (xed < -0.05) {
+          return {
+            short: "complements",
+            line: "Negative XED: joint demand (complements). A rise in the price of B cuts demand for A, so demand for A shifts left."
+          };
+        }
+        return {
+          short: "unrelated",
+          line: "XED is about zero: the goods are unrelated. A change in the price of B barely moves quantity of A."
+        };
+      }
+      function updateSteps() {
+        const done = {
+          1: state.eps != null,
+          2: state.PB1 != null,
+          3: state.QA1 != null,
+          4: state.PB2 != null,
+          5: !!state.results
+        };
+        root.querySelectorAll(".xed-step").forEach(function (el) {
+          const n = el.getAttribute("data-step");
+          el.classList.remove("on", "done");
+          if (done[n] && n !== "5") el.classList.add("done");
+          else if (n === "1" && !done[1]) el.classList.add("on");
+          else if (n === "2" && done[1] && !done[2]) el.classList.add("on");
+          else if (n === "3" && done[2] && !done[3]) el.classList.add("on");
+          else if (n === "4" && done[3] && !done[4]) el.classList.add("on");
+          else if (n === "5" && done[4] && !done[5]) el.classList.add("on");
+          else if (done[5] && n === "5") el.classList.add("done");
+        });
+        document.getElementById("xed-calc").disabled = false;
+      }
+      function hideWorking() {
+        const out = document.getElementById("xed-output");
+        out.hidden = true;
+        out.innerHTML = "";
+        document.getElementById("xed-working").hidden = true;
+        hideFactors();
+      }
+      function hideFactors() {
+        const box = document.getElementById("xed-factors");
+        box.hidden = true;
+        box.innerHTML = "";
+      }
+      function hideShiftNote() {
+        const el = document.getElementById("xed-shift-note");
+        if (el) el.hidden = true;
+      }
+      function showShiftNote() {
+        const el = document.getElementById("xed-shift-note");
+        if (!el) return;
+        const a = state.a;
+        const b = state.b;
+        const move = state.results || state.diagram;
+        const bDearer = !(move && move.pctP < 0);
+        const bMove = bDearer ? "more expensive" : "cheaper";
+        const bArrow = bDearer ? "↑" : "↓";
+        const shift = move ? move.shift : "right";
+        const substitutes = !(move && move.XED < 0);
+        const aqa = substitutes
+          ? "<p><strong>Competitive demand (substitutes):</strong> Price of " + b + " " + bArrow +
+            " → demand for " + a + " shifts " + shift + ".</p>"
+          : "<p><strong>Joint demand (complements):</strong> Price of " + b + " " + bArrow +
+            " → demand for " + a + " shifts " + shift + ".</p>";
+        el.innerHTML =
+          aqa +
+          "<p>A movement along a demand curve happens only when the price of " + a + " itself changes.</p>" +
+          "<p>Here, the price of " + a + " stays the same — it’s the price of " + b + " that changes.</p>" +
+          "<p>So consumers aren’t reacting to " + a + " becoming cheaper or dearer; they’re reacting to " + b +
+          " becoming " + bMove + ". That’s an external factor, which causes a shift of the entire demand curve.</p>";
+        el.hidden = false;
+      }
+      function butterFactorsHtml() {
+        const xed = state.results ? fmt(state.results.XED) : "0.80";
+        return "<p class=\"xed-factor-lead\">Even though the calculated XED for butter vs margarine is " + xed +
+          ", the actual cross-elasticity can shift a lot depending on how closely consumers perceive the two products as substitutes. XED is not fixed — it moves when taste, health concerns, branding, and market conditions change.</p>" +
+          "<h4>1. Closeness of substitution (the core determinant)</h4>" +
+          "<ul>" +
+          "<li>If consumers see margarine as a near-perfect substitute for butter, XED rises.</li>" +
+          "<li>If consumers see butter as “premium” and margarine as “budget,” substitution weakens → XED falls.</li>" +
+          "</ul>" +
+          "<p>This is the single biggest driver of cross-elasticity.</p>" +
+          "<h4>2. Changes in taste and preferences</h4>" +
+          "<h5>Health trends</h5>" +
+          "<ul>" +
+          "<li>If margarine is marketed as healthier (e.g., lower saturated fat), switching becomes easier → XED rises.</li>" +
+          "<li>If butter gains popularity due to “natural food” trends, margarine becomes a weaker substitute → XED falls.</li>" +
+          "</ul>" +
+          "<h5>Cultural or cooking preferences</h5>" +
+          "<ul>" +
+          "<li>Some recipes strongly favour butter for flavour → weaker substitution → XED falls.</li>" +
+          "</ul>" +
+          "<h4>3. Brand loyalty and product differentiation</h4>" +
+          "<ul>" +
+          "<li>Strong branding (e.g., Lurpak, Kerrygold) reduces switching even when margarine prices change → XED falls.</li>" +
+          "<li>If margarine brands differentiate less and compete mainly on price, switching becomes easier → XED rises.</li>" +
+          "</ul>" +
+          "<h4>4. Income levels</h4>" +
+          "<ul>" +
+          "<li>Higher incomes may push consumers toward butter (a perceived premium good). → Margarine becomes a weaker substitute → XED falls.</li>" +
+          "<li>Lower incomes increase price sensitivity. → Consumers switch more readily → XED rises.</li>" +
+          "</ul>" +
+          "<h4>5. Availability of alternatives</h4>" +
+          "<h5>Plant-based spreads (vegan butter, olive-oil spreads)</h5>" +
+          "<ul>" +
+          "<li>More alternatives reduce the direct butter–margarine substitution → XED falls.</li>" +
+          "</ul>" +
+          "<h5>Cooking oils</h5>" +
+          "<ul>" +
+          "<li>If households switch to oils for baking/frying, both butter and margarine lose relevance → XED falls.</li>" +
+          "</ul>" +
+          "<h4>6. Packaging and product formats</h4>" +
+          "<ul>" +
+          "<li>If butter becomes available in cheaper, smaller packs, consumers may stick with butter even when margarine prices change → XED falls.</li>" +
+          "<li>If margarine offers convenient tubs or spreadable formats, substitution becomes easier → XED rises.</li>" +
+          "</ul>" +
+          "<h4>7. Promotions and supermarket pricing strategies</h4>" +
+          "<ul>" +
+          "<li>Buy-one-get-one-free deals on margarine reduce switching to butter → XED falls.</li>" +
+          "<li>Loyalty card discounts on butter increase switching when margarine prices rise → XED rises.</li>" +
+          "</ul>" +
+          "<h4>8. Time period</h4>" +
+          "<ul>" +
+          "<li>Short run: habits dominate; households may not switch immediately → lower XED.</li>" +
+          "<li>Long run: consumers adjust recipes, shopping routines, and preferences → higher XED.</li>" +
+          "</ul>" +
+          "<h4>9. Information and advertising</h4>" +
+          "<ul>" +
+          "<li>Campaigns emphasising butter’s “natural” qualities reduce substitution → XED falls.</li>" +
+          "<li>Campaigns emphasising margarine’s health benefits increase substitution → XED rises.</li>" +
+          "</ul>";
+      }
+      function colaFactorsHtml() {
+        const xed = state.results ? fmt(state.results.XED) : "0.70";
+        return "<p class=\"xed-factor-lead\">Even though the calculated XED for Cola vs Pepsi is " + xed +
+          ", the actual cross-elasticity can shift a lot depending on branding, taste, availability, marketing, and consumer psychology. Cola and Pepsi are classic substitutes, but not perfect ones — and anything that changes how closely consumers see them as related will change the XED.</p>" +
+          "<h4>Factors that could influence the XED between Cola and Pepsi</h4>" +
+          "<h4>1. Closeness of substitution (the core determinant)</h4>" +
+          "<ul>" +
+          "<li>If consumers see Cola and Pepsi as almost identical, XED rises.</li>" +
+          "<li>If consumers strongly prefer one brand, substitution weakens → XED falls.</li>" +
+          "</ul>" +
+          "<p>This is the biggest driver of cross-elasticity.</p>" +
+          "<h4>2. Brand loyalty and identity</h4>" +
+          "<ul>" +
+          "<li>Cola and Pepsi have some of the strongest brand identities in the world.</li>" +
+          "<li>High loyalty → weaker switching → XED falls.</li>" +
+          "<li>Weak loyalty (e.g., among younger or price-sensitive consumers) → XED rises.</li>" +
+          "</ul>" +
+          "<p>Brand loyalty is one of the main reasons XED is not close to 1.0.</p>" +
+          "<h4>3. Taste preferences</h4>" +
+          "<ul>" +
+          "<li>Some consumers insist the taste is different. → Lower XED.</li>" +
+          "<li>If taste differences become less noticeable (e.g., new formulations), switching becomes easier. → Higher XED.</li>" +
+          "</ul>" +
+          "<h4>4. Marketing, advertising, and promotions</h4>" +
+          "<ul>" +
+          "<li>Heavy advertising by Pepsi can increase switching when Cola prices rise → XED rises.</li>" +
+          "<li>Loyalty card discounts or multi-buy deals on Cola reduce switching → XED falls.</li>" +
+          "<li>Marketing can change perceived closeness even without price changes.</li>" +
+          "</ul>" +
+          "<h4>5. Availability and shelf placement</h4>" +
+          "<ul>" +
+          "<li>If Pepsi is widely available but Cola is not (or vice versa), switching becomes easier → XED rises.</li>" +
+          "<li>If one brand dominates shelf space, consumers may stick with it → XED falls.</li>" +
+          "<li>Retailer decisions directly affect elasticity.</li>" +
+          "</ul>" +
+          "<h4>6. Income levels</h4>" +
+          "<ul>" +
+          "<li>Higher incomes may push consumers toward branded Cola over cheaper Pepsi alternatives → XED falls.</li>" +
+          "<li>Lower incomes increase price sensitivity → XED rises.</li>" +
+          "<li>Elasticity often increases when budgets tighten.</li>" +
+          "</ul>" +
+          "<h4>7. Presence of other substitutes</h4>" +
+          "<h5>Own-brand supermarket cola</h5>" +
+          "<ul>" +
+          "<li>More alternatives reduce the direct Cola–Pepsi substitution → XED falls.</li>" +
+          "</ul>" +
+          "<h5>Energy drinks or flavoured waters</h5>" +
+          "<ul>" +
+          "<li>If consumers switch to these instead, both Cola and Pepsi lose substitutability → XED falls.</li>" +
+          "</ul>" +
+          "<h4>8. Packaging and product formats</h4>" +
+          "<ul>" +
+          "<li>If Cola offers more convenient formats (mini cans, large bottles), switching becomes harder → XED falls.</li>" +
+          "<li>If Pepsi introduces new formats or flavours, substitution becomes easier → XED rises.</li>" +
+          "</ul>" +
+          "<h4>9. Time period</h4>" +
+          "<ul>" +
+          "<li>Short run: habits dominate; consumers buy their usual brand → lower XED.</li>" +
+          "<li>Long run: consumers adjust routines, try alternatives, respond to promotions → higher XED.</li>" +
+          "</ul>" +
+          "<h4>10. Information and advertising campaigns</h4>" +
+          "<ul>" +
+          "<li>Campaigns emphasising “original taste” or nostalgia reduce switching → XED falls.</li>" +
+          "<li>Campaigns emphasising value or price competitiveness increase switching → XED rises.</li>" +
+          "</ul>";
+      }
+      function busFactorsHtml() {
+        const xed = state.results ? fmt(state.results.XED) : "0.50";
+        return "<p class=\"xed-factor-lead\">Even though the calculated XED for bus travel vs train tickets is " + xed +
+          ", the actual cross-elasticity can shift a lot depending on how closely consumers perceive the two modes as substitutes. XED is not fixed — it moves when market conditions, convenience, psychology, and policy change.</p>" +
+          "<h4>Factors that could change the XED between bus travel and train tickets</h4>" +
+          "<h4>1. Closeness of substitution (the biggest determinant)</h4>" +
+          "<ul>" +
+          "<li>If buses and trains serve different routes, they are weaker substitutes → XED falls.</li>" +
+          "<li>If they serve identical commuter corridors, they become close substitutes → XED rises.</li>" +
+          "</ul>" +
+          "<p>This aligns with the principle that XED depends on how closely goods are related.</p>" +
+          "<h4>2. Relative convenience and travel time</h4>" +
+          "<ul>" +
+          "<li>If trains become much faster or more reliable, consumers may not switch to buses even when train prices rise → lower XED.</li>" +
+          "<li>If buses introduce express routes or bus lanes, making travel times similar to trains → higher XED.</li>" +
+          "</ul>" +
+          "<h4>3. Quality differences</h4>" +
+          "<p>Improvements in comfort, Wi-Fi, seating, cleanliness, or safety on either mode change perceived substitutability.</p>" +
+          "<ul>" +
+          "<li>Train quality ↑ → bus becomes a weaker substitute → XED falls.</li>" +
+          "<li>Bus quality ↑ → stronger substitution → XED rises.</li>" +
+          "</ul>" +
+          "<h4>4. Availability of alternatives</h4>" +
+          "<ul>" +
+          "<li>If car ownership rises, both bus and train demand may fall regardless of relative prices → XED falls.</li>" +
+          "<li>If cycling infrastructure improves, both modes face competition → XED falls.</li>" +
+          "<li>If ride-sharing (Uber, Bolt) becomes cheaper, consumers may switch away from both → XED falls.</li>" +
+          "</ul>" +
+          "<h4>5. Income effects</h4>" +
+          "<ul>" +
+          "<li>Higher incomes may push commuters toward trains (perceived as higher quality). → Bus becomes a weaker substitute → XED falls.</li>" +
+          "<li>Lower incomes may push commuters toward buses. → Bus becomes a stronger substitute → XED rises.</li>" +
+          "</ul>" +
+          "<p>This follows the idea that demand elasticity depends on income levels and type of good.</p>" +
+          "<h4>6. Government policy</h4>" +
+          "<ul>" +
+          "<li>Subsidies for buses (e.g., £2 fare cap) make buses more attractive → XED rises.</li>" +
+          "<li>Rail fare freezes or off-peak discounts reduce switching → XED falls.</li>" +
+          "<li>Congestion charges may push commuters toward public transport overall, but the relative effect on bus vs train determines XED.</li>" +
+          "</ul>" +
+          "<h4>7. Capacity constraints</h4>" +
+          "<ul>" +
+          "<li>If trains are overcrowded, commuters may switch to buses more readily → XED rises.</li>" +
+          "<li>If buses are full or infrequent, switching becomes harder → XED falls.</li>" +
+          "</ul>" +
+          "<h4>8. Habit, routine, and behavioural factors</h4>" +
+          "<ul>" +
+          "<li>Strong commuter habits reduce switching even when prices change → XED falls.</li>" +
+          "<li>If commuters are flexible (e.g., students, part-time workers), switching is easier → XED rises.</li>" +
+          "</ul>" +
+          "<p>Habit and branding effects reduce elasticity generally.</p>" +
+          "<h4>9. Time period</h4>" +
+          "<ul>" +
+          "<li>Short run: commuters may be locked into a routine → low XED.</li>" +
+          "<li>Long run: people can adjust routes, buy season tickets, or change jobs → higher XED.</li>" +
+          "</ul>" +
+          "<p>Elasticity tends to increase over time as alternatives become easier to adopt.</p>";
+      }
+      function teaFactorsHtml() {
+        const xed = state.results ? fmt(state.results.XED) : "0.40";
+        return "<p class=\"xed-factor-lead\">Even though the calculated XED for tea vs coffee is " + xed +
+          ", the actual cross-elasticity can shift a lot because tea and coffee are only imperfect substitutes. Anything that changes how closely consumers perceive them as alternatives will change the XED.</p>" +
+          "<h4>Factors that could influence the XED between tea and coffee</h4>" +
+          "<h4>1. Closeness of substitution (the core determinant)</h4>" +
+          "<ul>" +
+          "<li>If consumers see tea and coffee as interchangeable sources of caffeine → XED rises.</li>" +
+          "<li>If consumers view them as fundamentally different drinks (taste, ritual, culture) → XED falls.</li>" +
+          "</ul>" +
+          "<p>This is the biggest driver of cross-elasticity.</p>" +
+          "<h4>2. Taste and cultural preferences</h4>" +
+          "<ul>" +
+          "<li>Strong cultural tea-drinking habits (e.g., UK households) reduce switching → lower XED.</li>" +
+          "<li>If coffee culture grows (cafés, barista trends), consumers may switch more readily → higher XED.</li>" +
+          "</ul>" +
+          "<h4>3. Branding and product differentiation</h4>" +
+          "<ul>" +
+          "<li>Premium coffee brands (Costa, Starbucks, Nespresso) create identity and loyalty → weaker substitution → XED falls.</li>" +
+          "<li>If tea brands differentiate less and compete mainly on price, switching becomes easier → XED rises.</li>" +
+          "</ul>" +
+          "<h4>4. Health perceptions</h4>" +
+          "<ul>" +
+          "<li>If tea is marketed as healthier (antioxidants, lower caffeine), consumers may switch from coffee even without price changes → XED rises.</li>" +
+          "<li>If coffee is promoted as beneficial (metabolism, focus), tea becomes a weaker substitute → XED falls.</li>" +
+          "</ul>" +
+          "<h4>5. Income levels</h4>" +
+          "<ul>" +
+          "<li>Higher incomes may push consumers toward premium coffee → tea becomes a weaker substitute → XED falls.</li>" +
+          "<li>Lower incomes increase price sensitivity → switching between tea and coffee becomes more common → XED rises.</li>" +
+          "</ul>" +
+          "<h4>6. Availability and convenience</h4>" +
+          "<ul>" +
+          "<li>If workplaces or cafés mainly offer coffee, switching becomes harder → XED falls.</li>" +
+          "<li>If tea becomes more widely available (iced tea, ready-to-drink formats), substitution becomes easier → XED rises.</li>" +
+          "</ul>" +
+          "<h4>7. Presence of other substitutes</h4>" +
+          "<h5>Energy drinks, hot chocolate, chai lattes, matcha, herbal teas</h5>" +
+          "<ul>" +
+          "<li>More alternatives reduce the direct tea–coffee substitution → XED falls.</li>" +
+          "<li>If alternatives become expensive or less available, tea and coffee become closer substitutes → XED rises.</li>" +
+          "</ul>" +
+          "<h4>8. Habit and routine</h4>" +
+          "<ul>" +
+          "<li>Morning coffee routines reduce switching even when tea prices change → lower XED.</li>" +
+          "<li>If consumers are flexible (students, occasional drinkers), switching becomes easier → higher XED.</li>" +
+          "</ul>" +
+          "<h4>9. Time period</h4>" +
+          "<ul>" +
+          "<li>Short run: habits dominate → lower XED.</li>" +
+          "<li>Long run: consumers adjust routines, try alternatives, respond to price changes → higher XED.</li>" +
+          "</ul>" +
+          "<h4>10. Marketing and advertising</h4>" +
+          "<ul>" +
+          "<li>Campaigns promoting tea as calming or healthy increase switching when coffee prices rise → XED rises.</li>" +
+          "<li>Campaigns promoting coffee as premium or essential reduce switching → XED falls.</li>" +
+          "</ul>";
+      }
+      function androidFactorsHtml() {
+        const xed = state.results ? fmt(state.results.XED) : "0.60";
+        return "<p class=\"xed-factor-lead\">Even though the calculated XED for Android vs iPhone is " + xed +
+          ", the actual cross-elasticity can shift a lot because these are imperfect substitutes. Anything that changes how closely consumers perceive them as alternatives will change the XED.</p>" +
+          "<h4>Factors that could influence the XED between Android phones and iPhones</h4>" +
+          "<h4>1. Closeness of substitution (the core determinant)</h4>" +
+          "<ul>" +
+          "<li>If consumers see Android and iPhone as broadly similar smartphones → XED rises.</li>" +
+          "<li>If consumers view iPhones as a premium, unique ecosystem → XED falls.</li>" +
+          "</ul>" +
+          "<p>This is the biggest driver of cross-elasticity.</p>" +
+          "<h4>2. Ecosystem lock-in</h4>" +
+          "<h5>iMessage, FaceTime, AirPods, Mac integration</h5>" +
+          "<ul>" +
+          "<li>Strong ecosystem lock-in reduces switching → lower XED.</li>" +
+          "<li>If Android improves cross-platform integration (e.g., Windows Phone Link, Google ecosystem), switching becomes easier → higher XED.</li>" +
+          "</ul>" +
+          "<h4>3. Brand loyalty and identity</h4>" +
+          "<ul>" +
+          "<li>Apple has extremely strong brand loyalty. → Weaker substitution → XED falls.</li>" +
+          "<li>If Android brands (Samsung, Google Pixel) build strong loyalty, switching also reduces → XED falls.</li>" +
+          "<li>If loyalty weakens (e.g., due to poor updates or bad press), switching increases → XED rises.</li>" +
+          "</ul>" +
+          "<h4>4. Price sensitivity and income levels</h4>" +
+          "<ul>" +
+          "<li>Higher incomes may push consumers toward iPhones → Android becomes a weaker substitute → XED falls.</li>" +
+          "<li>Lower incomes increase price sensitivity → switching between Android and iPhone becomes more common → XED rises.</li>" +
+          "</ul>" +
+          "<h4>5. Product differentiation</h4>" +
+          "<ul>" +
+          "<li>If iPhones introduce unique features (e.g., exclusive apps, hardware innovations), Android becomes a weaker substitute → XED falls.</li>" +
+          "<li>If Android phones offer similar features at lower prices, substitution strengthens → XED rises.</li>" +
+          "</ul>" +
+          "<h4>6. Availability and carrier contracts</h4>" +
+          "<ul>" +
+          "<li>If carriers offer better deals on Android phones, switching becomes easier → XED rises.</li>" +
+          "<li>If iPhones dominate contract deals or upgrade programmes, switching becomes harder → XED falls.</li>" +
+          "</ul>" +
+          "<h4>7. Presence of other substitutes</h4>" +
+          "<h5>Budget smartphones, refurbished iPhones, mid-range Androids, foldables, Chromebooks, tablets</h5>" +
+          "<ul>" +
+          "<li>More alternatives reduce the direct Android–iPhone substitution → XED falls.</li>" +
+          "<li>If alternatives become expensive or less available, Android and iPhone become closer substitutes → XED rises.</li>" +
+          "</ul>" +
+          "<h4>8. App ecosystem and compatibility</h4>" +
+          "<ul>" +
+          "<li>Exclusive apps or better optimisation on iPhone reduce switching → XED falls.</li>" +
+          "<li>If Android apps become more universal or better optimised, substitution strengthens → XED rises.</li>" +
+          "</ul>" +
+          "<h4>9. Habit and switching costs</h4>" +
+          "<ul>" +
+          "<li>Data transfer, learning a new interface, buying new accessories → all reduce switching → lower XED.</li>" +
+          "<li>If switching becomes easier (e.g., better transfer tools), XED rises.</li>" +
+          "</ul>" +
+          "<h4>10. Time period</h4>" +
+          "<ul>" +
+          "<li>Short run: habits dominate; consumers stick with their usual brand → lower XED.</li>" +
+          "<li>Long run: consumers adjust preferences, respond to price changes, and upgrade cycles → higher XED.</li>" +
+          "</ul>";
+      }
+      function petrolCarsFactorsHtml() {
+        const xed = state.results ? fmt(state.results.XED) : "-0.50";
+        return "<p class=\"xed-factor-lead\">Even though the calculated XED for petrol cars vs petrol is " + xed +
+          ", the actual cross-elasticity can shift a lot because petrol cars and petrol are complements whose relationship depends on technology, policy, habits, and the availability of alternatives. Anything that changes how tightly petrol cars rely on petrol will change the XED.</p>" +
+          "<h4>Factors that could influence the XED between petrol cars and petrol</h4>" +
+          "<h4>1. Closeness of complementarity (the core determinant)</h4>" +
+          "<ul>" +
+          "<li>Petrol cars require petrol → strong complement → more negative XED.</li>" +
+          "<li>If cars become more fuel-efficient or hybridised → weaker complement → XED moves toward zero.</li>" +
+          "</ul>" +
+          "<p>This is the biggest driver of cross-elasticity.</p>" +
+          "<h4>2. Fuel efficiency improvements</h4>" +
+          "<ul>" +
+          "<li>More efficient engines reduce petrol consumption per mile. → Petrol price rises have a smaller effect on car demand → XED becomes less negative.</li>" +
+          "<li>If cars become less efficient (e.g., larger SUVs), petrol becomes more essential. → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>3. Availability of substitutes for petrol cars</h4>" +
+          "<h5>Electric vehicles (EVs)</h5>" +
+          "<ul>" +
+          "<li>More EV adoption weakens the petrol–car complement → XED rises toward zero.</li>" +
+          "</ul>" +
+          "<h5>Public transport improvements</h5>" +
+          "<ul>" +
+          "<li>If buses/trains become more attractive, petrol price rises cause bigger drops in petrol-car demand → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>4. Income levels</h4>" +
+          "<ul>" +
+          "<li>Higher incomes reduce sensitivity to petrol price changes → XED becomes less negative.</li>" +
+          "<li>Lower incomes increase sensitivity → petrol price rises cause bigger drops in car demand → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>5. Government policy</h4>" +
+          "<h5>Fuel duty increases</h5>" +
+          "<ul>" +
+          "<li>Petrol becomes more expensive → stronger complement → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h5>Subsidies for EVs or hybrids</h5>" +
+          "<ul>" +
+          "<li>Petrol cars become easier to substitute → XED rises toward zero.</li>" +
+          "</ul>" +
+          "<h5>Congestion charges / emissions zones</h5>" +
+          "<ul>" +
+          "<li>Petrol cars become less attractive → petrol price changes have larger effects → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>6. Habit and necessity</h4>" +
+          "<ul>" +
+          "<li>If driving is essential (commuting, rural areas), petrol price rises may not reduce car demand much → XED becomes less negative.</li>" +
+          "<li>If driving is discretionary (urban areas), petrol price rises cut car demand more → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>7. Availability of alternative fuels</h4>" +
+          "<h5>Biofuels, synthetic fuels, LPG, hydrogen</h5>" +
+          "<ul>" +
+          "<li>More alternatives weaken the petrol–car complement → XED rises toward zero.</li>" +
+          "</ul>" +
+          "<h4>8. Car ownership structure</h4>" +
+          "<ul>" +
+          "<li>If households own multiple cars, they may switch usage patterns (use the more efficient car). → Petrol price rises reduce demand for petrol cars more → XED becomes more negative.</li>" +
+          "<li>If households own only one car, switching is harder → XED becomes less negative.</li>" +
+          "</ul>" +
+          "<h4>9. Time period</h4>" +
+          "<ul>" +
+          "<li>Short run: habits dominate; people still need to drive → XED is less negative.</li>" +
+          "<li>Long run: people can change cars, move house, switch transport modes → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>10. Expectations about future petrol prices</h4>" +
+          "<ul>" +
+          "<li>If consumers expect petrol prices to keep rising, they may avoid buying petrol cars now → XED becomes more negative.</li>" +
+          "<li>If they expect prices to fall, petrol price rises have smaller effects → XED becomes less negative.</li>" +
+          "</ul>";
+      }
+      function printersFactorsHtml() {
+        const xed = state.results ? fmt(state.results.XED) : "-0.80";
+        return "<p class=\"xed-factor-lead\">Even though the calculated XED for printers vs ink cartridges is " + xed +
+          ", the actual cross-elasticity can shift a lot because printers and ink are strong complements, but the strength of that complement depends on technology, pricing strategies, consumer behaviour, and market structure. Anything that changes how tightly printers rely on ink will change the XED.</p>" +
+          "<h4>Factors that could influence the XED between printers and ink cartridges</h4>" +
+          "<h4>1. Closeness of complementarity (the core determinant)</h4>" +
+          "<ul>" +
+          "<li>Printers require ink → strong complement → more negative XED.</li>" +
+          "<li>If printers become more efficient or use less ink → weaker complement → XED moves toward zero.</li>" +
+          "</ul>" +
+          "<p>This is the biggest driver of cross-elasticity.</p>" +
+          "<h4>2. Printer technology changes</h4>" +
+          "<h5>Laser printers</h5>" +
+          "<ul>" +
+          "<li>Use toner instead of ink → ink becomes less relevant → XED becomes less negative.</li>" +
+          "</ul>" +
+          "<h5>EcoTank / refillable tank printers</h5>" +
+          "<ul>" +
+          "<li>Reduce reliance on cartridges → weaker complement → XED rises toward zero.</li>" +
+          "</ul>" +
+          "<h5>Ink-saving modes</h5>" +
+          "<ul>" +
+          "<li>Reduce ink usage → petrol-style efficiency effect → XED becomes less negative.</li>" +
+          "</ul>" +
+          "<h4>3. Availability of substitutes for ink</h4>" +
+          "<h5>Third-party cartridges</h5>" +
+          "<ul>" +
+          "<li>If cheaper alternatives exist, consumers may not reduce printer demand when branded ink prices rise → XED becomes less negative.</li>" +
+          "</ul>" +
+          "<h5>Refill services</h5>" +
+          "<ul>" +
+          "<li>Lower cost of ink → weaker complement → XED rises toward zero.</li>" +
+          "</ul>" +
+          "<h4>4. Pricing strategies (razor-and-blades model)</h4>" +
+          "<ul>" +
+          "<li>Many firms sell printers cheaply and ink expensively. → Strong complement → XED becomes more negative.</li>" +
+          "<li>If firms reduce ink prices or bundle ink with printers, complementarity weakens → XED becomes less negative.</li>" +
+          "</ul>" +
+          "<h4>5. Consumer behaviour and printing habits</h4>" +
+          "<ul>" +
+          "<li>Heavy home or office printing → ink price rises strongly reduce printer demand → XED becomes more negative.</li>" +
+          "<li>Light or occasional printing → ink price rises barely affect printer demand → XED becomes less negative.</li>" +
+          "</ul>" +
+          "<h4>6. Availability of substitutes for printing</h4>" +
+          "<h5>Cloud storage, digital documents, email, PDF signing, screens instead of paper</h5>" +
+          "<ul>" +
+          "<li>Reduce reliance on printing → ink price rises have a smaller effect on printer demand → XED becomes less negative.</li>" +
+          "<li>If workplaces still require printed documents, complementarity remains strong → XED stays more negative.</li>" +
+          "</ul>" +
+          "<h4>7. Income levels</h4>" +
+          "<ul>" +
+          "<li>Higher incomes reduce sensitivity to ink price changes → XED becomes less negative.</li>" +
+          "<li>Lower incomes increase sensitivity → ink price rises cause bigger drops in printer demand → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>8. Business vs household use</h4>" +
+          "<ul>" +
+          "<li>Businesses often buy printers regardless of ink price changes → XED becomes less negative.</li>" +
+          "<li>Households may delay buying printers if ink becomes expensive → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>9. Time period</h4>" +
+          "<ul>" +
+          "<li>Short run: consumers still need to print → XED is less negative.</li>" +
+          "<li>Long run: consumers can switch to digital alternatives or buy different printer types → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>10. Expectations about future ink prices</h4>" +
+          "<ul>" +
+          "<li>If consumers expect ink prices to keep rising, they may avoid buying printers now → XED becomes more negative.</li>" +
+          "<li>If they expect prices to fall, ink price rises have smaller effects → XED becomes less negative.</li>" +
+          "</ul>";
+      }
+      function consolesFactorsHtml() {
+        const xed = state.results ? fmt(state.results.XED) : "-0.70";
+        return "<p class=\"xed-factor-lead\">Even though the calculated XED for games consoles vs video games is " + xed +
+          ", the actual cross-elasticity can shift a lot because consoles and games are strong complements, but the strength of that complement depends on technology, pricing, platform strategy, and consumer behaviour. Anything that changes how tightly consoles rely on games will change the XED.</p>" +
+          "<h4>Factors that could influence the XED between games consoles and video games</h4>" +
+          "<h4>1. Closeness of complementarity (the core determinant)</h4>" +
+          "<ul>" +
+          "<li>Consoles require games → strong complement → more negative XED.</li>" +
+          "<li>If consoles offer more non-gaming uses (streaming, apps, media) → weaker complement → XED moves toward zero.</li>" +
+          "</ul>" +
+          "<p>This is the biggest driver of cross-elasticity.</p>" +
+          "<h4>2. Exclusive games and platform lock-in</h4>" +
+          "<ul>" +
+          "<li>If a console has strong exclusives (e.g., Nintendo, PlayStation), consumers may buy the console even if game prices rise → XED becomes less negative.</li>" +
+          "<li>If exclusives weaken and games become cross-platform, consoles rely more on game purchases → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>3. Digital vs physical game pricing</h4>" +
+          "<ul>" +
+          "<li>Digital stores often have higher prices → game price rises reduce console demand more → XED becomes more negative.</li>" +
+          "<li>Frequent digital sales (Steam-style discounts on consoles) weaken complementarity → XED becomes less negative.</li>" +
+          "</ul>" +
+          "<h4>4. Subscription services</h4>" +
+          "<h5>Game Pass, PS Plus, Nintendo Online</h5>" +
+          "<ul>" +
+          "<li>If consumers can access many games cheaply, game price changes matter less → XED becomes less negative.</li>" +
+          "<li>If subscriptions become expensive or limited, game price rises matter more → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>5. Availability of substitutes</h4>" +
+          "<h5>PC gaming, mobile gaming, cloud gaming</h5>" +
+          "<ul>" +
+          "<li>More alternatives weaken the console–game complement → XED rises toward zero.</li>" +
+          "<li>If alternatives become expensive or less available, consoles and games become stronger complements → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>6. Income levels</h4>" +
+          "<ul>" +
+          "<li>Higher incomes reduce sensitivity to game price changes → XED becomes less negative.</li>" +
+          "<li>Lower incomes increase sensitivity → game price rises cause bigger drops in console demand → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>7. Console pricing strategies</h4>" +
+          "<ul>" +
+          "<li>If consoles are sold cheaply (loss-leader model) and rely on game sales for profit, complementarity strengthens → XED becomes more negative.</li>" +
+          "<li>If consoles become expensive and games cheaper, complementarity weakens → XED becomes less negative.</li>" +
+          "</ul>" +
+          "<h4>8. Game type and usage intensity</h4>" +
+          "<ul>" +
+          "<li>Heavy gamers buy many games → game price rises strongly reduce console demand → XED becomes more negative.</li>" +
+          "<li>Casual gamers buy few games → game price rises barely affect console demand → XED becomes less negative.</li>" +
+          "</ul>" +
+          "<h4>9. Backward compatibility</h4>" +
+          "<ul>" +
+          "<li>If new consoles play old games, consumers may buy the console even if new game prices rise → XED becomes less negative.</li>" +
+          "<li>If consoles require new expensive games, complementarity strengthens → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>10. Time period</h4>" +
+          "<ul>" +
+          "<li>Short run: habits dominate; people still use their console → XED is less negative.</li>" +
+          "<li>Long run: consumers can switch platforms, reduce gaming, or move to PC → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>11. Expectations about future game prices</h4>" +
+          "<ul>" +
+          "<li>If consumers expect game prices to keep rising, they may avoid buying consoles now → XED becomes more negative.</li>" +
+          "<li>If they expect prices to fall (sales, bundles), game price rises have smaller effects → XED becomes less negative.</li>" +
+          "</ul>";
+      }
+      function strawberriesFactorsHtml() {
+        const xed = state.results ? fmt(state.results.XED) : "-0.40";
+        return "<p class=\"xed-factor-lead\">Even though the calculated XED for strawberries vs cream is " + xed +
+          ", the actual cross-elasticity can shift a lot because strawberries and cream are weak complements whose relationship depends on seasonality, habits, culture, availability, and the presence of alternatives. Anything that changes how often they are consumed together will change the XED.</p>" +
+          "<h4>Factors that could influence the XED between strawberries and cream</h4>" +
+          "<h4>1. Closeness of complementarity (the core determinant)</h4>" +
+          "<ul>" +
+          "<li>If consumers strongly associate strawberries with cream (e.g., Wimbledon season), complementarity strengthens → XED becomes more negative.</li>" +
+          "<li>If consumers eat strawberries with yoghurt, ice cream, or on their own, complementarity weakens → XED moves toward zero.</li>" +
+          "</ul>" +
+          "<p>This is the biggest driver of cross-elasticity.</p>" +
+          "<h4>2. Seasonality</h4>" +
+          "<h5>Summer / Wimbledon season</h5>" +
+          "<ul>" +
+          "<li>Demand for strawberries and cream rises together → stronger complement → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h5>Off-season</h5>" +
+          "<ul>" +
+          "<li>Strawberries are less popular; cream is used for other desserts → weaker complement → XED becomes less negative.</li>" +
+          "</ul>" +
+          "<h4>3. Availability of substitutes</h4>" +
+          "<h5>Yoghurt, ice cream, custard, whipped toppings</h5>" +
+          "<ul>" +
+          "<li>More alternatives weaken the strawberry–cream complement → XED rises toward zero.</li>" +
+          "<li>If substitutes become expensive or less available, strawberries and cream become stronger complements → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>4. Income levels</h4>" +
+          "<ul>" +
+          "<li>Higher incomes may push consumers toward premium alternatives (gelato, patisserie desserts) → weaker complement → XED becomes less negative.</li>" +
+          "<li>Lower incomes increase price sensitivity → cream price rises cut strawberry demand more → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>5. Health perceptions</h4>" +
+          "<ul>" +
+          "<li>If cream is seen as unhealthy (fat, calories), consumers may reduce cream consumption even if strawberry prices fall → weaker complement → XED becomes less negative.</li>" +
+          "<li>If healthier cream alternatives appear (low-fat, plant-based), complementarity may strengthen → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>6. Cultural habits and traditions</h4>" +
+          "<ul>" +
+          "<li>In regions or households where strawberries and cream are a traditional pairing, complementarity is strong → XED becomes more negative.</li>" +
+          "<li>Where strawberries are eaten mainly in smoothies or baking, complementarity weakens → XED becomes less negative.</li>" +
+          "</ul>" +
+          "<h4>7. Marketing and promotions</h4>" +
+          "<ul>" +
+          "<li>Supermarkets often run bundled promotions (e.g., “Strawberries + Cream £3”). → Stronger complement → XED becomes more negative.</li>" +
+          "<li>If cream is promoted separately for other uses (cakes, desserts), complementarity weakens → XED becomes less negative.</li>" +
+          "</ul>" +
+          "<h4>8. Quality and freshness</h4>" +
+          "<ul>" +
+          "<li>If strawberries are particularly sweet or high-quality, consumers may eat them without cream → weaker complement → XED becomes less negative.</li>" +
+          "<li>If strawberries are less sweet, consumers may rely more on cream → stronger complement → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>9. Time period</h4>" +
+          "<ul>" +
+          "<li>Short run: habits dominate; consumers still pair strawberries with cream → XED is more negative.</li>" +
+          "<li>Long run: consumers adjust habits, try alternatives, or change dessert preferences → XED becomes less negative.</li>" +
+          "</ul>" +
+          "<h4>10. Expectations about future cream prices</h4>" +
+          "<ul>" +
+          "<li>If consumers expect cream prices to keep rising, they may avoid buying strawberries now → XED becomes more negative.</li>" +
+          "<li>If they expect prices to fall (seasonal discounts), cream price rises have smaller effects → XED becomes less negative.</li>" +
+          "</ul>";
+      }
+      function smartphonesFactorsHtml() {
+        const xed = state.results ? fmt(state.results.XED) : "-0.30";
+        return "<p class=\"xed-factor-lead\">Even though the calculated XED for smartphones vs mobile apps is " + xed +
+          ", the actual cross-elasticity can shift a lot because smartphones and apps are weak complements whose relationship depends on ecosystem design, app pricing, technology, habits, and the availability of alternatives. Anything that changes how tightly smartphone usage relies on apps will change the XED.</p>" +
+          "<h4>Factors that could influence the XED between smartphones and mobile apps</h4>" +
+          "<h4>1. Closeness of complementarity (the core determinant)</h4>" +
+          "<ul>" +
+          "<li>If smartphones rely heavily on apps for functionality → stronger complement → XED becomes more negative.</li>" +
+          "<li>If smartphones offer many built-in features (camera, browser, messaging) → weaker complement → XED moves toward zero.</li>" +
+          "</ul>" +
+          "<p>This is the biggest driver of cross-elasticity.</p>" +
+          "<h4>2. App ecosystem design</h4>" +
+          "<h5>App Store / Google Play lock-in</h5>" +
+          "<ul>" +
+          "<li>If apps are essential and tightly integrated, app price rises reduce smartphone demand more → XED becomes more negative.</li>" +
+          "<li>If ecosystems shift toward free or bundled apps, complementarity weakens → XED becomes less negative.</li>" +
+          "</ul>" +
+          "<h4>3. Availability of free apps</h4>" +
+          "<ul>" +
+          "<li>If most apps are free or ad-supported, app price changes matter less → XED becomes less negative.</li>" +
+          "<li>If paid apps dominate (e.g., professional tools), app price rises cut smartphone demand more → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>4. Subscription models</h4>" +
+          "<h5>Apple Arcade, Google Play Pass, Microsoft 365 mobile, Spotify, Netflix</h5>" +
+          "<ul>" +
+          "<li>If users access many apps through subscriptions, individual app price rises matter less → XED becomes less negative.</li>" +
+          "<li>If subscriptions become expensive or limited, complementarity strengthens → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>5. Presence of substitutes</h4>" +
+          "<h5>Web apps, mobile browsers, progressive web apps (PWAs)</h5>" +
+          "<ul>" +
+          "<li>If users can access services without downloading apps, complementarity weakens → XED rises toward zero.</li>" +
+          "<li>If web alternatives are poor, smartphones rely more on apps → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>6. Income levels</h4>" +
+          "<ul>" +
+          "<li>Higher incomes reduce sensitivity to app price changes → XED becomes less negative.</li>" +
+          "<li>Lower incomes increase sensitivity → app price rises cut smartphone demand more → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>7. Smartphone usage intensity</h4>" +
+          "<ul>" +
+          "<li>Heavy app users (gaming, social media, productivity) rely strongly on apps → XED becomes more negative.</li>" +
+          "<li>Light users (calls, texts, browsing) rely less on apps → XED becomes less negative.</li>" +
+          "</ul>" +
+          "<h4>8. App quality and innovation</h4>" +
+          "<ul>" +
+          "<li>If apps become more powerful (AI tools, editing apps, games), smartphones rely more on them → stronger complement → XED becomes more negative.</li>" +
+          "<li>If apps stagnate or become less essential, complementarity weakens → XED becomes less negative.</li>" +
+          "</ul>" +
+          "<h4>9. Operating system differences</h4>" +
+          "<ul>" +
+          "<li>iOS users often rely more on apps due to ecosystem design → stronger complement → more negative XED.</li>" +
+          "<li>Android users may rely more on web apps or sideloading → weaker complement → less negative XED.</li>" +
+          "</ul>" +
+          "<h4>10. Time period</h4>" +
+          "<ul>" +
+          "<li>Short run: habits dominate; people still use their phones → XED is less negative.</li>" +
+          "<li>Long run: consumers adjust habits, switch ecosystems, or rely more on web apps → XED becomes more negative.</li>" +
+          "</ul>" +
+          "<h4>11. Expectations about future app prices</h4>" +
+          "<ul>" +
+          "<li>If consumers expect app prices to keep rising, they may avoid buying smartphones now → XED becomes more negative.</li>" +
+          "<li>If they expect prices to fall (sales, bundles), app price rises have smaller effects → XED becomes less negative.</li>" +
+          "</ul>";
+      }
+      function showFactors() {
+        const box = document.getElementById("xed-factors");
+        const data = XED_FACTORS[state.a];
+        if (!data) {
+          hideFactors();
+          return;
+        }
+        if (data.custom === "butter") {
+          box.innerHTML = butterFactorsHtml();
+          box.hidden = false;
+          return;
+        }
+        if (data.custom === "cola") {
+          box.innerHTML = colaFactorsHtml();
+          box.hidden = false;
+          return;
+        }
+        if (data.custom === "bus") {
+          box.innerHTML = busFactorsHtml();
+          box.hidden = false;
+          return;
+        }
+        if (data.custom === "tea") {
+          box.innerHTML = teaFactorsHtml();
+          box.hidden = false;
+          return;
+        }
+        if (data.custom === "android") {
+          box.innerHTML = androidFactorsHtml();
+          box.hidden = false;
+          return;
+        }
+        if (data.custom === "petrolcars") {
+          box.innerHTML = petrolCarsFactorsHtml();
+          box.hidden = false;
+          return;
+        }
+        if (data.custom === "printers") {
+          box.innerHTML = printersFactorsHtml();
+          box.hidden = false;
+          return;
+        }
+        if (data.custom === "consoles") {
+          box.innerHTML = consolesFactorsHtml();
+          box.hidden = false;
+          return;
+        }
+        if (data.custom === "strawberries") {
+          box.innerHTML = strawberriesFactorsHtml();
+          box.hidden = false;
+          return;
+        }
+        if (data.custom === "smartphones") {
+          box.innerHTML = smartphonesFactorsHtml();
+          box.hidden = false;
+          return;
+        }
+        let html = "<h4>Factors that could change the XED</h4>" +
+          "<p>These examples could raise or lower XED for <strong>" + state.a + "</strong> and <strong>" + state.b +
+          "</strong>. They do not change the diagram or the exam working above.</p><ul>";
+        data.forEach(function (line) {
+          html += "<li>" + line + "</li>";
+        });
+        html += "</ul>";
+        box.innerHTML = html;
+        box.hidden = false;
+      }
+      function buildMove() {
+        if (![state.eps, state.PB1, state.QA1, state.PB2].every(picked)) return null;
+        const slope = state.eps * (state.QA1 / state.PB1);
+        const QA2 = state.QA1 + slope * (state.PB2 - state.PB1);
+        if (!(QA2 > 0)) return { invalid: true };
+        const pctQ = ((QA2 - state.QA1) / state.QA1) * 100;
+        const pctP = ((state.PB2 - state.PB1) / state.PB1) * 100;
+        const XED = pctQ / pctP;
+        const cls = classify(XED);
+        const shift = QA2 > state.QA1 + 0.01 ? "right" : (QA2 < state.QA1 - 0.01 ? "left" : "very little");
+        return { slope: slope, QA2: QA2, pctQ: pctQ, pctP: pctP, XED: XED, cls: cls, shift: shift };
+      }
+      function diagramCaption(move) {
+        const priceBit = move.pctP > 0
+          ? "The price of " + state.b + " rises"
+          : "The price of " + state.b + " falls";
+        return priceBit + ". Demand for " + state.a + " shifts " + move.shift + ".";
+      }
+      function maybeCalculate() {
+        const cap = document.getElementById("xed-caption");
+        const move = buildMove();
+        if (!move) {
+          state.diagram = null;
+          cap.textContent = "The diagram appears once all four choices are made.";
+          cap.classList.remove("xed-explain");
+          hideShiftNote();
+          drawEmpty();
+          updateSteps();
+          return;
+        }
+        if (move.invalid) {
+          state.diagram = null;
+          setError("That price change for B would push quantity of A to zero or below. Try a smaller percentage change.");
+          cap.textContent = "The diagram appears once all four choices are made.";
+          cap.classList.remove("xed-explain");
+          hideShiftNote();
+          drawEmpty();
+          updateSteps();
+          return;
+        }
+        state.diagram = move;
+        drawDiagram(move);
+        showShiftNote();
+        cap.textContent = diagramCaption(move);
+        cap.classList.add("xed-explain");
+        updateSteps();
+      }
+
+      function productBName(btn) {
+        const parts = (btn.textContent || "").split(" / B ");
+        if (parts.length > 1 && parts[1].trim()) return parts[1].trim();
+        return "good B";
+      }
+      function setBPriceName(name) {
+        const label = name || "good B";
+        document.getElementById("xed-b-up").textContent = label;
+        document.getElementById("xed-b-down").textContent = label;
+      }
+      document.getElementById("xed-productGroup").addEventListener("click", function (ev) {
+        const btn = ev.target.closest("button");
+        if (!btn) return;
+        state.eps = parseFloat(btn.getAttribute("data-eps"));
+        state.a = btn.getAttribute("data-a");
+        state.b = btn.getAttribute("data-b");
+        setBPriceName(productBName(btn));
+        state.results = null;
+        if (state.PB2pct != null) state.PB2 = null;
+        setChosen(document.getElementById("xed-productGroup"), btn);
+        setPairButtons(btn);
+        document.getElementById("xed-prod-hint").textContent =
+          "(A = " + state.a + "; B = " + state.b + "; typical XED ≈ " + fmt(state.eps) + ")";
+        setError("");
+        hideWorking();
+        maybeCalculate();
+      });
+      document.getElementById("xed-pbGroup").addEventListener("click", function (ev) {
+        const btn = ev.target.closest("button");
+        if (!btn) return;
+        state.PB1 = parseFloat(btn.getAttribute("data-pb1"));
+        state.results = null;
+        if (state.PB2pct != null) state.PB2 = state.PB1 * (1 + state.PB2pct);
+        setChosen(document.getElementById("xed-pbGroup"), btn);
+        setError("");
+        hideWorking();
+        maybeCalculate();
+      });
+      document.getElementById("xed-qaGroup").addEventListener("click", function (ev) {
+        const btn = ev.target.closest("button");
+        if (!btn) return;
+        state.QA1 = parseFloat(btn.getAttribute("data-qa1"));
+        state.results = null;
+        setChosen(document.getElementById("xed-qaGroup"), btn);
+        setError("");
+        hideWorking();
+        maybeCalculate();
+      });
+      document.getElementById("xed-pb2Group").addEventListener("click", function (ev) {
+        const btn = ev.target.closest("button");
+        if (!btn) return;
+        if (state.PB1 == null) {
+          setError("Choose an initial price of good B first.");
+          return;
+        }
+        state.PB2pct = parseFloat(btn.getAttribute("data-pct"));
+        state.PB2 = state.PB1 * (1 + state.PB2pct);
+        state.results = null;
+        setChosen(document.getElementById("xed-pb2Group"), btn);
+        setError("");
+        hideWorking();
+        maybeCalculate();
+      });
+
+      document.getElementById("xed-calc").addEventListener("click", calculate);
+
+      function calculate() {
+        setError("");
+        const move = buildMove();
+        if (!move) {
+          setError("Finish Step 1 to Step 4, then calculate.");
+          return;
+        }
+        if (move.invalid) {
+          setError("That price change for B would push quantity of A to zero or below. Try a smaller percentage change.");
+          state.results = null;
+          state.diagram = null;
+          hideFactors();
+          hideShiftNote();
+          drawEmpty();
+          updateSteps();
+          return;
+        }
+        const QA2 = move.QA2;
+        const pctQ = move.pctQ;
+        const pctP = move.pctP;
+        const XED = move.XED;
+        const cls = move.cls;
+        const shift = move.shift;
+        state.diagram = move;
+        state.results = move;
+        const pbUp = pctP > 0;
+        const pBit = pbUp
+          ? "A " + fmt(pctP) + "% increase in the price of " + state.b
+          : "A " + fmt(abs(pctP)) + "% decrease in the price of " + state.b;
+        let qBit;
+        if (pctQ > 0.05) qBit = "raises quantity of " + state.a + " demanded by " + fmt(pctQ) + "%";
+        else if (pctQ < -0.05) qBit = "cuts quantity of " + state.a + " demanded by " + fmt(abs(pctQ)) + "%";
+        else qBit = "leaves quantity of " + state.a + " almost unchanged";
+        document.getElementById("xed-caption").textContent =
+          pBit + " " + qBit + ". XED = " + fmt(XED) + " (" + cls.short + "). Demand for " + state.a + " shifts " + shift + ".";
+        document.getElementById("xed-caption").classList.add("xed-explain");
+        showShiftNote();
+        const out = document.getElementById("xed-output");
+        out.hidden = false;
+        out.innerHTML =
+          "<p><strong>" + state.a + "</strong> and <strong>" + state.b + "</strong> — typical XED ≈ " + fmt(state.eps) +
+          ". For this move, XED = " + fmt(XED) + " (" + cls.short + ").</p>" +
+          "<p><strong>%ΔQ<sub>A</sub></strong> = (" + fmt(QA2) + " − " + fmt(state.QA1) + ") ÷ " + fmt(state.QA1) +
+          " × 100 = <strong>" + fmt(pctQ) + "%</strong></p>" +
+          "<p><strong>%ΔP<sub>B</sub></strong> = (" + fmt(state.PB2) + " − " + fmt(state.PB1) + ") ÷ " + fmt(state.PB1) +
+          " × 100 = <strong>" + fmt(pctP) + "%</strong></p>" +
+          "<p><strong>XED</strong> = %ΔQ<sub>A</sub> ÷ %ΔP<sub>B</sub> = " + fmt(pctQ) + " ÷ " + fmt(pctP) +
+          " = <strong>" + fmt(XED) + "</strong></p>" +
+          "<p>" + cls.line + " Price of " + state.a + " is held constant, so this is a <strong>shift</strong> of demand, not a movement along the curve.</p>";
+        document.getElementById("xed-working").hidden = false;
+        document.getElementById("xed-working").textContent = "Hide exam working";
+        drawDiagram(state.results);
+        showFactors();
+        updateSteps();
+      }
+
+      document.getElementById("xed-working").addEventListener("click", function () {
+        const out = document.getElementById("xed-output");
+        out.hidden = !out.hidden;
+        this.textContent = out.hidden ? "Show exam working" : "Hide exam working";
+      });
+
+      document.getElementById("xed-reset").addEventListener("click", function () {
+        state.eps = null; state.a = ""; state.b = "";
+        state.PB1 = null; state.QA1 = null; state.PB2 = null; state.PB2pct = null; state.diagram = null; state.results = null;
+        root.querySelectorAll(".chosen").forEach(function (b) { b.classList.remove("chosen"); });
+        setPairButtons(null);
+        setBPriceName("good B");
+        document.getElementById("xed-prod-hint").textContent = "(A is the good we demand; B is the other good)";
+        setError("");
+        hideWorking();
+        document.getElementById("xed-working").textContent = "Show exam working";
+        document.getElementById("xed-caption").textContent = "The diagram appears once all four choices are made.";
+        document.getElementById("xed-caption").classList.remove("xed-explain");
+        hideShiftNote();
+        drawEmpty();
+        updateSteps();
+      });
+
+      function wrapText(ctx, text, x, y, maxW, lineH) {
+        const words = text.split(" ");
+        let line = "";
+        let yy = y;
+        words.forEach(function (word, i) {
+          const test = line ? line + " " + word : word;
+          if (ctx.measureText(test).width > maxW && line) {
+            ctx.fillText(line, x, yy);
+            line = word;
+            yy += lineH;
+          } else line = test;
+          if (i === words.length - 1) ctx.fillText(line, x, yy);
+        });
+      }
+
+      function syncSave() {
+        const btn = document.getElementById("xed-save");
+        if (btn) btn.disabled = !state.diagram;
+      }
+      function saveDiagram() {
+        const canvas = document.getElementById("xed-diagram");
+        function slug(text) {
+          return String(text || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+        }
+        const a = slug(state.a);
+        const b = slug(state.b);
+        const name = a && b ? "cross-price-elasticity-" + a + "-" + b + ".png" : "cross-price-elasticity.png";
+        const link = document.createElement("a");
+        link.download = name;
+        link.href = canvas.toDataURL("image/png");
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+      document.getElementById("xed-save").addEventListener("click", saveDiagram);
+
+      function drawEmpty() {
+        hideShiftNote();
+        const canvas = document.getElementById("xed-diagram");
+        const ctx = canvas.getContext("2d");
+        const W = canvas.width, H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = "#5c5348";
+        ctx.font = "15px \"Financier Text\", Georgia, Palatino, serif";
+        wrapText(ctx, "Choose a pair of goods, PB₁, QA₁ and a change in the price of B. Demand for A will shift.", 40, H / 2, W - 80, 22);
+        ctx.strokeStyle = "#1c1915";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(88, 40);
+        ctx.lineTo(88, H - 56);
+        ctx.lineTo(W - 36, H - 56);
+        ctx.stroke();
+        ctx.fillStyle = "#1c1915";
+        ctx.font = "bold 13px \"Financier Text\", Georgia, Palatino, serif";
+        ctx.fillText("Price (£)", 12, 28);
+        ctx.fillText("Quantity of A demanded", W / 2 - 70, H - 16);
+        syncSave();
+      }
+
+      function demandEnds(qAt, pAt, maxQ, maxP) {
+        const hits = [];
+        function pushHit(q, p) {
+          if (!isFinite(q) || !isFinite(p)) return;
+          if (q < -0.001 || q > maxQ + 0.001 || p < -0.001 || p > maxP + 0.001) return;
+          hits.push({ q: Math.min(Math.max(q, 0), maxQ), p: Math.min(Math.max(p, 0), maxP) });
+        }
+        pushHit(0, pAt(0));
+        pushHit(maxQ, pAt(maxQ));
+        pushHit(qAt(0), 0);
+        pushHit(qAt(maxP), maxP);
+        hits.sort(function (a, b) { return a.q - b.q; });
+        const ends = [];
+        hits.forEach(function (h) {
+          const last = ends[ends.length - 1];
+          if (!last || Math.abs(last.q - h.q) > 0.02) ends.push(h);
+        });
+        return ends;
+      }
+
+      function drawDemandLine(ctx, ends, qToX, pToY, color) {
+        if (ends.length < 2) return;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.8;
+        ctx.beginPath();
+        ctx.moveTo(qToX(ends[0].q), pToY(ends[0].p));
+        ctx.lineTo(qToX(ends[ends.length - 1].q), pToY(ends[ends.length - 1].p));
+        ctx.stroke();
+      }
+
+      function along(ends, t) {
+        const a = ends[0], b = ends[ends.length - 1];
+        return { q: a.q + (b.q - a.q) * t, p: a.p + (b.p - a.p) * t };
+      }
+
+      function drawDiagram(r) {
+        const canvas = document.getElementById("xed-diagram");
+        const ctx = canvas.getContext("2d");
+        const W = canvas.width, H = canvas.height;
+        const QA1 = state.QA1, QA2 = r.QA2;
+        const margin = { left: 88, right: 70, top: 36, bottom: 64 };
+        const plotW = W - margin.left - margin.right;
+        const plotH = H - margin.top - margin.bottom;
+        const maxQ = Math.max(QA1, QA2) * 1.85;
+        const pStar = 40;
+        const maxP = 72;
+        const k = -(maxQ * 0.62) / maxP;
+        const qAt1 = function (p) { return QA1 + k * (p - pStar); };
+        const pAt1 = function (q) { return pStar + (q - QA1) / k; };
+        const qAt2 = function (p) { return QA2 + k * (p - pStar); };
+        const pAt2 = function (q) { return pStar + (q - QA2) / k; };
+        const qToX = function (q) { return margin.left + (q / maxQ) * plotW; };
+        const pToY = function (p) { return margin.top + (1 - p / maxP) * plotH; };
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, W, H);
+        ctx.strokeStyle = "#f0dce2";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        let i;
+        for (i = 0; i <= 5; i++) {
+          const y = margin.top + (i / 5) * plotH;
+          ctx.moveTo(margin.left, y);
+          ctx.lineTo(margin.left + plotW, y);
+          const x = margin.left + (i / 5) * plotW;
+          ctx.moveTo(x, margin.top);
+          ctx.lineTo(x, margin.top + plotH);
+        }
+        ctx.stroke();
+        ctx.strokeStyle = "#1c1915";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, margin.top);
+        ctx.lineTo(margin.left, margin.top + plotH);
+        ctx.lineTo(margin.left + plotW, margin.top + plotH);
+        ctx.stroke();
+        ctx.fillStyle = "#1c1915";
+        ctx.font = "bold 13px \"Financier Text\", Georgia, Palatino, serif";
+        ctx.fillText("Price (£)", 10, 22);
+        const qAxis = "Quantity of " + state.a + (state.qUnit ? " (" + state.qUnit + ")" : "");
+        ctx.font = "bold 12px \"Financier Text\", Georgia, Palatino, serif";
+        ctx.fillText(qAxis, margin.left + plotW / 2 - ctx.measureText(qAxis).width / 2, H - 14);
+        ctx.fillStyle = "#5c5348";
+        ctx.font = "11px \"Financier Text\", Georgia, Palatino, serif";
+        for (i = 0; i <= 5; i++) {
+          const rawQ = (i / 5) * maxQ;
+          const qLab = maxQ < 8 ? rawQ.toFixed(1) : String(Math.round(rawQ));
+          ctx.fillText(qLab, margin.left + (i / 5) * plotW - 8, margin.top + plotH + 18);
+        }
+        const ends1 = demandEnds(qAt1, pAt1, maxQ, maxP);
+        const ends2 = demandEnds(qAt2, pAt2, maxQ, maxP);
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(margin.left, margin.top, plotW, plotH);
+        ctx.clip();
+        ctx.setLineDash([8, 6]);
+        drawDemandLine(ctx, ends1, qToX, pToY, "#183a66");
+        ctx.setLineDash([]);
+        drawDemandLine(ctx, ends2, qToX, pToY, "#183a66");
+        ctx.restore();
+        function placeCurveLabel(text, ends, t, color, xShift, yShift) {
+          if (ends.length < 2) return;
+          const pos = along(ends, t);
+          ctx.font = "bold 16px \"Financier Text\", Georgia, Palatino, serif";
+          const w = ctx.measureText(text).width;
+          let x = qToX(pos.q) + xShift;
+          let y = pToY(pos.p) + yShift;
+          if (x + w > W - 10) x = W - 10 - w;
+          if (x < margin.left + 6) x = margin.left + 6;
+          if (y < margin.top + 16) y = margin.top + 16;
+          if (y > H - 22) y = H - 22;
+          ctx.fillStyle = "#fff";
+          ctx.fillRect(x - 3, y - 14, w + 6, 18);
+          ctx.fillStyle = color;
+          ctx.fillText(text, x, y);
+        }
+        const d1IsRight = QA2 >= QA1;
+        placeCurveLabel("D", ends1, 0.32, "#183a66", d1IsRight ? -20 : 12, -8);
+        placeCurveLabel("D₁", ends2, 0.78, "#183a66", d1IsRight ? 12 : -24, 6);
+        const x1 = qToX(QA1), y1 = pToY(pStar);
+        const x2 = qToX(QA2), y2 = pToY(pStar);
+        const axisY = margin.top + plotH;
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = "#1c1915";
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, y1);
+        ctx.lineTo(Math.max(x1, x2), y1);
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x1, axisY);
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2, axisY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        if (Math.abs(x2 - x1) > 18) {
+          const midY = y1 - 18;
+          ctx.strokeStyle = "#183a66";
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(x1, midY);
+          ctx.lineTo(x2, midY);
+          ctx.stroke();
+          const dir = x2 > x1 ? 1 : -1;
+          ctx.beginPath();
+          ctx.moveTo(x2, midY);
+          ctx.lineTo(x2 - 8 * dir, midY - 5);
+          ctx.lineTo(x2 - 8 * dir, midY + 5);
+          ctx.closePath();
+          ctx.fillStyle = "#183a66";
+          ctx.fill();
+        }
+        ctx.fillStyle = "#183a66";
+        ctx.beginPath(); ctx.arc(x1, y1, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#183a66";
+        ctx.beginPath(); ctx.arc(x2, y2, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#1c1915";
+        ctx.font = "bold 12px \"Financier Text\", Georgia, Palatino, serif";
+        ctx.fillText("P", margin.left - 22, y1 + 4);
+        const qClose = Math.abs(x2 - x1) < 28;
+        ctx.fillText("Q₁", x1 - (qClose && x1 <= x2 ? 22 : 10), axisY + 32);
+        ctx.fillText("Q₂", x2 - (qClose && x2 >= x1 ? -4 : 10), axisY + 32);
+        syncSave();
+      }
+
+      drawEmpty();
+      updateSteps();
+    }
+    initXedBuilder();
+  </script>
+</body>
+</html>

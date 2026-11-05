@@ -1,0 +1,72 @@
+/* Financier Display and Financier Text are used when installed on this computer. */
+@font-face {
+  font-family: "Financier Display";
+  src: local("Financier Display"), local("Financier Display Regular"), local("FinancierDisplay-Regular");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Financier Display";
+  src: local("Financier Display Medium"), local("FinancierDisplay-Medium");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Financier Display";
+  src: local("Financier Display Bold"), local("FinancierDisplay-Bold");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Financier Text";
+  src: local("Financier Text"), local("Financier Text Regular"), local("FinancierText-Regular");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Financier Text";
+  src: local("Financier Text Medium"), local("FinancierText-Medium");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Financier Text";
+  src: local("Financier Text Bold"), local("FinancierText-Bold");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --paper: #fef7f9;
+  --bg: #fef7f9;
+  --line: #f0dce2;
+  --accent-soft: #f8e8ec;
+  --muted: #5c5348;
+}
+
+html,
+body {
+  background: #fef7f9;
+}
+
+body,
+button,
+textarea,
+input {
+  font-family: "Financier Text", Georgia, "Palatino Linotype", Palatino, serif;
+}
+
+h1,
+h2,
+h3,
+.mark,
+.clock,
+.word {
+  font-family: "Financier Display", Georgia, "Palatino Linotype", Palatino, serif;
+}

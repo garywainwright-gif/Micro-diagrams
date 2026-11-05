@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>What did the teacher do wrong.</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #e4d9c8;
+      --paper: #f7f1e8;
+      --card: #fffaf3;
+      --accent: #9a3412;
+      --accent-soft: #f3e2d4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    a { color: inherit; }
+    .book { max-width: 920px; margin: 0 auto; padding: 20px 20px 72px; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 4px 0 16px;
+    }
+    .mark {
+      font-family: "Financier Display", Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+      line-height: 1.15;
+    }
+    .mark span { color: var(--accent); }
+    header nav a {
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.92rem;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 1px;
+    }
+    .topic {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 22px 24px;
+    }
+    h1 { margin: 0 0 8px; font-size: 1.75rem; letter-spacing: -0.03em; }
+    .hero-photo {
+      display: block;
+      width: 50%;
+      height: auto;
+      border-radius: 10px;
+      margin: 0 0 16px;
+    }
+    .head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .head > div:first-child { flex: 1 1 28rem; min-width: 0; }
+    .intro { margin: 0 0 10px; }
+    .scorebox {
+      min-width: 11rem;
+      text-align: right;
+      background: var(--accent-soft);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 14px;
+    }
+    .scores { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .score-main {
+      margin: 0;
+      font-size: 1.7rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    .score-sub { margin: 0; color: var(--muted); font-size: 0.82rem; }
+    .chart-wrap {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 8px 4px;
+      margin-top: 8px;
+    }
+    .chart-wrap[hidden] { display: none; }
+    .chart-title { margin: 4px 8px 0; font-weight: 800; }
+    svg.chart {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 700 / 460;
+    }
+    .chart-note { margin: 4px 8px 8px; color: var(--muted); font-size: 0.92rem; }
+    .scenario {
+      background: var(--accent-soft);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin: 14px 0 0;
+    }
+    .q-count { margin: 0 0 4px; color: var(--muted); font-size: 0.88rem; }
+    .ask { margin: 0; font-weight: 800; }
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 12px 0 0;
+    }
+    .choices button {
+      text-align: left;
+      font: inherit;
+      font-weight: 650;
+      line-height: 1.35;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 2px solid var(--accent);
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .choices button:hover:not(:disabled) { background: var(--accent-soft); }
+    .choices button:disabled { cursor: default; }
+    .choices button.ok { background: #dcfce7; border-color: #166534; color: #14532d; }
+    .choices button.bad { background: #ffe4e6; border-color: #9f1239; color: #9f1239; }
+    .choices button.reveal { background: #fff7ed; border-color: #c2410c; color: #9a3412; }
+    .feedback { margin: 12px 0 0; min-height: 1.4em; font-size: 0.98rem; }
+    .feedback.ok { color: #166534; }
+    .feedback.bad { color: #9f1239; }
+    .feedback p { margin: 0 0 8px; }
+    .feedback p:last-child { margin-bottom: 0; }
+    .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .tools button {
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fffaf3;
+      border: 0;
+      padding: 8px 12px;
+    }
+    .tools button.ghost { background: #fff; color: var(--accent); border: 1px solid var(--line); }
+    .tools button.ghost:hover:not(:disabled) { background: var(--accent-soft); }
+    .tools button:disabled { opacity: 0.45; cursor: default; }
+    button:focus-visible, a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    @media (max-width: 640px) {
+      .scorebox { text-align: left; }
+    }
+  </style>
+  <link rel="stylesheet" href="../diagram-economist.css" />
+</head>
+<body>
+  <div class="book">
+    <header>
+      <a class="mark" href="../Diagram Economist.html">The Diagram <span>Economist</span></a>
+      <nav><a href="../micro-diagrams.html">Back to interactive games</a></nav>
+    </header>
+    <article class="topic">
+      <img class="hero-photo" src="../teacher-blackboard.png" alt="A teacher pointing at economics diagrams on a blackboard, including perfect competition for the whole market and one firm.">
+      <div class="head">
+        <div>
+          <h1>What did the teacher do wrong.</h1>
+          <p class="intro">Each diagram has four reasons a teacher might have drawn the diagram on screen. Pick the reason the teacher got wrong.</p>
+        </div>
+        <div class="scores">
+          <div class="scorebox" aria-live="polite">
+            <p class="score-main"><span id="score-points">0</span> / <span id="score-attempts">0</span></p>
+            <p class="score-sub" id="score-sub">reasons spotted</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-wrap" id="chart-externality">
+        <p class="chart-title" id="chart-title-ext">Positive externality and a merit good</p>
+        <svg class="chart" width="700" height="460" viewBox="0 0 700 460" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="chart-title-ext chart-note-ext">
+          <line x1="90" y1="36" x2="90" y2="360" stroke="#1c1915" stroke-width="2" />
+          <polygon points="90,24 85,40 95,40" fill="#1c1915" />
+          <line x1="90" y1="360" x2="650" y2="360" stroke="#1c1915" stroke-width="2" />
+          <polygon points="662,360 646,355 646,365" fill="#1c1915" />
+          <text x="22" y="248" fill="#5c5348" font-size="14" font-family="Georgia, Palatino Linotype, Palatino, serif" transform="rotate(-90 22 248)">Price, costs, benefits</text>
+          <text x="560" y="400" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">Quantity</text>
+
+          <line x1="90" y1="160" x2="460" y2="160" stroke="#5c5348" stroke-width="1.25" stroke-dasharray="5 4" />
+          <line x1="90" y1="250" x2="280" y2="250" stroke="#5c5348" stroke-width="1.25" stroke-dasharray="5 4" />
+          <line x1="280" y1="70" x2="280" y2="360" stroke="#5c5348" stroke-width="1.25" stroke-dasharray="5 4" />
+          <line x1="460" y1="160" x2="460" y2="360" stroke="#5c5348" stroke-width="1.25" stroke-dasharray="5 4" />
+
+          <polygon points="280,70 460,160 280,250" fill="#86efac" fill-opacity="0.55" />
+
+          <line x1="150" y1="315" x2="560" y2="110" stroke="#1c1915" stroke-width="3" />
+          <text x="498" y="96" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">MPC = MSC</text>
+
+          <line x1="175" y1="108" x2="350" y2="345" stroke="#1c1915" stroke-width="3" />
+          <text x="356" y="340" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">MPB</text>
+
+          <line x1="190" y1="25" x2="560" y2="210" stroke="#1c1915" stroke-width="3" />
+          <text x="548" y="232" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">MSB</text>
+
+          <circle cx="280" cy="250" r="5" fill="#1c1915" />
+          <circle cx="460" cy="160" r="5" fill="#1c1915" />
+          <text x="268" y="62" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">D</text>
+          <text x="248" y="246" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">F</text>
+          <text x="472" y="154" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">E</text>
+
+          <text x="360" y="48" fill="#9f1239" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">Welfare gain</text>
+          <line x1="400" y1="54" x2="370" y2="100" stroke="#9f1239" stroke-width="2" />
+          <polygon points="370,108 364,92 380,96" fill="#9f1239" />
+
+          <text x="78" y="164" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">P1</text>
+          <text x="78" y="254" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">Pe</text>
+          <text x="70" y="378" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif" style="font-variant-numeric: lining-nums">0</text>
+          <text x="280" y="380" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">Qe</text>
+          <text x="460" y="380" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">Q1</text>
+
+          <line x1="300" y1="398" x2="440" y2="398" stroke="#9f1239" stroke-width="2.4" />
+          <polygon points="292,398 308,392 308,404" fill="#9f1239" />
+          <polygon points="448,398 432,392 432,404" fill="#9f1239" />
+          <text x="370" y="418" text-anchor="middle" fill="#9f1239" font-size="15" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">Underconsumption</text>
+        </svg>
+        <p class="chart-note" id="chart-note-ext">MSB and MPB slope down. MPC and MSC are the same upward line. F is where MPB meets that line, at price Pe and quantity Qe. E is where MSB meets it, at price P1 and quantity Q1. The shaded triangle is marked as a welfare gain.</p>
+      </div>
+
+      <div class="chart-wrap" id="chart-monopoly" hidden>
+        <p class="chart-title" id="chart-title-mon">Monopoly</p>
+        <svg class="chart" width="700" height="460" viewBox="0 0 700 460" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="chart-title-mon chart-note-mon">
+          <defs>
+            <marker id="arrow-ink" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#1c1915" />
+            </marker>
+          </defs>
+          <line x1="108" y1="48" x2="108" y2="400" stroke="#1c1915" stroke-width="2" />
+          <polygon points="108,36 103,50 113,50" fill="#1c1915" />
+          <line x1="108" y1="400" x2="640" y2="400" stroke="#1c1915" stroke-width="2" />
+          <polygon points="652,400 636,395 636,405" fill="#1c1915" />
+          <text x="28" y="230" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif" transform="rotate(-90 28 230)">Price</text>
+          <text x="560" y="438" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">Output</text>
+
+          <rect x="108" y="208" width="172.8" height="72" fill="#bfdbfe" stroke="#2563eb" stroke-width="1.6" stroke-dasharray="6 4" />
+          <line x1="280.8" y1="280" x2="280.8" y2="400" stroke="#1c1915" stroke-width="1.25" stroke-dasharray="5 4" />
+
+          <polyline fill="none" stroke="#1c1915" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" points="151.2,131.1 162,149.7 172.8,167.2 183.6,183.6 194.4,198.8 205.2,212.9 216,225.9 226.8,237.7 237.6,248.4 248.4,258 259.2,266.5 270,273.8 280.8,280 291.6,285.1 302.4,289 313.2,291.8 324,293.5 334.8,294.1 345.6,293.5 356.4,291.8 367.2,289 378,285.1 388.8,280 399.6,273.8 410.4,266.5 421.2,258 432,248.4 442.8,237.7 453.6,225.9 464.4,212.9 475.2,198.8 486,183.6 496.8,167.2 507.6,149.7 518.4,131.1 529.2,111.4" />
+          <polyline fill="none" stroke="#1c1915" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" points="194.4,391 205.2,386.1 216,380.8 226.8,375.1 237.6,368.9 248.4,362.4 259.2,355.3 270,347.9 280.8,340 291.6,331.7 302.4,322.9 313.2,313.8 324,304.1 334.8,294.1 345.6,283.6 356.4,272.7 367.2,261.4 378,249.6 388.8,237.4 399.6,224.8 410.4,211.7 421.2,198.2 432,184.3 442.8,169.9 453.6,155.1 464.4,139.9 475.2,124.2 486,108.1 496.8,91.6 507.6,74.6" />
+          <polyline fill="none" stroke="#1c1915" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" points="129.6,92.5 140.4,100.8 151.2,109 162,117.2 172.8,125.5 183.6,133.8 194.4,142 205.2,150.2 216,158.5 226.8,166.8 237.6,175 248.4,183.2 259.2,191.5 270,199.8 280.8,208 291.6,216.2 302.4,224.5 313.2,232.8 324,241 334.8,249.2 345.6,257.5 356.4,265.8 367.2,274 378,282.2 388.8,290.5 399.6,298.8 410.4,307 421.2,315.2 432,323.5 442.8,331.8 453.6,340 464.4,348.2 475.2,356.5" />
+          <polyline fill="none" stroke="#1c1915" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" points="129.6,109 140.4,125.5 151.2,142 162,158.5 172.8,175 183.6,191.5 194.4,208 205.2,224.5 216,241 226.8,257.5 237.6,274 248.4,290.5 259.2,307 270,323.5 280.8,340 291.6,356.5 302.4,373 313.2,389.5" />
+
+          <text x="522" y="70" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">MC</text>
+          <text x="548" y="100" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">AC</text>
+          <text x="492" y="378" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">D (AR)</text>
+          <text x="336" y="358" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">MR</text>
+
+          <text x="330" y="128" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">Supernormal profit</text>
+          <line x1="400" y1="136" x2="292" y2="198" stroke="#1c1915" stroke-width="1.6" marker-end="url(#arrow-ink)" />
+          <text x="124" y="352" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">MC = MR</text>
+          <line x1="196" y1="348" x2="270" y2="340" stroke="#1c1915" stroke-width="1.6" marker-end="url(#arrow-ink)" />
+
+          <text x="98" y="212" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">Pm</text>
+          <text x="98" y="284" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">ACm</text>
+          <text x="96" y="422" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif" style="font-variant-numeric: lining-nums">0</text>
+          <text x="280.8" y="422" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">Qm</text>
+        </svg>
+        <p class="chart-note" id="chart-note-mon">D (AR) and MR slope down, and MR is the steeper line. MC slopes up and meets MR at output Qm. The price Pm is the point on D (AR) at that output. ACm is average cost at Qm. The shaded rectangle is supernormal profit.</p>
+      </div>
+
+      <div class="scenario" id="scenario">
+        <p class="q-count" id="q-count">Question 1 of 4</p>
+        <p class="ask" id="ask">What did the teacher do wrong?</p>
+      </div>
+      <div class="choices" id="choices" role="group" aria-labelledby="ask"></div>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+      <div class="tools">
+        <button type="button" id="btn-next" disabled>Next question</button>
+        <button type="button" class="ghost" id="btn-save">Save diagram</button>
+        <button type="button" class="ghost" id="btn-reset">Start again</button>
+      </div>
+    </article>
+  </div>
+  <script>
+    (function () {
+      var ROUNDS = [
+        {
+          diagram: "externality",
+          options: [
+            {
+              text: "To teach a positive externality: society benefits more than the buyer, so MSB lies above MPB.",
+              fit: "MSB is the upper benefit curve. The gap between MSB and MPB is the benefit to third parties, which the buyer does not take into account."
+            },
+            {
+              text: "To show that third-party benefits are ignored, which is why MSB is greater than MPB.",
+              fit: "If those benefits were included in demand, the curve would be MSB. The market uses MPB, so the external benefit is left out."
+            },
+            {
+              text: "To show that the market underconsumes the good. Quantity stays at Qe, to the left of Q1.",
+              fit: "The market stops at F, where MPB meets MPC. The socially best quantity is further right, at E and Q1."
+            },
+            {
+              decoy: true,
+              text: "To show a negative externality, with MSC above MPC and the market overproducing.",
+              why: "MPC and MSC are the same line, so there is no external cost. The external effect is a benefit: MSB is above MPB, and the market quantity is too low."
+            }
+          ]
+        },
+        {
+          diagram: "externality",
+          options: [
+            {
+              text: "To explain merit goods, such as education or vaccinations, which the market underconsumes.",
+              fit: "A merit good has benefits that people undervalue. The diagram shows that private demand, MPB, produces less than society wants."
+            },
+            {
+              text: "To show that individuals undervalue the long-term benefits, so their demand is the lower curve, MPB.",
+              fit: "MPB is below MSB. Buyers do not count the full benefit, including the benefit to other people and the longer-term gain."
+            },
+            {
+              text: "To show that society wants a higher quantity, Q1, than the market provides at Qe.",
+              fit: "E, where MSB meets MSC, is to the right of F. The socially best quantity is Q1. The market quantity is the smaller one, Qe."
+            },
+            {
+              decoy: true,
+              text: "To show that merit goods are overconsumed, with the market quantity above the social optimum.",
+              why: "The market quantity is Qe, and it is to the left of Q1. Merit goods in this diagram are underconsumed."
+            }
+          ]
+        },
+        {
+          diagram: "externality",
+          options: [
+            {
+              text: "To illustrate underconsumption: the market quantity Qe is below the socially optimal quantity Q1.",
+              fit: "The red arrow sits between Qe and Q1, and Qe is the left-hand quantity. The market is not consuming enough."
+            },
+            {
+              text: "To show that the market equilibrium is too low. It is at F, where MPB equals MPC.",
+              fit: "F is the free-market point. Price is Pe and quantity is Qe. That quantity is short of the quantity at E."
+            },
+            {
+              text: "To show that the socially optimal quantity is higher, at E, where MSB equals MSC.",
+              fit: "E is the point on the right, at Q1 and P1. Because MSB is above MPB, the best quantity is greater than the market quantity."
+            },
+            {
+              decoy: true,
+              text: "To show that Q1 is less than Qe, so the free-market quantity is above the social optimum.",
+              why: "On this diagram Q1 is to the right of Qe. The free-market quantity is the smaller one, so Qe is below Q1."
+            }
+          ]
+        },
+        {
+          diagram: "externality",
+          options: [
+            {
+              text: "To show the welfare gain from increased consumption. The shaded triangle is that gain.",
+              fit: "The green triangle lies between Qe and Q1, bounded by MSB and MPC. It is the extra welfare from consuming more than the market does."
+            },
+            {
+              text: "To show the gain society would receive if consumption rose from Qe to Q1.",
+              fit: "Moving from F toward E raises quantity from Qe to Q1. The triangle is the welfare gained by that increase."
+            },
+            {
+              text: "To show why a subsidy, or another policy that raises consumption toward Q1, can increase total welfare.",
+              fit: "The shaded area is the welfare the market is missing. Intervention that moves quantity from Qe toward Q1 can capture that gain."
+            },
+            {
+              decoy: true,
+              text: "To show that total welfare rises if consumption is cut from Q1 back to Qe.",
+              why: "Cutting quantity from Q1 to Qe moves away from E and gives up the shaded triangle. The welfare gain comes from increasing consumption, from Qe to Q1."
+            }
+          ]
+        },
+        {
+          diagram: "monopoly",
+          options: [
+            {
+              text: "To show that the profit-maximising output is Qm, where MR equals MC.",
+              fit: "MC meets MR on the dashed line at Qm. That is the output the monopolist chooses."
+            },
+            {
+              text: "To show that the price Pm is then read from Qm up to the demand curve, D (or AR).",
+              fit: "At output Qm the firm charges the price buyers will pay. That price is Pm, on D (or AR), above the point where MR meets MC."
+            },
+            {
+              text: "To show the monopoly decision: choose output where MR equals MC, then set the price from the AR curve.",
+              fit: "Qm comes from MR = MC. Pm is the matching point on D (or AR)."
+            },
+            {
+              decoy: true,
+              text: "To show that the monopolist sets output where AR equals AC, and reads the price from the MR curve.",
+              why: "Output is where MR meets MC, at Qm. The price is Pm on D (or AR), above that quantity."
+            }
+          ]
+        },
+        {
+          diagram: "monopoly",
+          options: [
+            {
+              text: "To illustrate supernormal profit. The upper shaded rectangle is the gap between price Pm and average cost ACm.",
+              fit: "The rectangle runs from ACm up to Pm, out to Qm. Price is above average cost."
+            },
+            {
+              text: "To show that the monopolist earns supernormal profit at Qm, because Pm is above ACm.",
+              fit: "At Qm, D (or AR) gives the price Pm and the AC curve gives the cost ACm. Pm is the higher of the two."
+            },
+            {
+              text: "To show supernormal profit that barriers to entry can protect, so it need not be competed away in the long run.",
+              fit: "The rectangle is profit above average cost. Barriers to entry can stop new firms from removing it."
+            },
+            {
+              decoy: true,
+              text: "To show a loss, with average cost ACm above the price Pm.",
+              why: "Pm is the upper line and ACm is below it. The shaded rectangle between them is supernormal profit at output Qm."
+            }
+          ]
+        },
+        {
+          diagram: "monopoly",
+          options: [
+            {
+              text: "To explain why MR lies below AR: the monopolist faces a downward-sloping demand curve.",
+              fit: "D (or AR) slopes down, and MR is drawn below it."
+            },
+            {
+              text: "To show that selling a larger output means lowering the price, so MR falls faster than AR.",
+              fit: "MR is steeper than D (or AR). Extra sales reduce the price received on the units already sold."
+            },
+            {
+              text: "To show that MR stays below AR for a firm that sets its own price.",
+              fit: "Along the whole diagram, the MR line is beneath D (or AR)."
+            },
+            {
+              decoy: true,
+              text: "To show that MR lies above AR, because the monopolist can sell more without lowering the price.",
+              why: "MR is the steeper line, and it sits below D (or AR). Demand slopes down, so a larger output is sold at a lower price."
+            }
+          ]
+        },
+        {
+          diagram: "monopoly",
+          options: [
+            {
+              text: "To teach allocative inefficiency: monopoly output Qm is below the output where MC meets AR.",
+              fit: "MR meets MC at Qm. MC meets D (or AR) further to the right, so that competitive output is higher."
+            },
+            {
+              text: "To show underproduction and a higher price than the output where price equals marginal cost.",
+              fit: "Pm is the price at Qm. Where MC meets AR, output is larger and the price on the demand curve is lower."
+            },
+            {
+              text: "To show that resources are misallocated, because output stops where MR equals MC rather than where price equals MC.",
+              fit: "Price equals MC where MC meets AR. The monopolist stops earlier, at Qm, where MR equals MC."
+            },
+            {
+              decoy: true,
+              text: "To show that monopoly output Qm is larger than the competitive output where MC crosses AR.",
+              why: "Qm is where MR meets MC. MC crosses D (or AR) to the right of that point, so the competitive output is higher than Qm."
+            }
+          ]
+        }
+      ];
+
+      var qCount = document.getElementById("q-count");
+      var ask = document.getElementById("ask");
+      var choices = document.getElementById("choices");
+      var feedback = document.getElementById("feedback");
+      var nextBtn = document.getElementById("btn-next");
+      var resetBtn = document.getElementById("btn-reset");
+      var scorePoints = document.getElementById("score-points");
+      var scoreAttempts = document.getElementById("score-attempts");
+      var scoreSub = document.getElementById("score-sub");
+
+      var rounds = [];
+      var index = 0;
+      var score = 0;
+      var attempts = 0;
+      var locked = false;
+      var finished = false;
+
+      function shuffle(list) {
+        var a = list.slice();
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var tmp = a[i];
+          a[i] = a[j];
+          a[j] = tmp;
+        }
+        return a;
+      }
+
+      function clear(node) {
+        while (node.firstChild) node.removeChild(node.firstChild);
+      }
+
+      function addParagraph(parent, lead, rest) {
+        var p = document.createElement("p");
+        var strong = document.createElement("strong");
+        strong.textContent = lead;
+        p.appendChild(strong);
+        p.appendChild(document.createTextNode(" " + rest));
+        parent.appendChild(p);
+      }
+
+      function updateScore() {
+        scorePoints.textContent = String(score);
+        scoreAttempts.textContent = String(attempts);
+        scoreSub.textContent = finished ? "spotted out of " + rounds.length : "reasons spotted";
+      }
+
+      function showDiagram(kind) {
+        document.getElementById("chart-externality").hidden = kind !== "externality";
+        document.getElementById("chart-monopoly").hidden = kind !== "monopoly";
+      }
+
+      function showRound() {
+        var round = rounds[index];
+        locked = false;
+        finished = false;
+        clear(choices);
+        clear(feedback);
+        feedback.className = "feedback";
+        showDiagram(round.diagram);
+        var frame = round.diagram === "monopoly" ? "Monopoly diagram" : "Positive externality diagram";
+        qCount.textContent = "Question " + (index + 1) + " of " + rounds.length + " — " + frame;
+        ask.textContent = "What did the teacher do wrong?";
+        nextBtn.disabled = true;
+        nextBtn.textContent = index === rounds.length - 1 ? "See score" : "Next question";
+        round.options.forEach(function (option) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = option.text;
+          btn.addEventListener("click", function () { choose(btn, option); });
+          choices.appendChild(btn);
+        });
+      }
+
+      function choose(btn, option) {
+        if (locked) return;
+        locked = true;
+        attempts += 1;
+        var buttons = choices.querySelectorAll("button");
+        var decoy = null;
+        for (var i = 0; i < buttons.length; i++) buttons[i].disabled = true;
+        rounds[index].options.forEach(function (item) {
+          if (item.decoy) decoy = item;
+        });
+        if (option.decoy) {
+          score += 1;
+          btn.classList.add("ok");
+          feedback.className = "feedback ok";
+          addParagraph(feedback, "That reason is not true.", option.why);
+        } else {
+          btn.classList.add("bad");
+          for (var n = 0; n < buttons.length; n++) {
+            if (buttons[n].textContent === decoy.text) buttons[n].classList.add("reveal");
+          }
+          feedback.className = "feedback bad";
+          addParagraph(feedback, "That reason does fit the diagram.", option.fit);
+          addParagraph(feedback, "The reason that is not true:", decoy.text + " " + decoy.why);
+        }
+
+        updateScore();
+        nextBtn.disabled = false;
+        nextBtn.focus();
+      }
+
+      function showScore() {
+        finished = true;
+        clear(choices);
+        clear(feedback);
+        feedback.className = "feedback";
+        qCount.textContent = "Score";
+        ask.textContent = "You spotted " + score + " of " + rounds.length + " reasons the teacher got wrong.";
+        nextBtn.textContent = "Play again";
+        nextBtn.disabled = false;
+        updateScore();
+      }
+
+      function start() {
+        rounds = shuffle(ROUNDS).map(function (round) {
+          return { diagram: round.diagram, options: shuffle(round.options) };
+        });
+        index = 0;
+        score = 0;
+        attempts = 0;
+        finished = false;
+        updateScore();
+        showRound();
+      }
+
+      nextBtn.addEventListener("click", function () {
+        if (finished) {
+          start();
+          return;
+        }
+        if (index >= rounds.length - 1) {
+          showScore();
+          return;
+        }
+        index += 1;
+        showRound();
+      });
+
+      resetBtn.addEventListener("click", start);
+
+      function downloadFile(blob, name) {
+        var link = document.createElement("a");
+        var url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = name;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      }
+
+      function saveDiagram() {
+        var wrap = null;
+        var wraps = document.querySelectorAll(".chart-wrap");
+        for (var i = 0; i < wraps.length; i++) {
+          if (!wraps[i].hidden) { wrap = wraps[i]; break; }
+        }
+        if (!wrap) return;
+        var svg = wrap.querySelector("svg");
+        var box = svg.viewBox.baseVal;
+        var w = box && box.width ? box.width : 700;
+        var h = box && box.height ? box.height : 460;
+        var clone = svg.cloneNode(true);
+        clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        clone.setAttribute("width", String(w));
+        clone.setAttribute("height", String(h));
+        var xml = new XMLSerializer().serializeToString(clone);
+        var svgBlob = new Blob([xml], { type: "image/svg+xml;charset=utf-8" });
+        var url = URL.createObjectURL(svgBlob);
+        var image = new Image();
+        var file = wrap.id === "chart-monopoly" ? "teacher-wrong-monopoly.png" : "teacher-wrong-positive-externality.png";
+        image.onload = function () {
+          var scale = 2;
+          var canvas = document.createElement("canvas");
+          canvas.width = w * scale;
+          canvas.height = h * scale;
+          var ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          canvas.toBlob(function (png) {
+            if (png) downloadFile(png, file);
+            else downloadFile(svgBlob, file.replace(/\.png$/, ".svg"));
+          }, "image/png");
+        };
+        image.onerror = function () {
+          URL.revokeObjectURL(url);
+          downloadFile(svgBlob, file.replace(/\.png$/, ".svg"));
+        };
+        image.src = url;
+      }
+
+      document.getElementById("btn-save").addEventListener("click", saveDiagram);
+      start();
+    })();
+  </script>
+</body>
+</html>

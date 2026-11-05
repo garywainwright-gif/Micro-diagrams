@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Axes are the foundation of every diagram — they tell the examiner what story the student is trying to tell.</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #e4d9c8;
+      --paper: #f7f1e8;
+      --card: #fffaf3;
+      --accent: #9a3412;
+      --accent-soft: #f3e2d4;
+      --ok: #166534;
+      --ok-bg: #e7f6ec;
+      --ok-line: #b7e4c7;
+      --bad: #9f1239;
+      --bad-bg: #fde8ee;
+      --bad-line: #f3c1cf;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.45;
+    }
+    a { color: inherit; }
+    .wrap { max-width: none; margin: 0; padding: 0 28px 72px; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 22px 0 8px;
+    }
+    .mark {
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+      line-height: 1.15;
+    }
+    .mark span { color: var(--accent); }
+    header nav a {
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.92rem;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 1px;
+    }
+    h1 {
+      margin: 18px 0 8px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.7rem;
+      letter-spacing: -0.02em;
+      font-weight: 700;
+      line-height: 1.25;
+      max-width: 36em;
+    }
+    .intro { margin: 0 0 16px; max-width: 78ch; }
+    .intro p { margin: 0 0 8px; }
+    .intro ul { margin: 0; padding-left: 1.3em; }
+    .intro li { margin: 0 0 4px; }
+    .bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: var(--paper);
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 14px;
+    }
+    .stat {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat span { color: var(--muted); font-weight: 600; }
+    .clockbox {
+      background: var(--accent-soft);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 4px 12px;
+      min-width: 7.5rem;
+    }
+    .clockbox .score-main {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+    }
+    .clockbox .score-sub {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .clockbox.urgent .score-main { color: var(--accent); }
+    .clockbox.done .score-main { color: var(--ok); }
+    .clockbox.out .score-main { color: var(--bad); }
+    .text-btn, .chip, .diagram {
+      font: inherit;
+      color: var(--ink);
+    }
+    .text-btn {
+      margin-left: auto;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .feedback {
+      min-height: 3.2em;
+      margin: 0 0 14px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      font-size: 1.35rem;
+      line-height: 1.4;
+    }
+    .feedback.ok { background: var(--ok-bg); border-color: var(--ok-line); color: var(--ok); }
+    .feedback.bad { background: var(--bad-bg); border-color: var(--bad-line); color: var(--bad); }
+    .col-title {
+      margin: 0 0 8px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.05rem;
+    }
+    .axes-banner {
+      margin: 0 0 10px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    .axes-banner span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-family: "Segoe UI", system-ui, sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .stage-empty {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      min-height: 520px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .diagram {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 8px 8px 14px;
+      min-width: 0;
+      width: 100%;
+    }
+    .diagram.flash { background: var(--bad-bg); border-color: var(--bad-line); }
+    .plot { position: relative; }
+    .diagram svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fff;
+      pointer-events: none;
+    }
+    .inside {
+      position: absolute;
+      z-index: 3;
+      left: 10%;
+      top: 8%;
+      right: 4%;
+      bottom: 12%;
+      overflow: hidden;
+      padding: 10px;
+      pointer-events: auto;
+    }
+    .inside-label {
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+    .inside .chip {
+      position: absolute;
+      width: auto;
+      max-width: none;
+      white-space: nowrap;
+      line-height: 1.25;
+      cursor: pointer;
+      background: var(--card);
+      border: 1px solid var(--line);
+      box-shadow: 0 1px 0 rgba(28, 25, 21, 0.06);
+    }
+    .inside .chip.locked { cursor: default; }
+    .inside .chip.missed {
+      cursor: default;
+      background: var(--bad-bg);
+      border-color: var(--bad-line);
+      color: var(--bad);
+    }
+    .scoreline {
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.25rem;
+      margin: 12px 0 0;
+      font-weight: 700;
+    }
+    .scoreline.final {
+      font-size: 1.45rem;
+      margin-top: 18px;
+    }
+    .chip {
+      display: inline-block;
+      width: auto;
+      text-align: left;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      touch-action: manipulation;
+      user-select: none;
+    }
+    .chip.locked {
+      cursor: default;
+      background: var(--ok-bg);
+      border-color: var(--ok-line);
+      color: var(--ok);
+    }
+    .chip.fresh { animation: slide-in 0.4s ease; }
+    @keyframes slide-in {
+      from { transform: translateY(-18px); opacity: 0; }
+      to { transform: none; opacity: 1; }
+    }
+    .chip:focus-visible, .text-btn:focus-visible, a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+  </style>
+  <link rel="stylesheet" href="../diagram-economist.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="mark" href="../Diagram Economist.html">The Diagram <span>Economist</span></a>
+      <nav><a href="../micro-diagrams.html">Back to interactive games</a></nav>
+    </header>
+    <h1>Axes are the foundation of every diagram — they tell the examiner what story the student is trying to tell.</h1>
+    <div class="intro">
+      <p>A random blank axes diagram appears for 30 seconds at a time. Click as many correct uses as you can before the axes change. The game lasts 5 minutes.</p>
+    </div>
+    <div id="app"></div>
+  </div>
+  <script>
+    var TOPICS = [
+      {
+        id: "market",
+        title: "Market diagrams",
+        y: "Price",
+        x: "Quantity",
+        src: "axes-price-quantity.png?v=20261103",
+        items: [
+          "Demand shift",
+          "Supply shift",
+          "Consumer Surplus",
+          "Specific tax",
+          "Ad valorem tax",
+          "Subsidy",
+          "Price Ceiling",
+          "Minimum Price",
+          "Buffer Stock Schemes",
+          "PED",
+          "YED",
+          "PES",
+          "XED"
+        ],
+        wrongItems: [
+          "Positive Externalities",
+          "Monopsony Labour Market",
+          "Trade Union",
+          "Perfect Competition",
+          "Oligopoly",
+          "Supply-Side Policies",
+          "Demand-pull inflation",
+          "Cost-push inflation",
+          "Economic Growth",
+          "National Minimum Wage"
+        ]
+      },
+      {
+        id: "adas",
+        title: "AD/AS diagrams",
+        y: "Price level",
+        x: "Real national output",
+        src: "axes-price-level-real-national-output.png?v=20261103",
+        items: [
+          "Aggregate Demand",
+          "Aggregate Supply",
+          "Recession",
+          "Demand-Side Policies",
+          "AD shifts: Fiscal expansion",
+          "Monetary policy",
+          "Supply-Side Policies",
+          "Demand-pull inflation",
+          "Cost-push inflation",
+          "Economic Growth",
+          "positive output gap",
+          "negative output gap",
+          "Classical LRAS",
+          "Keynesian LRAS"
+        ],
+        wrongItems: [
+          "Positive Externalities",
+          "Monopsony Labour Market",
+          "Trade Union",
+          "Perfect Competition",
+          "Oligopoly",
+          "Monopoly",
+          "Merit Goods"
+        ]
+      },
+      {
+        id: "ppf",
+        title: "Production possibility frontier",
+        y: "Good B",
+        x: "Good A",
+        src: "axes-good-b-good-a.png?v=20261103",
+        items: [
+          "PPF",
+          "Economic growth",
+          "Productive inefficiency",
+          "Productively efficient",
+          "Opportunity cost"
+        ],
+        wrongItems: [
+          "Positive Externalities",
+          "Monopsony Labour Market",
+          "Trade Union",
+          "Perfect Competition",
+          "Monopoly",
+          "Long-run equilibrium",
+          "Merit Goods",
+          "Demerit Goods",
+          "Public Goods"
+        ]
+      },
+      {
+        id: "firm-crp",
+        title: "Firm cost and revenue",
+        y: "Costs, Revenue and Price",
+        x: "Output",
+        src: "axes-costs-revenue-price-output.png?v=20261103",
+        items: [
+          "Monopoly",
+          "Profit-maximising",
+          "Supernormal profit",
+          "Normal profit",
+          "Long-run equilibrium"
+        ],
+        wrongItems: [
+          "Positive Externalities",
+          "Monopsony Labour Market",
+          "Trade Union",
+          "Perfect Competition",
+          "Economic Growth",
+          "Cost-push inflation",
+          "positive output gap"
+        ]
+      },
+      {
+        id: "labour",
+        title: "Labour markets",
+        y: "Wage rate cost and revenue product",
+        x: "Quantity of labour",
+        src: "axes-wage-labour.png?v=20261103",
+        items: [
+          "Competitive Labour market",
+          "National Minimum Wage",
+          "Monopsony Labour Market",
+          "Trade Union Diagram",
+          "Monopsony with a Trade Union"
+        ],
+        wrongItems: [
+          "Positive Externalities",
+          "Monopoly",
+          "Long-run equilibrium",
+          "Perfect Competition",
+          "Oligopoly",
+          "Monopolistic Competition"
+        ]
+      },
+      {
+        id: "failure",
+        title: "Market failure",
+        y: "Price, costs, benefits",
+        x: "Quantity",
+        src: "axes-price-costs-benefits-quantity.png?v=20261103",
+        items: [
+          "Negative Externalities of Production",
+          "Negative Externalities of Consumption",
+          "Positive Externalities of Production",
+          "Positive Externalities of Consumption",
+          "Merit Goods",
+          "Demerit Goods",
+          "Public Goods"
+        ],
+        wrongItems: [
+          "Monopoly firm",
+          "Perfect Competition",
+          "Monopolistic Competition",
+          "Oligopoly",
+          "Shutdown diagram",
+          "Cost curves"
+        ]
+      }
+    ];
+    var GAME_SECONDS = 300;
+    var ROUND_SECONDS = 30;
+    var CHIP_COUNT = 20;
+
+    var currentTopic = null;
+    var chips = [];
+    var correctClicks = 0;
+    var wrongClicks = 0;
+    var possibleCorrect = 0;
+    var chipN = 0;
+    var feedback = { kind: "", text: "Press Start to begin. Axes change every 30 seconds. Click the correct uses." };
+    var flashTimer = 0;
+    var justLocked = null;
+    var justMissed = null;
+    var gameLeft = GAME_SECONDS;
+    var roundLeft = ROUND_SECONDS;
+    var gameRunning = false;
+    var gameOver = false;
+    var tickTimer = null;
+    var gameEndAt = 0;
+    var roundEndAt = 0;
+
+    function shuffle(list) {
+      var arr = list.slice();
+      for (var i = arr.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+      }
+      return arr;
+    }
+
+    function esc(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function formatClock(total) {
+      var minutes = Math.floor(total / 60);
+      var seconds = total % 60;
+      return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+    }
+
+    function stopTimers() {
+      gameRunning = false;
+      if (tickTimer) {
+        clearInterval(tickTimer);
+        tickTimer = null;
+      }
+    }
+
+    function axesKey(topic) {
+      return topic.y + "\n" + topic.x;
+    }
+
+    function uniqueAxesList() {
+      var seen = {};
+      var list = [];
+      TOPICS.forEach(function (topic) {
+        var key = axesKey(topic);
+        if (seen[key]) return;
+        seen[key] = true;
+        list.push({
+          y: topic.y,
+          x: topic.x,
+          title: topic.y + " vs " + topic.x,
+          src: topic.src || ""
+        });
+      });
+      return list;
+    }
+
+    function usesForAxes(axes) {
+      var seen = {};
+      var texts = [];
+      TOPICS.forEach(function (topic) {
+        if (topic.y !== axes.y || topic.x !== axes.x) return;
+        topic.items.forEach(function (text) {
+          if (seen[text]) return;
+          seen[text] = true;
+          texts.push(text);
+        });
+      });
+      return texts;
+    }
+
+    function allUseTexts() {
+      var seen = {};
+      var texts = [];
+      TOPICS.forEach(function (topic) {
+        topic.items.forEach(function (text) {
+          if (seen[text]) return;
+          seen[text] = true;
+          texts.push(text);
+        });
+      });
+      return texts;
+    }
+
+    function pickRandomAxes() {
+      var pool = uniqueAxesList();
+      if (currentTopic && pool.length > 1) {
+        pool = pool.filter(function (axes) {
+          return axes.y !== currentTopic.y || axes.x !== currentTopic.x;
+        });
+      }
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    function wrongUsesForAxes(axes) {
+      var texts = [];
+      var seen = {};
+      TOPICS.forEach(function (topic) {
+        if (topic.y !== axes.y || topic.x !== axes.x) return;
+        if (!topic.wrongItems) return;
+        topic.wrongItems.forEach(function (text) {
+          if (seen[text]) return;
+          seen[text] = true;
+          texts.push(text);
+        });
+      });
+      return texts;
+    }
+
+    function chipBox(chip) {
+      var fontPx = chip.fontSize || 15;
+      var padY = chip.padY || 8;
+      var padX = chip.padX || 12;
+      var widthPx = Math.min(340, Math.max(72, chip.text.length * fontPx * 0.56 + padX * 2));
+      var heightPx = fontPx * 1.3 + padY * 2;
+      return {
+        w: (widthPx / 880) * 100,
+        h: (heightPx / 500) * 100
+      };
+    }
+
+    function boxesOverlap(a, b, gap) {
+      gap = gap == null ? 1.2 : gap;
+      return !(
+        a.left + a.w + gap <= b.left ||
+        b.left + b.w + gap <= a.left ||
+        a.top + a.h + gap <= b.top ||
+        b.top + b.h + gap <= a.top
+      );
+    }
+
+    function scatterChips(list) {
+      var sizeChoices = [12, 13, 14, 15, 16, 17, 18, 19, 20];
+      var placed = [];
+      var ordered = shuffle(list.slice()).sort(function (a, b) {
+        return b.text.length - a.text.length;
+      });
+      ordered.forEach(function (chip) {
+        var sizeIndex = Math.floor(Math.random() * sizeChoices.length);
+        chip.fontSize = sizeChoices[sizeIndex];
+        chip.padX = 8 + Math.floor(Math.random() * 8);
+        chip.padY = 6 + Math.floor(Math.random() * 6);
+        var box = chipBox(chip);
+        var top = 4;
+        var left = 2;
+        var tries = 0;
+        var ok = false;
+        var maxLeft = Math.max(2, 98 - box.w);
+        var maxTop = Math.max(2, 96 - box.h);
+        while (tries < 160 && !ok) {
+          if (tries > 80 && chip.fontSize > 12) {
+            chip.fontSize -= 1;
+            chip.padX = Math.max(7, chip.padX - 1);
+            chip.padY = Math.max(5, chip.padY - 1);
+            box = chipBox(chip);
+            maxLeft = Math.max(2, 98 - box.w);
+            maxTop = Math.max(2, 96 - box.h);
+          }
+          top = 2 + Math.random() * (maxTop - 2);
+          left = 1 + Math.random() * (maxLeft - 1);
+          var candidate = { top: top, left: left, w: box.w, h: box.h };
+          ok = !placed.some(function (spot) {
+            return boxesOverlap(candidate, spot);
+          });
+          tries += 1;
+        }
+        if (!ok) {
+          var col = placed.length % 4;
+          var row = Math.floor(placed.length / 4);
+          left = 2 + col * 24;
+          top = 4 + row * 14;
+          box = chipBox(chip);
+        }
+        chip.top = Math.round(top * 10) / 10;
+        chip.left = Math.round(left * 10) / 10;
+        placed.push({ top: chip.top, left: chip.left, w: box.w, h: box.h });
+      });
+      return list;
+    }
+
+    function buildChips(axes) {
+      chipN = 0;
+      var correctPool = shuffle(usesForAxes(axes));
+      var forcedWrong = wrongUsesForAxes(axes);
+      var wrongPool = forcedWrong.length
+        ? shuffle(forcedWrong)
+        : shuffle(allUseTexts().filter(function (text) {
+          return correctPool.indexOf(text) === -1;
+        }));
+      var chosenCorrect = forcedWrong.length
+        ? correctPool.slice()
+        : correctPool.slice(0, Math.min(correctPool.length, CHIP_COUNT));
+      var chosenWrong = forcedWrong.length
+        ? wrongPool.slice()
+        : wrongPool.slice(0, CHIP_COUNT - chosenCorrect.length);
+      var built = [];
+      var i;
+      for (i = 0; i < chosenCorrect.length; i++) {
+        chipN += 1;
+        built.push({
+          id: "c" + chipN,
+          text: chosenCorrect[i],
+          correct: true,
+          locked: false,
+          missed: false
+        });
+      }
+      for (i = 0; i < chosenWrong.length; i++) {
+        chipN += 1;
+        built.push({
+          id: "c" + chipN,
+          text: chosenWrong[i],
+          correct: false,
+          locked: false,
+          missed: false
+        });
+      }
+      return scatterChips(shuffle(built));
+    }
+
+    function startRound() {
+      currentTopic = pickRandomAxes();
+      chips = buildChips(currentTopic);
+      possibleCorrect += chips.filter(function (chip) { return chip.correct; }).length;
+      justLocked = null;
+      justMissed = null;
+      roundEndAt = Date.now() + ROUND_SECONDS * 1000;
+      roundLeft = ROUND_SECONDS;
+      if (!gameOver) {
+        var lookingFor = chips.filter(function (chip) { return chip.correct; }).length;
+        feedback = {
+          kind: "",
+          text: "Click diagrams that use these axes, you are looking for " + lookingFor + " correct answer" + (lookingFor === 1 ? "" : "s") + "."
+        };
+      }
+    }
+
+    function resultPercent() {
+      if (!possibleCorrect) return 0;
+      return Math.max(0, Math.min(100, Math.round(100 * correctClicks / possibleCorrect)));
+    }
+
+    function endGame() {
+      stopTimers();
+      gameOver = true;
+      gameLeft = 0;
+      roundLeft = 0;
+      feedback = {
+        kind: "ok",
+        text: "Time is up. Cumulative score: " + correctClicks + " (" + resultPercent() + "%)."
+      };
+      render();
+    }
+
+    function paintClocks() {
+      var gameClock = document.getElementById("game-clock");
+      var roundClock = document.getElementById("round-clock");
+      var gameBox = document.getElementById("game-clockbox");
+      var roundBox = document.getElementById("round-clockbox");
+      if (gameClock) gameClock.textContent = formatClock(gameLeft);
+      if (roundClock) roundClock.textContent = formatClock(roundLeft);
+      if (gameBox) gameBox.className = clockClass("game");
+      if (roundBox) roundBox.className = clockClass("round");
+    }
+
+    function tick() {
+      if (!gameRunning || gameOver) return;
+      var now = Date.now();
+      gameLeft = Math.max(0, Math.round((gameEndAt - now) / 1000));
+      roundLeft = Math.max(0, Math.round((roundEndAt - now) / 1000));
+      if (gameLeft <= 0) {
+        endGame();
+        return;
+      }
+      if (roundLeft <= 0) {
+        startRound();
+        render();
+        return;
+      }
+      paintClocks();
+    }
+
+    function startGame() {
+      stopTimers();
+      clearTimeout(flashTimer);
+      correctClicks = 0;
+      wrongClicks = 0;
+      possibleCorrect = 0;
+      gameOver = false;
+      gameRunning = true;
+      gameEndAt = Date.now() + GAME_SECONDS * 1000;
+      gameLeft = GAME_SECONDS;
+      startRound();
+      tickTimer = setInterval(tick, 250);
+      render();
+    }
+
+    function resetIdle() {
+      stopTimers();
+      clearTimeout(flashTimer);
+      currentTopic = null;
+      chips = [];
+      correctClicks = 0;
+      wrongClicks = 0;
+      possibleCorrect = 0;
+      justLocked = null;
+      justMissed = null;
+      gameOver = false;
+      gameLeft = GAME_SECONDS;
+      roundLeft = ROUND_SECONDS;
+      feedback = { kind: "", text: "Press Start to begin. Axes change every 30 seconds. Click the correct uses." };
+    }
+
+    function chipById(id) {
+      for (var i = 0; i < chips.length; i++) {
+        if (chips[i].id === id) return chips[i];
+      }
+      return null;
+    }
+
+    function clickChip(id) {
+      if (!gameRunning || gameOver) return;
+      var chip = chipById(id);
+      if (!chip || chip.locked || chip.missed) return;
+      if (chip.correct) {
+        chip.locked = true;
+        justLocked = chip.id;
+        justMissed = null;
+        correctClicks += 1;
+        feedback = {
+          kind: "ok",
+          text: chip.text + " is correct for " + currentTopic.y + " vs " + currentTopic.x + "."
+        };
+        return;
+      }
+      chip.missed = true;
+      justMissed = chip.id;
+      justLocked = null;
+      wrongClicks += 1;
+      feedback = {
+        kind: "bad",
+        text: chip.text + " does not belong on these axes."
+      };
+    }
+
+    function diagramSvg(topic) {
+      var label = esc(topic.y) + " against " + esc(topic.x);
+      if (topic.src) {
+        return '<img src="' + esc(topic.src) + '" alt="' + label + '" style="display:block;width:100%;height:auto;">';
+      }
+      var ySize = topic.y.length > 22 ? 22 : 28;
+      var xSize = topic.x.length > 22 ? 22 : 28;
+      return '<svg viewBox="0 0 1200 700" role="img" aria-label="' + label + '">' +
+        '<line x1="110" y1="50" x2="110" y2="600" stroke="#111" stroke-width="3.5"/>' +
+        '<line x1="110" y1="600" x2="1120" y2="600" stroke="#111" stroke-width="3.5"/>' +
+        '<polygon points="110,30 100,52 120,52" fill="#111"/>' +
+        '<polygon points="1140,600 1118,590 1118,610" fill="#111"/>' +
+        '<text x="42" y="340" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="' + ySize + '" font-weight="700" transform="rotate(-90 42 340)">' + esc(topic.y) + '</text>' +
+        '<text x="1120" y="655" text-anchor="end" font-family="Segoe UI, Arial, sans-serif" font-size="' + xSize + '" font-weight="700">' + esc(topic.x) + '</text>' +
+        '<text x="88" y="630" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">0</text>' +
+        '</svg>';
+    }
+
+    function clockClass(kind) {
+      var cls = "clockbox";
+      if (gameOver) cls += " out";
+      else if (kind === "game" && gameRunning && gameLeft <= 30) cls += " urgent";
+      else if (kind === "round" && gameRunning && roundLeft <= 5) cls += " urgent";
+      return cls;
+    }
+
+    function render() {
+      var freshId = justLocked;
+      var missedId = justMissed;
+      justLocked = null;
+      justMissed = null;
+      var html = '<div class="bar">' +
+        '<div class="' + clockClass("game") + '" id="game-clockbox">' +
+        '<p class="score-main" id="game-clock" role="timer" aria-label="Game time left">' + formatClock(gameLeft) + '</p>' +
+        '<p class="score-sub">Game time</p>' +
+        '</div>' +
+        '<div class="' + clockClass("round") + '" id="round-clockbox">' +
+        '<p class="score-main" id="round-clock" role="timer" aria-label="Axes change countdown">' + formatClock(roundLeft) + '</p>' +
+        '<p class="score-sub">Axes change</p>' +
+        '</div>' +
+        '<div class="stat">' + correctClicks + ' <span>score</span></div>' +
+        '<div class="stat">' + wrongClicks + ' <span>wrong</span></div>' +
+        '<div class="stat">' + correctClicks + '/' + possibleCorrect + ' <span>found</span></div>' +
+        '<button type="button" class="text-btn" data-action="' + (gameRunning && !gameOver ? "new" : "start") + '">' +
+        (gameRunning && !gameOver ? "New game" : (gameOver ? "Play again" : "Start")) +
+        '</button>' +
+        '</div>';
+      html += '<p class="feedback ' + feedback.kind + '" id="feedback">' + esc(feedback.text) + '</p>';
+      if (!currentTopic) {
+        html += '<div class="stage-empty">Press Start to show a random blank axes diagram.</div>';
+      } else {
+        html += '<div class="diagram"><div class="plot">' +
+          diagramSvg(currentTopic) +
+          '<div class="inside" aria-label="Click the correct uses">';
+        chips.forEach(function (chip) {
+          var place = ' style="top:' + (chip.top != null ? chip.top : 4) + '%;left:' + (chip.left != null ? chip.left : 4) +
+            '%;font-size:' + (chip.fontSize || 15) + 'px;padding:' + (chip.padY || 8) + 'px ' + (chip.padX || 12) + 'px;"';
+          if (chip.locked) {
+            html += '<div class="chip locked' + (chip.id === freshId ? " fresh" : "") + '"' + place + '>' + esc(chip.text) + '</div>';
+            return;
+          }
+          if (chip.missed) {
+            html += '<div class="chip missed' + (chip.id === missedId ? " fresh" : "") + '"' + place + '>' + esc(chip.text) + '</div>';
+            return;
+          }
+          if (gameOver) {
+            html += '<div class="chip"' + place + '>' + esc(chip.text) + '</div>';
+            return;
+          }
+          html += '<div class="chip" data-item="' + chip.id + '" role="button" tabindex="0"' + place + '>' + esc(chip.text) + '</div>';
+        });
+        html += '</div></div></div>';
+      }
+      if (gameOver) {
+        var result = resultPercent();
+        html += '<p class="scoreline final">Cumulative score: ' + correctClicks + '</p>';
+        html += '<p class="scoreline">Correct answers found: ' + correctClicks + ' out of ' + possibleCorrect + ' possible across all axes.</p>';
+        html += '<p class="scoreline">Wrong choices: ' + wrongClicks + '.</p>';
+        html += '<p class="scoreline">Result: ' + result + '%.</p>';
+      }
+      document.getElementById("app").innerHTML = html;
+    }
+
+    function handleChipPress(event) {
+      var chip = event.target.closest(".chip[data-item]");
+      if (!chip) return false;
+      event.preventDefault();
+      clickChip(chip.getAttribute("data-item"));
+      render();
+      return true;
+    }
+
+    document.getElementById("app").addEventListener("pointerdown", function (event) {
+      if (event.button != null && event.button !== 0) return;
+      if (handleChipPress(event)) return;
+    });
+
+    document.getElementById("app").addEventListener("click", function (event) {
+      var btn = event.target.closest("[data-action]");
+      if (btn) {
+        clearTimeout(flashTimer);
+        if (btn.getAttribute("data-action") === "start") startGame();
+        else {
+          resetIdle();
+          startGame();
+        }
+        return;
+      }
+    });
+
+    document.getElementById("app").addEventListener("keydown", function (event) {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      if (handleChipPress(event)) return;
+    });
+
+    resetIdle();
+    render();
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tariffs</title>
+  <link rel="stylesheet" href="diagram-economist.css" />
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #f0dce2;
+      --paper: #fffaf3;
+      --bg: #fef7f9;
+      --formula: #f8e8ec;
+      --accent: #9a3412;
+      --accent-soft: #f8e8ec;
+      --ok: #166534;
+      --ok-bg: #e7f6ec;
+      --ok-line: #b7e4c7;
+      --bad: #9f1239;
+      --bad-bg: #fde8ee;
+      --bad-line: #f3c1cf;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Financier Text", Georgia, "Palatino Linotype", Palatino, serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+      font-size: 1.05rem;
+    }
+    h1, h2, .mark {
+      font-family: "Financier Display", Georgia, "Palatino Linotype", Palatino, serif;
+      letter-spacing: -0.02em;
+    }
+    a { color: inherit; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 0 22px 72px; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 22px 0 8px;
+    }
+    .mark {
+      font-size: 1.35rem;
+      font-weight: 700;
+      text-decoration: none;
+      line-height: 1.15;
+    }
+    .mark span { color: var(--accent); }
+    header nav a {
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.92rem;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 1px;
+    }
+    h1 { margin: 12px 0 8px; font-size: 1.85rem; }
+    .lead { margin: 0 0 16px; max-width: 46em; }
+    .play {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.7fr);
+      gap: 18px;
+      align-items: start;
+    }
+    .chart-wrap {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 8px;
+    }
+    svg.chart { display: block; width: 100%; height: auto; touch-action: manipulation; }
+    svg text { font-family: "Financier Text", Georgia, "Palatino Linotype", Palatino, serif; }
+    .curve { fill: none; stroke: #1c1915; stroke-width: 2.6; stroke-linecap: round; }
+    .curve.hot { stroke: var(--accent); stroke-width: 4; }
+    .curve-label {
+      font-size: 17px;
+      font-weight: 700;
+      fill: var(--accent);
+      paint-order: stroke;
+      stroke: #fff;
+      stroke-width: 5px;
+    }
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 16px 14px;
+    }
+    .q-kicker {
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.88rem;
+    }
+    h2 { margin: 0 0 8px; font-size: 1.28rem; line-height: 1.25; }
+    .hint { margin: 0 0 12px; color: var(--muted); }
+    .names { display: flex; flex-direction: column; gap: 8px; }
+    .names button, .actions button {
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+      border-radius: 8px;
+      border: 1px solid #e4b8c4;
+      background: #fff;
+      color: var(--accent);
+      padding: 10px 12px;
+    }
+    .names button { width: 100%; }
+    .names button:hover, .actions button:hover { background: var(--accent-soft); }
+    .names button[aria-pressed="true"] {
+      background: var(--accent);
+      color: #fffaf3;
+      border-color: var(--accent);
+    }
+    .names button.done {
+      background: #166534;
+      border-color: #166534;
+      color: #fff;
+      cursor: default;
+    }
+    .names button:disabled { opacity: 1; }
+    .names button.done:hover { background: #166534; color: #fff; }
+    .score {
+      margin: 0 0 10px;
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--accent);
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .actions button.secondary {
+      background: transparent;
+      color: var(--ink);
+      border-color: var(--line);
+    }
+    button:focus-visible, a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .feedback {
+      min-height: 3.2em;
+      margin: 12px 0 0;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: var(--formula);
+      border: 1px solid var(--line);
+    }
+    .feedback.ok { background: var(--ok-bg); border-color: var(--ok-line); color: var(--ok); }
+    .feedback.bad { background: var(--bad-bg); border-color: var(--bad-line); color: var(--bad); }
+    .progress { margin: 10px 0 0; font-weight: 700; }
+    @media (min-width: 900px) {
+      .panel { position: sticky; top: 16px; }
+    }
+    @media (max-width: 860px) {
+      .play { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="mark" href="Diagram Economist.html">The Diagram <span>Economist</span></a>
+      <nav><a href="macro-diagrams.html">Back</a></nav>
+    </header>
+    <main>
+      <h1>Tariffs</h1>
+      <p class="lead">A country can import this good at the world price. A tariff has been added. The letters mark prices and quantities. Name the four lines, mark the introduction of the tariff and the fall in domestic demand, then mark consumer surplus before and after the tariff, and the increase in domestic supply.</p>
+      <div class="play">
+        <div class="chart-wrap">
+          <svg class="chart" id="chart" viewBox="0 0 1140 580" role="img" aria-label="Tariff diagram. Price is on the vertical axis and quantity on the horizontal axis. One line slopes down from N. One line slopes up from M. A horizontal line sits at P1 and another at pe. Dashed lines drop from K, L, F and J to quantities B, C, A and D.">
+            <line x1="110" y1="28" x2="110" y2="500" stroke="#1c1915" stroke-width="2" />
+            <polygon points="110,12 104,28 116,28" fill="#1c1915" />
+            <line x1="110" y1="500" x2="1000" y2="500" stroke="#1c1915" stroke-width="2" />
+            <polygon points="1016,500 1000,494 1000,506" fill="#1c1915" />
+            <text x="860" y="548" fill="#5c5348" font-size="18">Quantity</text>
+
+            <g id="guides" fill="none" stroke="#5c5348" stroke-width="1.6" stroke-dasharray="6 5">
+              <line x1="245" y1="355" x2="245" y2="500" />
+              <line x1="367" y1="270" x2="367" y2="500" />
+              <line x1="547" y1="270" x2="547" y2="500" />
+              <line x1="705" y1="355" x2="705" y2="500" />
+            </g>
+
+            <g id="areas"></g>
+
+            <line id="line-tariff" class="curve" x1="110" y1="270" x2="850" y2="270" />
+            <line id="line-world" class="curve" x1="110" y1="355" x2="850" y2="355" />
+            <line id="line-supply" class="curve" x1="110" y1="450" x2="720" y2="22" />
+            <line id="line-demand" class="curve" x1="110" y1="36" x2="830" y2="422" />
+            <text x="122" y="100" fill="#5c5348" font-size="18">Price</text>
+
+            <g id="letters" fill="#1c1915" font-size="18" font-weight="700">
+              <text x="122" y="26">N</text>
+              <text x="98" y="274" text-anchor="end">P1</text>
+              <text x="98" y="360" text-anchor="end">pe</text>
+              <text x="98" y="454" text-anchor="end">M</text>
+              <text x="348" y="258">K</text>
+              <text x="528" y="258">L</text>
+              <text x="228" y="346">F</text>
+              <text x="348" y="346">G</text>
+              <text x="528" y="346">H</text>
+              <text x="686" y="346">J</text>
+              <text x="245" y="524" text-anchor="middle">A</text>
+              <text x="367" y="524" text-anchor="middle">B</text>
+              <text x="547" y="524" text-anchor="middle">C</text>
+              <text x="705" y="524" text-anchor="middle">D</text>
+            </g>
+            <g id="curve-labels"></g>
+            <g id="moves"></g>
+          </svg>
+        </div>
+        <aside class="panel">
+          <p class="q-kicker" id="q-kicker">Question 1</p>
+          <h2 id="q-title">Why are the two arrows shown?</h2>
+          <p class="hint" id="q-hint">Choose the one correct answer.</p>
+          <p class="score" id="score" aria-live="polite">Score: 0 / 14</p>
+          <div class="names" id="names"></div>
+          <p class="progress" id="progress"></p>
+          <p class="feedback" id="feedback" aria-live="polite">The curves are labelled. Choose why the arrows are shown.</p>
+          <div class="actions">
+            <button type="button" class="secondary" id="reset">Try again</button>
+            <button type="button" id="save-diagram">Save diagram</button>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <script>
+    (function () {
+      var LINES = {
+        world: {
+          name: "World supply",
+          x1: 110, y1: 355, x2: 850, y2: 355,
+          lx: 864, ly: 342,
+          why: "World supply is the horizontal line at pe. With free trade the country can import any amount at the world price."
+        },
+        tariff: {
+          name: "World supply + Tariff",
+          x1: 110, y1: 270, x2: 850, y2: 270,
+          lx: 864, ly: 256,
+          why: "World supply + Tariff is the horizontal line at P1. The tariff lifts the price above the world price."
+        },
+        supply: {
+          name: "Domestic supply",
+          x1: 110, y1: 450, x2: 720, y2: 22,
+          lx: 732, ly: 36,
+          why: "Domestic supply slopes up from M. Home firms produce more as the price rises."
+        },
+        demand: {
+          name: "Domestic demand",
+          x1: 110, y1: 36, x2: 830, y2: 422,
+          lx: 848, ly: 448,
+          why: "Domestic demand slopes down from N. Home consumers buy more as the price falls."
+        }
+      };
+      var ORDER = ["world", "tariff", "supply", "demand"];
+      var MOVES = {
+        tariffRise: {
+          name: "Introduction of the tariff",
+          x1: 128, y1: 278, x2: 236, y2: 348,
+          why: "The tariff raises the price from pe to P1."
+        },
+        demandFall: {
+          name: "Fall in domestic demand",
+          x1: 555, y1: 468, x2: 698, y2: 536,
+          why: "Quantity demanded falls from D to C."
+        }
+      };
+      var MOVE_ORDER = ["tariffRise", "demandFall"];
+      var AREAS = {
+        surplusBefore: {
+          name: "Consumer surplus before the tariff",
+          why: "Before the tariff, consumers pay pe. Consumer surplus is the area under domestic demand and above pe, out to J."
+        }
+      };
+      var AREA_ORDER = ["surplusBefore"];
+      var AFTER = {
+        surplusAfter: {
+          name: "Consumer surplus after the tariff",
+          why: "After the tariff, consumers pay P1. Consumer surplus is the area under domestic demand and above P1, out to L."
+        }
+      };
+      var AFTER_ORDER = ["surplusAfter"];
+      var SUPPLY_MOVE = {
+        supplyRise: {
+          name: "Increase in domestic supply",
+          why: "Domestic supply increases from A to B."
+        }
+      };
+      var SUPPLY_ORDER = ["supplyRise"];
+      var HIT = 30;
+
+      var svg = document.getElementById("chart");
+      var namesEl = document.getElementById("names");
+      var feedback = document.getElementById("feedback");
+      var progress = document.getElementById("progress");
+      var scoreEl = document.getElementById("score");
+      var qKicker = document.getElementById("q-kicker");
+      var qTitle = document.getElementById("q-title");
+      var qHint = document.getElementById("q-hint");
+      var labelLayer = document.getElementById("curve-labels");
+      var moveLayer = document.getElementById("moves");
+      var areaLayer = document.getElementById("areas");
+      var SCORE_TOTAL = 14;
+      var score = 0;
+      var advanceTimer = null;
+      var stage = 1;
+
+      function updateScore() {
+        scoreEl.textContent = "Score: " + score + " / " + SCORE_TOTAL;
+      }
+
+      function completeMc(btn, nextFn, okMessage) {
+        btn.classList.add("done");
+        btn.disabled = true;
+        Array.prototype.forEach.call(namesEl.querySelectorAll("button"), function (b) {
+          b.disabled = true;
+        });
+        score += 1;
+        updateScore();
+        if (okMessage) setFeedback(okMessage, "ok");
+        else setFeedback("Correct.", "ok");
+        if (advanceTimer) clearTimeout(advanceTimer);
+        if (typeof nextFn === "function") {
+          advanceTimer = setTimeout(function () {
+            advanceTimer = null;
+            nextFn();
+          }, 750);
+        }
+      }
+
+      function prepareMcChoices(list) {
+        var arr = list.slice();
+        var i;
+        for (i = arr.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var tmp = arr[i];
+          arr[i] = arr[j];
+          arr[j] = tmp;
+        }
+        var lettered = list.some(function (c) {
+          return /^[A-D]\.\s/.test(c.text);
+        });
+        var letters = ["A", "B", "C", "D"];
+        return arr.map(function (choice, index) {
+          var bare = choice.text.replace(/^[A-D]\.\s*/, "");
+          return {
+            correct: choice.correct,
+            text: lettered ? letters[index] + ". " + bare : bare
+          };
+        });
+      }
+      var selected = "world";
+      var found = {};
+      var foundMoves = {};
+      var foundAreas = {};
+      var foundAfter = {};
+      var foundSupply = {};
+
+      function currentOrder() {
+        if (stage === 1) return ORDER;
+        if (stage === 2) return MOVE_ORDER;
+        if (stage === 3) return AREA_ORDER;
+        if (stage === 4) return AFTER_ORDER;
+        return SUPPLY_ORDER;
+      }
+      function currentDict() {
+        if (stage === 1) return LINES;
+        if (stage === 2) return MOVES;
+        if (stage === 3) return AREAS;
+        if (stage === 4) return AFTER;
+        return SUPPLY_MOVE;
+      }
+      function currentFound() {
+        if (stage === 1) return found;
+        if (stage === 2) return foundMoves;
+        if (stage === 3) return foundAreas;
+        if (stage === 4) return foundAfter;
+        return foundSupply;
+      }
+
+      function rebuildNames() {
+        var order = currentOrder();
+        var dict = currentDict();
+        var bag = currentFound();
+        namesEl.textContent = "";
+        order.forEach(function (id) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.id = "name-" + id;
+          btn.textContent = dict[id].name;
+          btn.addEventListener("click", function () {
+            if (bag[id]) return;
+            selected = id;
+            paintNames();
+            if (stage === 1) setFeedback("Click the line for " + dict[id].name + ".", "");
+            else if (stage === 2) showMovePrompt(id);
+            else if (stage === 3) setFeedback("Click the three letters that make up consumer surplus.", "");
+            else if (stage === 4) setFeedback("Click the three letters that make up consumer surplus after the tariff.", "");
+            else setFeedback("Click the two letters that show the increase in domestic supply.", "");
+          });
+          namesEl.appendChild(btn);
+        });
+      }
+
+      function paintNames() {
+        var order = currentOrder();
+        var dict = currentDict();
+        var bag = currentFound();
+        order.forEach(function (id) {
+          var btn = document.getElementById("name-" + id);
+          var done = !!bag[id];
+          btn.classList.toggle("done", done);
+          btn.disabled = done;
+          btn.setAttribute("aria-pressed", !done && id === selected ? "true" : "false");
+          btn.textContent = done ? dict[id].name + " \u2713" : dict[id].name;
+        });
+        var n = order.filter(function (id) { return bag[id]; }).length;
+        progress.textContent = (stage === 1 ? "Labelled " : "Marked ") + n + " of " + order.length;
+      }
+
+      function setFeedback(text, kind) {
+        feedback.textContent = text;
+        feedback.classList.toggle("ok", kind === "ok");
+        feedback.classList.toggle("bad", kind === "bad");
+      }
+
+      function svgPoint(ev) {
+        var pt = svg.createSVGPoint();
+        pt.x = ev.clientX;
+        pt.y = ev.clientY;
+        var ctm = svg.getScreenCTM();
+        if (!ctm) return { x: 0, y: 0 };
+        var p = pt.matrixTransform(ctm.inverse());
+        return { x: p.x, y: p.y };
+      }
+
+      function distToSeg(px, py, L) {
+        var dx = L.x2 - L.x1;
+        var dy = L.y2 - L.y1;
+        var len2 = dx * dx + dy * dy;
+        var t = ((px - L.x1) * dx + (py - L.y1) * dy) / len2;
+        t = Math.max(0, Math.min(1, t));
+        var x = L.x1 + t * dx;
+        var y = L.y1 + t * dy;
+        return Math.hypot(px - x, py - y);
+      }
+
+      function nearest(px, py) {
+        return ORDER.map(function (id) {
+          return { id: id, dist: distToSeg(px, py, LINES[id]) };
+        }).sort(function (a, b) { return a.dist - b.dist; });
+      }
+
+      function clearHot() {
+        ORDER.forEach(function (id) {
+          document.getElementById("line-" + id).classList.remove("hot");
+        });
+      }
+
+      function placeLabel(id) {
+        if (document.getElementById("label-" + id)) return;
+        var L = LINES[id];
+        var text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("id", "label-" + id);
+        text.setAttribute("class", "curve-label");
+        text.setAttribute("x", L.lx);
+        text.setAttribute("y", L.ly);
+        text.textContent = L.name;
+        labelLayer.appendChild(text);
+      }
+
+      function labelAllCurves() {
+        ORDER.forEach(function (id) {
+          found[id] = true;
+          placeLabel(id);
+        });
+      }
+
+      function nextUnfound() {
+        for (var i = 0; i < ORDER.length; i++) {
+          if (!found[ORDER[i]]) return ORDER[i];
+        }
+        return null;
+      }
+
+      function finishIfDone() {
+        if (nextUnfound()) return;
+        score += 1;
+        updateScore();
+        setFeedback("All four lines are labelled. Correct.", "ok");
+        if (advanceTimer) clearTimeout(advanceTimer);
+        advanceTimer = setTimeout(function () {
+          advanceTimer = null;
+          beginQuestion2();
+        }, 750);
+      }
+
+      function beginQuestion2() {
+        stage = 2;
+        drawMove("tariffRise");
+        drawMove("demandFall");
+        showArrowQuestion();
+      }
+
+      function moveAdvice(id) {
+        if (id === "tariffRise") return "Click the line where the tariff starts and the line where the tariff ends.";
+        return "Click the two letters that show the fall in domestic demand.";
+      }
+
+      function showMovePrompt(id) {
+        qHint.textContent = moveAdvice(id);
+        setFeedback(moveAdvice(id), "");
+      }
+
+      function svgEl(name) {
+        return document.createElementNS("http://www.w3.org/2000/svg", name);
+      }
+
+      function drawMove(id) {
+        if (document.getElementById("move-" + id)) return;
+        var g = svgEl("g");
+        g.setAttribute("id", "move-" + id);
+        g.setAttribute("fill", "#1c1915");
+        g.setAttribute("stroke", "#1c1915");
+        g.setAttribute("stroke-width", "2.4");
+        if (id === "tariffRise") {
+          var shaft = svgEl("line");
+          shaft.setAttribute("x1", "185");
+          shaft.setAttribute("y1", "344");
+          shaft.setAttribute("x2", "185");
+          shaft.setAttribute("y2", "296");
+          var head = svgEl("polygon");
+          head.setAttribute("points", "185,276 178,296 192,296");
+          g.appendChild(shaft);
+          g.appendChild(head);
+        } else {
+          var across = svgEl("line");
+          across.setAttribute("x1", "688");
+          across.setAttribute("y1", "488");
+          across.setAttribute("x2", "584");
+          across.setAttribute("y2", "488");
+          var tip = svgEl("polygon");
+          tip.setAttribute("points", "562,488 584,480 584,496");
+          g.appendChild(across);
+          g.appendChild(tip);
+        }
+        moveLayer.appendChild(g);
+      }
+
+      function nextMove() {
+        for (var i = 0; i < MOVE_ORDER.length; i++) {
+          if (!foundMoves[MOVE_ORDER[i]]) return MOVE_ORDER[i];
+        }
+        return null;
+      }
+
+      var demandLetters = { C: false, D: false };
+      var tariffLines = { world: false, tariff: false };
+      var LETTERS = {
+        C: { x: 547, y: 516 },
+        D: { x: 705, y: 516 }
+      };
+
+      function tariffLineAt(p) {
+        var world = distToSeg(p.x, p.y, LINES.world);
+        var tariff = distToSeg(p.x, p.y, LINES.tariff);
+        if (world > HIT && tariff > HIT) return null;
+        return world <= tariff ? "world" : "tariff";
+      }
+
+      function letterAt(p) {
+        var best = null;
+        var bestD = 44;
+        ["C", "D"].forEach(function (id) {
+          var d = Math.hypot(p.x - LETTERS[id].x, p.y - LETTERS[id].y);
+          if (d <= bestD) {
+            best = id;
+            bestD = d;
+          }
+        });
+        return best;
+      }
+
+      function completeMove(id) {
+        foundMoves[id] = true;
+        drawMove(id);
+        selected = nextMove();
+        paintNames();
+        if (selected) {
+          qHint.textContent = moveAdvice(selected);
+          setFeedback(moveAdvice(selected), "ok");
+        } else showArrowQuestion();
+      }
+
+      function handleMoveClick(p) {
+        if (q2Choice) return;
+        if (selected === "tariffRise") {
+          var line = tariffLineAt(p);
+          if (!line) {
+            setFeedback("Try again.", "bad");
+            return;
+          }
+          tariffLines[line] = true;
+          if (tariffLines.world && tariffLines.tariff) {
+            completeMove("tariffRise");
+            return;
+          }
+          setFeedback("Click the other line, where the tariff starts or ends.", "");
+          return;
+        }
+        if (selected === "demandFall") {
+          var letter = letterAt(p);
+          if (!letter) {
+            setFeedback("Try again.", "bad");
+            return;
+          }
+          demandLetters[letter] = true;
+          if (demandLetters.C && demandLetters.D) {
+            completeMove("demandFall");
+            return;
+          }
+          setFeedback("Click the other letter that shows the fall in domestic demand.", "");
+          return;
+        }
+        setFeedback("Try again.", "bad");
+      }
+
+      var q2Choice = false;
+      var q2Answered = false;
+      var Q2_CHOICES = [
+        { text: "They indicate the introduction of a tariff and a fall in domestic supply.", correct: true },
+        { text: "They indicate the removal of a tariff and a rise in domestic demand.", correct: false },
+        { text: "They indicate a subsidy and an increase in domestic supply.", correct: false },
+        { text: "They indicate a fall in the world price and a rise in imports.", correct: false }
+      ];
+
+      function showArrowQuestion() {
+        q2Choice = true;
+        q2Answered = false;
+        qKicker.textContent = "Question 1";
+        qTitle.textContent = "Why are the two arrows shown?";
+        qHint.textContent = "Choose the one correct answer.";
+        progress.textContent = "";
+        namesEl.textContent = "";
+        prepareMcChoices(Q2_CHOICES).forEach(function (choice) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = choice.text;
+          btn.addEventListener("click", function () {
+            if (q2Answered) return;
+            if (!choice.correct) {
+              setFeedback("Try again.", "bad");
+              return;
+            }
+            q2Answered = true;
+            completeMc(btn, beginQuestion3);
+          });
+          namesEl.appendChild(btn);
+        });
+        setFeedback("The arrows are on the diagram. Choose why they are shown.", "");
+      }
+
+      function beginQuestion3() {
+        stage = 3;
+        drawSurplus();
+        showSurplusQuestion();
+      }
+
+      var q3Choice = false;
+      var q3Answered = false;
+      var Q3_CHOICES = [
+        { text: "It shows the consumer surplus available before the tariff was introduced.", correct: true },
+        { text: "It shows the consumer surplus after the tariff was introduced.", correct: false },
+        { text: "It shows the tariff revenue collected by the government.", correct: false },
+        { text: "It shows the producer surplus before the tariff was introduced.", correct: false }
+      ];
+
+      function showSurplusQuestion() {
+        q3Choice = true;
+        q3Answered = false;
+        qKicker.textContent = "Question 2";
+        qTitle.textContent = "What does the shaded area represent?";
+        qHint.textContent = "Choose the one correct answer.";
+        progress.textContent = "";
+        namesEl.textContent = "";
+        prepareMcChoices(Q3_CHOICES).forEach(function (choice) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = choice.text;
+          btn.addEventListener("click", function () {
+            if (q3Answered) return;
+            if (!choice.correct) {
+              setFeedback("Try again.", "bad");
+              return;
+            }
+            q3Answered = true;
+            completeMc(btn, beginQuestion4);
+          });
+          namesEl.appendChild(btn);
+        });
+        setFeedback("The shaded area is on the diagram. Choose what it represents.", "");
+      }
+
+      var surplusLetters = { N: false, pe: false, J: false };
+      var SURPLUS_LETTERS = {
+        N: { x: 130, y: 18 },
+        pe: { x: 84, y: 352 },
+        J: { x: 694, y: 338 }
+      };
+
+      function surplusLetterAt(p) {
+        var best = null;
+        var bestD = 42;
+        ["N", "pe", "J"].forEach(function (id) {
+          var d = Math.hypot(p.x - SURPLUS_LETTERS[id].x, p.y - SURPLUS_LETTERS[id].y);
+          if (d <= bestD) {
+            best = id;
+            bestD = d;
+          }
+        });
+        return best;
+      }
+
+      function drawSurplus() {
+        if (document.getElementById("area-surplusBefore")) return;
+        var poly = svgEl("polygon");
+        poly.setAttribute("id", "area-surplusBefore");
+        poly.setAttribute("points", "110,36 705,355 110,355");
+        poly.setAttribute("fill", "#b7d4f3");
+        poly.setAttribute("stroke", "none");
+        areaLayer.appendChild(poly);
+      }
+
+      function handleAreaClick(p) {
+        if (foundAreas.surplusBefore) return;
+        var letter = surplusLetterAt(p);
+        if (!letter) {
+          setFeedback("Try again.", "bad");
+          return;
+        }
+        surplusLetters[letter] = true;
+        if (surplusLetters.N && surplusLetters.pe && surplusLetters.J) {
+          foundAreas.surplusBefore = true;
+          drawSurplus();
+          paintNames();
+          beginQuestion4();
+          return;
+        }
+        setFeedback("Click the other letters that make up consumer surplus.", "");
+      }
+
+      function beginQuestion4() {
+        stage = 4;
+        var before = document.getElementById("area-surplusBefore");
+        if (before) before.remove();
+        drawSurplusAfter();
+        showSurplusAfterQuestion();
+      }
+
+      var q4Choice = false;
+      var q4Answered = false;
+      var Q4_CHOICES = [
+        { text: "It shows the consumer surplus available after the tariff was introduced.", correct: true },
+        { text: "It shows the consumer surplus available before the tariff was introduced.", correct: false },
+        { text: "It shows the tariff revenue collected by the government.", correct: false },
+        { text: "It shows the producer surplus after the tariff was introduced.", correct: false }
+      ];
+
+      function showSurplusAfterQuestion() {
+        q4Choice = true;
+        q4Answered = false;
+        qKicker.textContent = "Question 3";
+        qTitle.textContent = "What does the shaded area represent?";
+        qHint.textContent = "Choose the one correct answer.";
+        progress.textContent = "";
+        namesEl.textContent = "";
+        prepareMcChoices(Q4_CHOICES).forEach(function (choice) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = choice.text;
+          btn.addEventListener("click", function () {
+            if (q4Answered) return;
+            if (!choice.correct) {
+              setFeedback("Try again.", "bad");
+              return;
+            }
+            q4Answered = true;
+            completeMc(btn, beginQuestion5);
+          });
+          namesEl.appendChild(btn);
+        });
+        setFeedback("The shaded area is on the diagram. Choose what it represents.", "");
+      }
+
+      var afterLetters = { P1: false, N: false, L: false };
+      var AFTER_LETTERS = {
+        P1: { x: 86, y: 266 },
+        N: { x: 130, y: 18 },
+        L: { x: 540, y: 252 }
+      };
+
+      function afterLetterAt(p) {
+        var best = null;
+        var bestD = 42;
+        ["P1", "N", "L"].forEach(function (id) {
+          var d = Math.hypot(p.x - AFTER_LETTERS[id].x, p.y - AFTER_LETTERS[id].y);
+          if (d <= bestD) {
+            best = id;
+            bestD = d;
+          }
+        });
+        return best;
+      }
+
+      function drawSurplusAfter() {
+        if (document.getElementById("area-surplusAfter")) return;
+        var poly = svgEl("polygon");
+        poly.setAttribute("id", "area-surplusAfter");
+        poly.setAttribute("points", "110,36 547,270 110,270");
+        poly.setAttribute("fill", "#b7d4f3");
+        poly.setAttribute("stroke", "none");
+        areaLayer.appendChild(poly);
+      }
+
+      function handleAfterClick(p) {
+        if (foundAfter.surplusAfter) return;
+        var letter = afterLetterAt(p);
+        if (!letter) {
+          setFeedback("Try again.", "bad");
+          return;
+        }
+        afterLetters[letter] = true;
+        if (afterLetters.P1 && afterLetters.N && afterLetters.L) {
+          foundAfter.surplusAfter = true;
+          drawSurplusAfter();
+          paintNames();
+          beginQuestion5();
+          return;
+        }
+        setFeedback("Click the other letters that make up consumer surplus after the tariff.", "");
+      }
+
+      function beginQuestion5() {
+        stage = 5;
+        var before = document.getElementById("area-surplusBefore");
+        var after = document.getElementById("area-surplusAfter");
+        if (before) before.remove();
+        if (after) after.remove();
+        drawSupplyRise();
+        showArrowPairQuestion();
+      }
+
+      var q5Choice = false;
+      var q5Answered = false;
+      var Q5_CHOICES = [
+        { text: "A to B shows an increase in domestic supply, and D to C shows a fall in domestic demand.", correct: true },
+        { text: "A to B shows a fall in domestic supply, and D to C shows an increase in domestic demand.", correct: false },
+        { text: "A to B shows an increase in imports, and D to C shows a fall in the world price.", correct: false },
+        { text: "A to B shows producer surplus, and D to C shows consumer surplus.", correct: false }
+      ];
+
+      function showArrowPairQuestion() {
+        q5Choice = true;
+        q5Answered = false;
+        qKicker.textContent = "Question 4";
+        qTitle.textContent = "What do the arrows from A to B and from D to C represent?";
+        qHint.textContent = "Choose the one correct answer.";
+        progress.textContent = "";
+        namesEl.textContent = "";
+        prepareMcChoices(Q5_CHOICES).forEach(function (choice) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = choice.text;
+          btn.addEventListener("click", function () {
+            if (q5Answered) return;
+            if (!choice.correct) {
+              setFeedback("Try again.", "bad");
+              return;
+            }
+            q5Answered = true;
+            completeMc(btn, beginQuestion6);
+          });
+          namesEl.appendChild(btn);
+        });
+        setFeedback("The arrows are on the diagram. Choose what A to B and D to C represent.", "");
+      }
+
+      function beginQuestion6() {
+        stage = 6;
+        moveLayer.textContent = "";
+        drawImportsBefore();
+        showImportsQuestion();
+      }
+
+      var q6Choice = false;
+      var q6Answered = false;
+      var Q6_CHOICES = [
+        { text: "It shows the level of imports before the tariff was introduced.", correct: true },
+        { text: "It shows the level of imports after the tariff was introduced.", correct: false },
+        { text: "It shows the consumer surplus before the tariff was introduced.", correct: false },
+        { text: "It shows the increase in domestic supply caused by the tariff.", correct: false }
+      ];
+
+      function showImportsQuestion() {
+        q6Choice = true;
+        q6Answered = false;
+        qKicker.textContent = "Question 5";
+        qTitle.textContent = "What does the double-headed arrow show?";
+        qHint.textContent = "Choose the one correct answer.";
+        progress.textContent = "";
+        namesEl.textContent = "";
+        prepareMcChoices(Q6_CHOICES).forEach(function (choice) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = choice.text;
+          btn.addEventListener("click", function () {
+            if (q6Answered) return;
+            if (!choice.correct) {
+              setFeedback("Try again.", "bad");
+              return;
+            }
+            q6Answered = true;
+            completeMc(btn, beginQuestion7);
+          });
+          namesEl.appendChild(btn);
+        });
+        setFeedback("The arrow is on the diagram. Choose what it shows.", "");
+      }
+
+      function drawImportsBefore() {
+        if (document.getElementById("move-importsBefore")) return;
+        var g = svgEl("g");
+        g.setAttribute("id", "move-importsBefore");
+        g.setAttribute("fill", "#1c1915");
+        g.setAttribute("stroke", "#1c1915");
+        g.setAttribute("stroke-width", "2.4");
+        var shaft = svgEl("line");
+        shaft.setAttribute("x1", "263");
+        shaft.setAttribute("y1", "556");
+        shaft.setAttribute("x2", "687");
+        shaft.setAttribute("y2", "556");
+        var left = svgEl("polygon");
+        left.setAttribute("points", "245,556 263,548 263,564");
+        var right = svgEl("polygon");
+        right.setAttribute("points", "705,556 687,548 687,564");
+        g.appendChild(shaft);
+        g.appendChild(left);
+        g.appendChild(right);
+        moveLayer.appendChild(g);
+      }
+
+      function beginQuestion7() {
+        stage = 7;
+        moveLayer.textContent = "";
+        drawImportsAfter();
+        showImportsAfterQuestion();
+      }
+
+      var q7Choice = false;
+      var q7Answered = false;
+      var Q7_CHOICES = [
+        { text: "It shows the level of imports after the tariff was introduced.", correct: true },
+        { text: "It shows the level of imports before the tariff was introduced.", correct: false },
+        { text: "It shows the consumer surplus after the tariff was introduced.", correct: false },
+        { text: "It shows the fall in domestic demand caused by the tariff.", correct: false }
+      ];
+
+      function showImportsAfterQuestion() {
+        q7Choice = true;
+        q7Answered = false;
+        qKicker.textContent = "Question 6";
+        qTitle.textContent = "What does the double-headed arrow show?";
+        qHint.textContent = "Choose the one correct answer.";
+        progress.textContent = "";
+        namesEl.textContent = "";
+        prepareMcChoices(Q7_CHOICES).forEach(function (choice) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = choice.text;
+          btn.addEventListener("click", function () {
+            if (q7Answered) return;
+            if (!choice.correct) {
+              setFeedback("Try again.", "bad");
+              return;
+            }
+            q7Answered = true;
+            completeMc(btn, beginQuestion8);
+          });
+          namesEl.appendChild(btn);
+        });
+        setFeedback("The arrow is on the diagram. Choose what it shows.", "");
+      }
+
+      function drawImportsAfter() {
+        if (document.getElementById("move-importsAfter")) return;
+        var g = svgEl("g");
+        g.setAttribute("id", "move-importsAfter");
+        g.setAttribute("fill", "#1c1915");
+        g.setAttribute("stroke", "#1c1915");
+        g.setAttribute("stroke-width", "2.4");
+        var shaft = svgEl("line");
+        shaft.setAttribute("x1", "385");
+        shaft.setAttribute("y1", "556");
+        shaft.setAttribute("x2", "529");
+        shaft.setAttribute("y2", "556");
+        var left = svgEl("polygon");
+        left.setAttribute("points", "367,556 385,548 385,564");
+        var right = svgEl("polygon");
+        right.setAttribute("points", "547,556 529,548 529,564");
+        g.appendChild(shaft);
+        g.appendChild(left);
+        g.appendChild(right);
+        moveLayer.appendChild(g);
+      }
+
+      function beginQuestion8() {
+        stage = 8;
+        moveLayer.textContent = "";
+        areaLayer.textContent = "";
+        drawProducerBefore();
+        showProducerBeforeQuestion();
+      }
+
+      var q8Choice = false;
+      var q8Answered = false;
+      var Q8_CHOICES = [
+        { text: "It shows the domestic producer surplus before the tariff was introduced.", correct: true },
+        { text: "It shows the domestic producer surplus after the tariff was introduced.", correct: false },
+        { text: "It shows the consumer surplus before the tariff was introduced.", correct: false },
+        { text: "It shows the tariff revenue collected by the government.", correct: false }
+      ];
+
+      function showProducerBeforeQuestion() {
+        q8Choice = true;
+        q8Answered = false;
+        qKicker.textContent = "Question 7";
+        qTitle.textContent = "What does the shaded area represent?";
+        qHint.textContent = "Choose the one correct answer.";
+        progress.textContent = "";
+        namesEl.textContent = "";
+        prepareMcChoices(Q8_CHOICES).forEach(function (choice) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = choice.text;
+          btn.addEventListener("click", function () {
+            if (q8Answered) return;
+            if (!choice.correct) {
+              setFeedback("Try again.", "bad");
+              return;
+            }
+            q8Answered = true;
+            completeMc(btn, beginQuestion9);
+          });
+          namesEl.appendChild(btn);
+        });
+        setFeedback("The shaded area is on the diagram. Choose what it represents.", "");
+      }
+
+      function drawProducerBefore() {
+        if (document.getElementById("area-producerBefore")) return;
+        var poly = svgEl("polygon");
+        poly.setAttribute("id", "area-producerBefore");
+        poly.setAttribute("points", "110,355 245,355 110,450");
+        poly.setAttribute("fill", "#b7d4f3");
+        poly.setAttribute("stroke", "none");
+        areaLayer.appendChild(poly);
+      }
+
+      function beginQuestion9() {
+        stage = 9;
+        areaLayer.textContent = "";
+        drawProducerAfter();
+        showProducerAfterQuestion();
+      }
+
+      var q9Choice = false;
+      var q9Answered = false;
+      var Q9_CHOICES = [
+        { text: "It shows the domestic producer surplus after the tariff was introduced.", correct: true },
+        { text: "It shows the domestic producer surplus before the tariff was introduced.", correct: false },
+        { text: "It shows the consumer surplus after the tariff was introduced.", correct: false },
+        { text: "It shows the tariff revenue collected by the government.", correct: false }
+      ];
+
+      function showProducerAfterQuestion() {
+        q9Choice = true;
+        q9Answered = false;
+        qKicker.textContent = "Question 8";
+        qTitle.textContent = "What does the shaded area represent?";
+        qHint.textContent = "Choose the one correct answer.";
+        progress.textContent = "";
+        namesEl.textContent = "";
+        prepareMcChoices(Q9_CHOICES).forEach(function (choice) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = choice.text;
+          btn.addEventListener("click", function () {
+            if (q9Answered) return;
+            if (!choice.correct) {
+              setFeedback("Try again.", "bad");
+              return;
+            }
+            q9Answered = true;
+            completeMc(btn, beginQuestion10);
+          });
+          namesEl.appendChild(btn);
+        });
+        setFeedback("The shaded area is on the diagram. Choose what it represents.", "");
+      }
+
+      function drawProducerAfter() {
+        if (document.getElementById("area-producerAfter")) return;
+        var poly = svgEl("polygon");
+        poly.setAttribute("id", "area-producerAfter");
+        poly.setAttribute("points", "110,270 367,270 110,450");
+        poly.setAttribute("fill", "#b7d4f3");
+        poly.setAttribute("stroke", "none");
+        areaLayer.appendChild(poly);
+      }
+
+      function beginQuestion10() {
+        stage = 10;
+        areaLayer.textContent = "";
+        drawTariffRevenue();
+        showTariffRevenueQuestion();
+      }
+
+      var q10Choice = false;
+      var q10Answered = false;
+      var Q10_CHOICES = [
+        { text: "It shows the level of tax revenue raised by the government following the introduction of the tariff.", correct: true },
+        { text: "It shows the domestic producer surplus after the tariff was introduced.", correct: false },
+        { text: "It shows the consumer surplus after the tariff was introduced.", correct: false },
+        { text: "It shows the level of imports before the tariff was introduced.", correct: false }
+      ];
+
+      function showTariffRevenueQuestion() {
+        q10Choice = true;
+        q10Answered = false;
+        qKicker.textContent = "Question 9";
+        qTitle.textContent = "What does the shaded area represent?";
+        qHint.textContent = "Choose the one correct answer.";
+        progress.textContent = "";
+        namesEl.textContent = "";
+        prepareMcChoices(Q10_CHOICES).forEach(function (choice) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = choice.text;
+          btn.addEventListener("click", function () {
+            if (q10Answered) return;
+            if (!choice.correct) {
+              setFeedback("Try again.", "bad");
+              return;
+            }
+            q10Answered = true;
+            completeMc(btn, beginQuestion11);
+          });
+          namesEl.appendChild(btn);
+        });
+        setFeedback("The shaded area is on the diagram. Choose what it represents.", "");
+      }
+
+      function drawTariffRevenue() {
+        if (document.getElementById("area-tariffRevenue")) return;
+        var poly = svgEl("polygon");
+        poly.setAttribute("id", "area-tariffRevenue");
+        poly.setAttribute("points", "367,270 547,270 547,355 367,355");
+        poly.setAttribute("fill", "#b7d4f3");
+        poly.setAttribute("stroke", "none");
+        areaLayer.appendChild(poly);
+      }
+
+      function beginQuestion11() {
+        stage = 11;
+        showPriceQuestion();
+      }
+
+      var q11Choice = false;
+      var q11Answered = false;
+      var Q11_CHOICES = [
+        { text: "A. Price falls from P1 to pe", correct: false },
+        { text: "B. Price rises from pe to P1", correct: true },
+        { text: "C. Price remains unchanged", correct: false },
+        { text: "D. Quantity demanded increases", correct: false }
+      ];
+
+      function showPriceQuestion() {
+        q11Choice = true;
+        q11Answered = false;
+        qKicker.textContent = "Question 10";
+        qTitle.textContent = "What is the effect of the tariff on the price paid by domestic consumers?";
+        qHint.textContent = "Choose the one correct answer.";
+        progress.textContent = "";
+        namesEl.textContent = "";
+        prepareMcChoices(Q11_CHOICES).forEach(function (choice) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = choice.text;
+          btn.addEventListener("click", function () {
+            if (q11Answered) return;
+            if (!choice.correct) {
+              setFeedback("Try again.", "bad");
+              return;
+            }
+            q11Answered = true;
+            completeMc(btn, beginQuestion12);
+          });
+          namesEl.appendChild(btn);
+        });
+        setFeedback("Choose the effect on the price paid by domestic consumers.", "");
+      }
+
+      function beginQuestion12() {
+        stage = 12;
+        areaLayer.textContent = "";
+        drawWelfareLoss();
+        showWelfareLossQuestion();
+      }
+
+      var q12Choice = false;
+      var q12Answered = false;
+      var Q12_CHOICES = [
+        { text: "They show the net welfare loss from introducing the tariff.", correct: true },
+        { text: "They show the tax revenue raised by the government following the introduction of the tariff.", correct: false },
+        { text: "They show the gain in welfare from introducing the tariff.", correct: false },
+        { text: "They show the domestic producer surplus after the tariff was introduced.", correct: false }
+      ];
+
+      function showWelfareLossQuestion() {
+        q12Choice = true;
+        q12Answered = false;
+        qKicker.textContent = "Question 11";
+        qTitle.textContent = "What do the two shaded areas represent?";
+        qHint.textContent = "Choose the one correct answer.";
+        progress.textContent = "";
+        namesEl.textContent = "";
+        prepareMcChoices(Q12_CHOICES).forEach(function (choice) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = choice.text;
+          btn.addEventListener("click", function () {
+            if (q12Answered) return;
+            if (!choice.correct) {
+              setFeedback("Try again.", "bad");
+              return;
+            }
+            q12Answered = true;
+            completeMc(btn, beginQuestion13);
+          });
+          namesEl.appendChild(btn);
+        });
+        setFeedback("The shaded areas are on the diagram. Choose what they represent.", "");
+      }
+
+      function beginQuestion13() {
+        stage = 13;
+        showPurposeQuestion();
+      }
+
+      var q13Choice = false;
+      var q13Answered = false;
+      var Q13_CHOICES = [
+        { text: "A. To increase the competitiveness of imports", correct: false },
+        { text: "B. To reduce government revenue", correct: false },
+        { text: "C. To protect domestic producers from foreign competition", correct: true },
+        { text: "D. To increase consumer surplus", correct: false }
+      ];
+
+      function showPurposeQuestion() {
+        q13Choice = true;
+        q13Answered = false;
+        qKicker.textContent = "Question 12";
+        qTitle.textContent = "What is the main purpose of imposing the tariff shown in the diagram?";
+        qHint.textContent = "Choose the one correct answer.";
+        progress.textContent = "";
+        namesEl.textContent = "";
+        prepareMcChoices(Q13_CHOICES).forEach(function (choice) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = choice.text;
+          btn.addEventListener("click", function () {
+            if (q13Answered) return;
+            if (!choice.correct) {
+              setFeedback("Try again.", "bad");
+              return;
+            }
+            q13Answered = true;
+            completeMc(btn, beginQuestion14);
+          });
+          namesEl.appendChild(btn);
+        });
+        setFeedback("Choose the main purpose of the tariff.", "");
+      }
+
+      function beginQuestion14() {
+        stage = 14;
+        showEffectsQuestion();
+      }
+
+      var q14Choice = false;
+      var q14Answered = false;
+      var Q14_CHOICES = [
+        { text: "A. Lower prices, higher imports, lower domestic output", correct: false },
+        { text: "B. Higher prices, lower imports, higher domestic output", correct: true },
+        { text: "C. Higher prices, higher imports, lower domestic output", correct: false },
+        { text: "D. Lower prices, lower imports, higher consumer welfare", correct: false }
+      ];
+
+      function showEffectsQuestion() {
+        q14Choice = true;
+        q14Answered = false;
+        qKicker.textContent = "Question 13";
+        qTitle.textContent = "Which combination best describes the likely effects of the tariff?";
+        qHint.textContent = "Choose the one correct answer.";
+        progress.textContent = "";
+        namesEl.textContent = "";
+        prepareMcChoices(Q14_CHOICES).forEach(function (choice) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = choice.text;
+          btn.addEventListener("click", function () {
+            if (q14Answered) return;
+            if (!choice.correct) {
+              setFeedback("Try again.", "bad");
+              return;
+            }
+            q14Answered = true;
+            completeMc(btn, beginQuestion15);
+          });
+          namesEl.appendChild(btn);
+        });
+        setFeedback("Choose the likely effects of the tariff.", "");
+      }
+
+      function beginQuestion15() {
+        stage = 15;
+        showEvaluationQuestion();
+      }
+
+      var q15Choice = false;
+      var q15Answered = false;
+      var Q15_CHOICES = [
+        { text: "A. The tariff benefits everyone because domestic firms produce more output.", correct: false },
+        { text: "B. The tariff is beneficial because it increases imports and lowers prices.", correct: false },
+        { text: "C. The tariff may protect domestic jobs and industries, but consumers face higher prices and less choice.", correct: true },
+        { text: "D. The tariff has no effect on consumer welfare because world prices remain unchanged.", correct: false }
+      ];
+
+      function showEvaluationQuestion() {
+        q15Choice = true;
+        q15Answered = false;
+        qKicker.textContent = "Question 14";
+        qTitle.textContent = "A government introduces the tariff shown in the diagram, increasing the domestic price from pe to P1. Which statement provides the best evaluation of this policy?";
+        qHint.textContent = "Choose the one correct answer.";
+        progress.textContent = "";
+        namesEl.textContent = "";
+        prepareMcChoices(Q15_CHOICES).forEach(function (choice) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = choice.text;
+          btn.addEventListener("click", function () {
+            if (q15Answered) return;
+            if (!choice.correct) {
+              setFeedback("Try again.", "bad");
+              return;
+            }
+            q15Answered = true;
+            completeMc(btn, null, "The tariff may protect domestic jobs and industries, but consumers face higher prices and less choice.");
+          });
+          namesEl.appendChild(btn);
+        });
+        setFeedback("Choose the best evaluation of the tariff.", "");
+      }
+
+      function drawWelfareLoss() {
+        if (document.getElementById("area-welfareLoss")) return;
+        var g = svgEl("g");
+        g.setAttribute("id", "area-welfareLoss");
+        var left = svgEl("polygon");
+        left.setAttribute("points", "245,355 367,270 367,355");
+        left.setAttribute("fill", "#b7d4f3");
+        left.setAttribute("stroke", "none");
+        var right = svgEl("polygon");
+        right.setAttribute("points", "547,270 547,355 705,355");
+        right.setAttribute("fill", "#b7d4f3");
+        right.setAttribute("stroke", "none");
+        g.appendChild(left);
+        g.appendChild(right);
+        areaLayer.appendChild(g);
+      }
+
+      var supplyLetters = { A: false, B: false };
+      var SUPPLY_LETTERS = {
+        A: { x: 245, y: 516 },
+        B: { x: 367, y: 516 }
+      };
+
+      function supplyLetterAt(p) {
+        var best = null;
+        var bestD = 44;
+        ["A", "B"].forEach(function (id) {
+          var d = Math.hypot(p.x - SUPPLY_LETTERS[id].x, p.y - SUPPLY_LETTERS[id].y);
+          if (d <= bestD) {
+            best = id;
+            bestD = d;
+          }
+        });
+        return best;
+      }
+
+      function drawSupplyRise() {
+        if (document.getElementById("move-supplyRise")) return;
+        var g = svgEl("g");
+        g.setAttribute("id", "move-supplyRise");
+        g.setAttribute("fill", "#1c1915");
+        g.setAttribute("stroke", "#1c1915");
+        g.setAttribute("stroke-width", "2.4");
+        var shaft = svgEl("line");
+        shaft.setAttribute("x1", "268");
+        shaft.setAttribute("y1", "488");
+        shaft.setAttribute("x2", "340");
+        shaft.setAttribute("y2", "488");
+        var tip = svgEl("polygon");
+        tip.setAttribute("points", "358,488 340,480 340,496");
+        g.appendChild(shaft);
+        g.appendChild(tip);
+        moveLayer.appendChild(g);
+      }
+
+      function handleSupplyClick(p) {
+        if (foundSupply.supplyRise) return;
+        var letter = supplyLetterAt(p);
+        if (!letter) {
+          setFeedback("Try again.", "bad");
+          return;
+        }
+        supplyLetters[letter] = true;
+        if (supplyLetters.A && supplyLetters.B) {
+          foundSupply.supplyRise = true;
+          drawSupplyRise();
+          selected = null;
+          paintNames();
+          setFeedback(SUPPLY_MOVE.supplyRise.why, "ok");
+          return;
+        }
+        setFeedback("Click the other letter that shows the increase in domestic supply.", "");
+      }
+
+      function markFound(id, message) {
+        found[id] = true;
+        placeLabel(id);
+        selected = nextUnfound();
+        paintNames();
+        if (selected) setFeedback(message + " Next, click the line for " + LINES[selected].name + ".", "ok");
+        else finishIfDone();
+      }
+
+      svg.addEventListener("pointermove", function (ev) {
+        clearHot();
+        if (stage !== 1) return;
+        var p = svgPoint(ev);
+        var ranked = nearest(p.x, p.y);
+        if (ranked[0].dist <= HIT && ranked[1].dist - ranked[0].dist >= 12) {
+          document.getElementById("line-" + ranked[0].id).classList.add("hot");
+        }
+      });
+      svg.addEventListener("pointerleave", clearHot);
+
+      svg.addEventListener("click", function (ev) {
+        var p = svgPoint(ev);
+        if (stage === 2) {
+          handleMoveClick(p);
+          return;
+        }
+        if (stage === 3) return;
+        if (stage === 4) return;
+        if (stage === 5) return;
+        if (stage === 6) return;
+        if (stage === 7) return;
+        if (stage === 8) return;
+        if (stage === 9) return;
+        if (stage === 10) return;
+        if (stage === 11) return;
+        if (stage === 12) return;
+        if (stage === 13) return;
+        if (stage === 14) return;
+        if (stage === 15) return;
+        var ranked = nearest(p.x, p.y);
+        var best = ranked[0];
+        var second = ranked[1];
+        if (best.dist > HIT) {
+          setFeedback(selected ? "Click the line for " + LINES[selected].name + "." : "Choose a name, then click its line.", "");
+          return;
+        }
+        if (second.dist <= HIT && second.dist - best.dist < 12) {
+          setFeedback("Those lines meet there. Click further along the line you mean.", "");
+          return;
+        }
+        if (found[best.id]) {
+          setFeedback(LINES[best.id].name + " is already labelled.", "");
+          return;
+        }
+        if (!selected) {
+          setFeedback("Choose a name, then click its line.", "");
+          return;
+        }
+        if (best.id === selected) markFound(best.id, LINES[best.id].why);
+        else setFeedback("Try again.", "bad");
+      });
+
+      function downloadFile(blob, name) {
+        var link = document.createElement("a");
+        var url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = name;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      }
+
+      function saveDiagram() {
+        var chart = document.getElementById("chart");
+        if (!chart) return;
+        var vb = (chart.getAttribute("viewBox") || "0 0 1140 580").split(/[\s,]+/).map(Number);
+        var w = vb[2] || 1140;
+        var h = vb[3] || 580;
+        var clone = chart.cloneNode(true);
+        clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        clone.setAttribute("width", String(w));
+        clone.setAttribute("height", String(h));
+        var xml = new XMLSerializer().serializeToString(clone);
+        var svgBlob = new Blob([xml], { type: "image/svg+xml;charset=utf-8" });
+        var url = URL.createObjectURL(svgBlob);
+        var image = new Image();
+        image.onload = function () {
+          var scale = 2;
+          var canvas = document.createElement("canvas");
+          canvas.width = w * scale;
+          canvas.height = h * scale;
+          var ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          canvas.toBlob(function (png) {
+            if (png) downloadFile(png, "tariff-diagram.png");
+            else downloadFile(svgBlob, "tariff-diagram.svg");
+          }, "image/png");
+        };
+        image.onerror = function () {
+          URL.revokeObjectURL(url);
+          downloadFile(svgBlob, "tariff-diagram.svg");
+        };
+        image.src = url;
+      }
+
+      document.getElementById("save-diagram").addEventListener("click", saveDiagram);
+      document.getElementById("reset").addEventListener("click", function () {
+        if (advanceTimer) clearTimeout(advanceTimer);
+        advanceTimer = null;
+        score = 0;
+        updateScore();
+        q2Choice = false;
+        q2Answered = false;
+        q3Choice = false;
+        q3Answered = false;
+        q4Choice = false;
+        q4Answered = false;
+        q5Choice = false;
+        q5Answered = false;
+        q6Choice = false;
+        q6Answered = false;
+        q7Choice = false;
+        q7Answered = false;
+        q8Choice = false;
+        q8Answered = false;
+        q9Choice = false;
+        q9Answered = false;
+        q10Choice = false;
+        q10Answered = false;
+        q11Choice = false;
+        q11Answered = false;
+        q12Choice = false;
+        q12Answered = false;
+        q13Choice = false;
+        q13Answered = false;
+        q14Choice = false;
+        q14Answered = false;
+        q15Choice = false;
+        q15Answered = false;
+        found = {};
+        foundMoves = {};
+        foundAreas = {};
+        foundAfter = {};
+        foundSupply = {};
+        demandLetters = { C: false, D: false };
+        tariffLines = { world: false, tariff: false };
+        surplusLetters = { N: false, pe: false, J: false };
+        afterLetters = { P1: false, N: false, L: false };
+        supplyLetters = { A: false, B: false };
+        selected = "world";
+        labelLayer.textContent = "";
+        moveLayer.textContent = "";
+        areaLayer.textContent = "";
+        clearHot();
+        labelAllCurves();
+        progress.textContent = "";
+        beginQuestion2();
+      });
+
+      labelAllCurves();
+      progress.textContent = "";
+      beginQuestion2();
+    })();
+  </script>
+</body>
+</html>

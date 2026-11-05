@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Consumer and Producer surplus</title>
+  <link rel="stylesheet" href="../diagram-economist.css" />
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #f0dce2;
+      --paper: #fef7f9;
+      --bg: #fef7f9;
+      --card: #fffaf3;
+      --formula: #f8e8ec;
+      --accent: #9a3412;
+      --accent-soft: #f8e8ec;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Financier Text", Georgia, "Palatino Linotype", Palatino, serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+    }
+    h1, h2, h3 {
+      font-family: "Financier Display", Georgia, "Palatino Linotype", Palatino, serif;
+      letter-spacing: -0.02em;
+    }
+    svg text {
+      font-family: "Financier Text", Georgia, "Palatino Linotype", Palatino, serif;
+    }
+    .book { max-width: 1440px; margin: 0 auto; padding: 16px 16px 48px; }
+    .topic {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 22px 24px;
+      margin: 16px 0;
+    }
+    h1 { margin: 0 0 8px; font-size: 1.75rem; }
+    h2 { margin: 0 0 10px; font-size: 1.05rem; }
+    .meta { color: var(--muted); font-size: 0.92rem; margin: 0 0 12px; }
+    .meta a { color: var(--accent); font-weight: 700; }
+    .intro {
+      margin: 0 0 16px;
+      padding: 14px 16px;
+      background: var(--accent-soft);
+      border: 1px solid #e4b8c4;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+    .stage {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .side { padding: 0; }
+    .side h2 { font-size: 0.98rem; margin-bottom: 8px; }
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px 16px;
+    }
+    .choice h3 { margin: 0 0 2px; font-size: 0.88rem; color: var(--accent); }
+    .hint { margin: 0 0 6px; color: var(--muted); font-size: 0.76rem; }
+    .chart-wrap {
+      background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 4px 4px 0;
+    }
+    svg.chart {
+      display: block; width: 100%; height: auto; margin: 0 auto;
+    }
+    .readout {
+      display: grid; grid-template-columns: 1fr 1fr 0.7fr; gap: 8px; margin: 8px 0;
+    }
+    .stat {
+      background: var(--formula); border-radius: 8px; padding: 8px 12px;
+    }
+    .stat span { display: block; color: var(--muted); font-size: 0.8rem; }
+    .stat strong { font-size: 1.05rem; }
+    .story { margin: 0 0 8px; min-height: 2.8em; font-size: 0.92rem; }
+    .limit { margin: 0 0 8px; color: #9a3412; font-weight: 700; font-size: 0.92rem; }
+    .mode { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+    .mode button {
+      font: inherit; font-weight: 700; cursor: pointer; border-radius: 8px;
+      background: var(--card); color: var(--accent); border: 1px solid #e4b8c4; padding: 8px 12px;
+    }
+    .mode button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .tools button, .seg button {
+      font: inherit; font-weight: 700; cursor: pointer; border-radius: 8px;
+    }
+    .tools button {
+      background: var(--card); color: var(--accent); border: 1px solid #e4b8c4; padding: 8px 12px;
+    }
+    .tools button:disabled, .seg button:disabled { opacity: 0.45; cursor: default; }
+    .force { margin: 0; }
+    .force p { margin: 0 0 4px; font-weight: 700; font-size: 0.86rem; }
+    .seg { display: flex; flex-wrap: wrap; gap: 4px; }
+    .seg button {
+      background: var(--card); color: var(--accent); border: 1px solid #e4b8c4;
+      padding: 4px 6px; font-size: 0.78rem;
+    }
+    .seg button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+    @media (max-width: 760px) {
+      .readout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="book">
+    <article class="topic">
+      <h1>Consumer and Producer surplus</h1>
+      <p class="meta"><a href="../micro-diagrams.html">Back to interactive games</a></p>
+      <p class="intro">Consumer surplus is the extra benefit consumers get because they pay less than the maximum they were willing to pay. Producer surplus is the extra benefit producers get because the market price is higher than the minimum they were willing to accept. Choose either consumer actions or producer actions to see how consumer / producer surplus changes.</p>
+      <div class="mode">
+        <button type="button" id="show-consumer" aria-pressed="false" aria-controls="consumer-panel">Consumer actions</button>
+        <button type="button" id="show-producer" aria-pressed="false" aria-controls="producer-panel">Producer actions</button>
+      </div>
+      <div class="stage">
+        <section class="side" id="consumer-panel" hidden>
+          <h2>Consumer actions</h2>
+          <div id="demand-forces" class="choices"></div>
+        </section>
+        <section class="side" id="producer-panel" hidden>
+          <h2>Producer techniques to increase producer surplus</h2>
+          <div id="supply-forces" class="choices"></div>
+        </section>
+        <div class="centre">
+          <div class="chart-wrap">
+            <svg class="chart" id="chart" viewBox="0 0 680 420" role="img" aria-labelledby="chart-title">
+              <title id="chart-title">Consumer surplus and producer surplus</title>
+              <defs>
+                <marker id="arrow-eq" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+                  <path d="M0,0 L9,4.5 L0,9 Z" fill="#1c1915" />
+                </marker>
+                <marker id="arrow-d" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+                  <path d="M0,0 L9,4.5 L0,9 Z" fill="#183a66" />
+                </marker>
+                <marker id="arrow-s" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+                  <path d="M0,0 L9,4.5 L0,9 Z" fill="#9a3412" />
+                </marker>
+              </defs>
+              <line x1="64" y1="36" x2="64" y2="352" stroke="#1c1915" stroke-width="2" />
+              <polygon points="64,28 59,42 69,42" fill="#1c1915" />
+              <line x1="64" y1="352" x2="620" y2="352" stroke="#1c1915" stroke-width="2" />
+              <polygon points="632,352 618,347 618,357" fill="#1c1915" />
+              <text x="74" y="44" fill="#5c5348" font-size="15" font-family="Financier Text, Georgia, Palatino, serif">Price</text>
+              <text x="548" y="376" fill="#5c5348" font-size="15" font-family="Financier Text, Georgia, Palatino, serif">Quantity</text>
+              <g id="original" opacity="0">
+                <line id="demand-old" stroke="#183a66" stroke-width="2" stroke-dasharray="6 4" opacity="0.45" />
+                <line id="supply-old" stroke="#9a3412" stroke-width="2" stroke-dasharray="6 4" opacity="0.45" />
+                <line id="guide-old-p" stroke="#5c5348" stroke-width="1.25" stroke-dasharray="4 3" opacity="0.7" />
+                <line id="guide-old-q" stroke="#5c5348" stroke-width="1.25" stroke-dasharray="4 3" opacity="0.7" />
+                <line id="move-path" stroke="#1c1915" stroke-width="2.25" marker-end="url(#arrow-eq)" />
+                <circle id="dot-old" r="5.5" fill="#fff" stroke="#5c5348" stroke-width="2" />
+                <text id="e-old" fill="#5c5348" font-size="15" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif">E</text>
+                <text id="old-price" fill="#5c5348" font-size="14" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif" text-anchor="end"></text>
+                <text id="old-q" fill="#5c5348" font-size="14" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif" text-anchor="middle"></text>
+                <text id="d-old-label" fill="#183a66" font-size="16" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif" opacity="0.7">D</text>
+                <text id="s-old-label" fill="#9a3412" font-size="16" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif" opacity="0.7">S</text>
+              </g>
+              <polygon id="cs" fill="#183a66" opacity="0.18" />
+              <polygon id="ps" fill="#9a3412" opacity="0.2" />
+              <line id="demand" stroke="#183a66" stroke-width="3" />
+              <line id="supply" stroke="#9a3412" stroke-width="3" />
+              <line id="shift-d" stroke="#183a66" stroke-width="2.5" marker-end="url(#arrow-d)" opacity="0" />
+              <line id="shift-s" stroke="#9a3412" stroke-width="2.5" marker-end="url(#arrow-s)" opacity="0" />
+              <line id="guide-b" stroke="#1c1915" stroke-width="1.5" stroke-dasharray="5 4" />
+              <line id="guide-s" stroke="#1c1915" stroke-width="1.5" stroke-dasharray="5 4" />
+              <line id="guide-v" stroke="#1c1915" stroke-width="1.5" stroke-dasharray="5 4" />
+              <text id="price-b" fill="#1c1915" font-size="15" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif" text-anchor="end"></text>
+              <text id="price-s" fill="#9a3412" font-size="15" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif" text-anchor="end"></text>
+              <text id="q-label" fill="#1c1915" font-size="15" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif" text-anchor="middle"></text>
+              <text id="wedge" fill="#1c1915" font-size="14" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif"></text>
+              <text id="cs-label" fill="#183a66" stroke="#fff" stroke-width="4" paint-order="stroke" font-size="15" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif">Consumer surplus</text>
+              <text id="ps-label" fill="#9a3412" stroke="#fff" stroke-width="4" paint-order="stroke" font-size="15" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif">Producer surplus</text>
+              <text id="d-label" fill="#183a66" font-size="18" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif">D</text>
+              <text id="s-label" fill="#9a3412" font-size="18" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif">S</text>
+              <text id="e-new" fill="#1c1915" font-size="15" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif"></text>
+              <text id="move-note" fill="#1c1915" font-size="14" font-weight="700" font-family="Financier Text, Georgia, Palatino, serif" x="150" y="24"></text>
+              <circle id="dot-d" r="6" fill="#183a66" stroke="#fff" stroke-width="1.5" />
+              <circle id="dot-s" r="6" fill="#9a3412" stroke="#fff" stroke-width="1.5" />
+            </svg>
+          </div>
+          <div class="readout" aria-live="polite">
+            <div class="stat"><span>Price buyers pay</span><strong id="stat-pc">£40</strong></div>
+            <div class="stat"><span>Price sellers receive</span><strong id="stat-pp">£40</strong></div>
+            <div class="stat"><span>Quantity</span><strong id="stat-q">60</strong></div>
+            <div class="stat"><span>Consumer surplus</span><strong id="stat-cs">£1200</strong></div>
+            <div class="stat"><span>Producer surplus</span><strong id="stat-ps">£1200</strong></div>
+          </div>
+          <p class="story" id="story">The market starts in equilibrium. Consumer surplus is the upper triangle and producer surplus is the lower triangle. Both are £1200. Choose a technique that can raise producer surplus.</p>
+          <p class="limit" id="limit-note" hidden>Another choice that way would move a curve off the diagram, so that choice is turned off.</p>
+          <div class="tools">
+            <button type="button" id="reset">Reset</button>
+            <button type="button" id="save-diagram" data-file="consumer-producer-surplus.png">Save diagram</button>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+  <script src="../equilibrium-save.js"></script>
+  <script>
+    (function () {
+      var QMAX = 140;
+      var PMAX = 100;
+      var START = "The market starts in equilibrium. Consumer surplus is the upper triangle and producer surplus is the lower triangle. Both are £1200. Choose a technique that can raise producer surplus.";
+      var GROUPS = [
+        { id: "substitutes", side: "d", group: "Switch to substitutes", hint: "Demand for the original good shifts left. Price and quantity fall.", options: [
+          { v: 1, label: "Switch to substitutes", kind: "demandLeft", delta: 22, cause: "Switching to substitutes shifts demand left, from E to E1", text: "Consumers switch to substitutes, so demand for the original good shifts left. The price falls and the quantity falls. Consumer surplus falls because consumers buy less of the original good." }
+        ]},
+        { id: "bulk", side: "d", group: "Bulk buying", hint: "The unit price falls for that consumer. The market price stays the same.", options: [
+          { v: 1, label: "Bulk buying", kind: "payLess", delta: 10, cause: "Bulk buying moves down the demand curve. The market price stays the same", text: "Bulk buying lowers the unit price for that consumer. Supply does not shift and the market price stays the same. Consumer surplus rises for that consumer only." }
+        ]},
+        { id: "timing", side: "d", group: "Timing of purchase", hint: "Postponing a purchase reduces demand today, so the curve shifts left.", options: [
+          { v: 1, label: "Timing of purchase", kind: "demandLeft", delta: 18, cause: "Postponing the purchase shifts demand left today, from E to E1", text: "Consumers postpone the purchase, expecting a lower price, a new model, or simply delaying consumption. Demand today shifts left, so the price falls and the quantity falls." }
+        ]},
+        { id: "discounts", side: "d", group: "Discounts and loyalty points", hint: "The effective price falls. The market price stays the same.", options: [
+          { v: 1, label: "Discounts and loyalty points", kind: "payLess", delta: 7, cause: "Discounts and loyalty points move down the demand curve. The market price stays the same", text: "Discounts and loyalty points lower the effective price paid. Supply does not shift and the market price stays the same." }
+        ]},
+        { id: "secondHand", side: "d", group: "Buy second hand", hint: "Demand for the new good shifts to the left.", options: [
+          { v: 1, label: "Buy second hand", kind: "demandLeft", delta: 28, cause: "Buying second hand shifts demand for new goods left, from E to E1", text: "Buying second hand shifts demand for the new good to the left, so the price falls." }
+        ]},
+        { id: "negotiate", side: "d", group: "Negotiate", hint: "The price falls for that buyer. The market price stays the same.", options: [
+          { v: 1, label: "Negotiate", kind: "payLess", delta: 4, cause: "Negotiating moves down the demand curve. The market price stays the same", text: "Negotiating lowers the price for that buyer. Supply does not shift and the market price stays the same." }
+        ]},
+        { id: "raisePrice", side: "s", group: "Raise prices", hint: "The firm moves up the demand curve.", options: [
+          { v: 1, label: "Raise prices", kind: "restrict", cause: "Raise prices moves the market from E to E1, up the demand curve", text: "The firm raises the price, so buyers move up the demand curve and the quantity falls." }
+        ]},
+        { id: "reduceCosts", side: "s", group: "Reduce costs", hint: "Supply shifts to the right and the price falls.", options: [
+          { v: 1, label: "Reduce costs", kind: "supply", cause: "Reduce costs shifts supply right, from E to E1", text: "Lower costs shift supply to the right, so the price falls." }
+        ]},
+        { id: "restrictSupply", side: "s", group: "Restrict supply", hint: "Supply shifts to the left and the price rises.", options: [
+          { v: 1, label: "Restrict supply", kind: "supplyLeft", cause: "Restrict supply shifts supply left, from E to E1", text: "Restricting supply shifts the supply curve to the left, so the price rises and the quantity falls." }
+        ]},
+        { id: "inelasticDemand", side: "s", group: "Make demand more inelastic", hint: "The demand curve becomes steeper, so the firm can raise the price.", options: [
+          { v: 1, label: "Make demand more inelastic", kind: "inelastic", cause: "More inelastic demand makes the curve steeper and moves the market from E to E1", text: "Demand becomes more inelastic. The curve is steeper, so the firm moves up the demand curve and the price rises." }
+        ]},
+        { id: "nonPrice", side: "s", group: "Non price determinants", hint: "A non-price determinant shifts the demand curve.", options: [
+          { v: 1, label: "Non price determinants", kind: "demand", cause: "Non price determinants shift demand right, from E to E1", text: "A non-price determinant shifts the demand curve to the right." }
+        ]}
+      ];
+
+      var values = {};
+      GROUPS.forEach(function (g) { values[g.id] = 0; });
+      var shown = { d: 0, s: 0, b: 1.5, m: 0, cut: 0 };
+      var busy = false;
+      var anim = 0;
+      var storyEl = document.getElementById("story");
+
+      function money(n) { return "£" + String(Math.round(n)); }
+      function area(n) { return String(Math.round(n)); }
+      function chosen(group, vals) {
+        var v = vals[group.id] || 0;
+        for (var i = 0; i < group.options.length; i++) {
+          if (group.options[i].v === v) return group.options[i];
+        }
+        return null;
+      }
+      function totals(vals) {
+        var d = 0;
+        var s = 0;
+        var inelastic = 0;
+        var elastic = 0;
+        var restrict = 0;
+        var cut = 0;
+        GROUPS.forEach(function (g) {
+          var opt = chosen(g, vals);
+          if (!opt) return;
+          if (opt.kind === "demand") d += opt.delta || 22;
+          else if (opt.kind === "demandLeft") d -= opt.delta || 22;
+          else if (opt.kind === "supply") s += opt.delta || 20;
+          else if (opt.kind === "supplyLeft") s -= opt.delta || 20;
+          else if (opt.kind === "inelastic") inelastic += 1;
+          else if (opt.kind === "elastic") elastic += 1;
+          else if (opt.kind === "restrict") restrict += 1;
+          else if (opt.kind === "payLess") cut += opt.delta || 8;
+        });
+        var b = 1.5 - 0.5 * Math.min(inelastic, 1) - 0.18 * Math.max(0, inelastic - 1);
+        b += 0.9 * Math.min(elastic, 1);
+        if (b < 0.78) b = 0.78;
+        if (b > 2.7) b = 2.7;
+        var m = (inelastic > 0 ? 13 + 7 * (inelastic - 1) : 0) + (restrict > 0 ? 14 : 0);
+        return { d: d, s: s, b: b, m: m, cut: cut };
+      }
+      function outcome(state) {
+        var A = 120 + state.d;
+        var pStar = (A - state.s) / 3;
+        var qStar = 1.5 * pStar + state.s;
+        var cut = state.cut || 0;
+        var p = pStar + state.m;
+        var qMarket = qStar - state.b * state.m;
+        var pc = p - cut;
+        var q = qMarket + state.b * cut;
+        return {
+          A: A, pStar: pStar, qStar: qStar, pp: p, pc: pc, q: q, qMarket: qMarket, b: state.b, s: state.s,
+          pint: pStar + qStar / state.b,
+          qHoriz: qStar + state.b * pStar,
+          mc: (qMarket - state.s) / 1.5
+        };
+      }
+      function consumerSurplus(o) { return 0.5 * (o.pint - o.pc) * o.q; }
+      function producerSurplus(o) {
+        var q = o.qMarket;
+        if (o.s > 0) return o.pp * q - Math.pow(Math.max(0, q - o.s), 2) / 3;
+        return o.pp * q - (q * q / 2 - o.s * q) / 1.5;
+      }
+      function xOf(q) { return 64 + (Math.max(0, Math.min(QMAX, q)) / QMAX) * 540; }
+      function yOf(p) { return 352 - (Math.max(0, Math.min(PMAX, p)) / PMAX) * 300; }
+      function fits(state) {
+        var o = outcome(state);
+        if (o.pp < 16 || o.pp > 86) return false;
+        if (o.pc < 16) return false;
+        if (o.q < 20 || o.q > QMAX - 18) return false;
+        if (o.pint < o.pp + 8 || o.pint > 125) return false;
+        if (state.m > 1 && o.pp < o.mc + 6) return false;
+        if (o.s > 0 && o.q < o.s + 8) return false;
+        if (o.pStar < 14 || o.pStar > 78) return false;
+        return true;
+      }
+      function trial(id, v) {
+        var vals = {};
+        GROUPS.forEach(function (g) { vals[g.id] = g.id === id ? v : values[g.id]; });
+        return totals(vals);
+      }
+
+      function arrow(id, x1, y1, x2, y2) {
+        var el = document.getElementById(id);
+        var dx = x2 - x1;
+        var dy = y2 - y1;
+        var len = Math.sqrt(dx * dx + dy * dy);
+        if (len < 22) {
+          el.setAttribute("opacity", "0");
+          return;
+        }
+        var ux = dx / len;
+        var uy = dy / len;
+        line(id, x1 + ux * 8, y1 + uy * 8, x2 - ux * 14, y2 - uy * 14);
+        el.setAttribute("opacity", "1");
+      }
+      function demandQ(state, p) {
+        var o = outcome(state);
+        return o.qHoriz - state.b * p;
+      }
+      function supplyQ(state, p) { return 1.5 * p + state.s; }
+      function bestShift(qAt, prefer, state, baseQ, newQ) {
+        var origin = { d: 0, s: 0, b: 1.5, m: 0 };
+        var best = null;
+        for (var p = 14; p <= 88; p += 2) {
+          var q1 = qAt(origin, p);
+          var q2 = qAt(state, p);
+          if (q1 < 16 || q2 < 16 || q1 > QMAX - 10 || q2 > QMAX - 10) continue;
+          if (Math.abs(q2 - q1) < 8) continue;
+          if (Math.abs(q1 - baseQ) < 8 && Math.abs(p - 40) < 10) continue;
+          if (Math.abs(q2 - newQ) < 8 && Math.abs(p - 40) < 10) continue;
+          var score = Math.abs(q2 - q1) - Math.abs(p - prefer) * 0.2;
+          if (!best || score > best.score) best = { p: p, q1: q1, q2: q2, score: score };
+        }
+        return best;
+      }
+      function shiftArrow(id, q1, q2, p, avoid) {
+        var clear = true;
+        for (var i = 0; i < avoid.length; i++) {
+          if (Math.abs(q1 - avoid[i]) < 10 || Math.abs(q2 - avoid[i]) < 10) clear = false;
+        }
+        if (!clear || q1 < 12 || q2 < 12 || q1 > QMAX - 8 || q2 > QMAX - 8 || p < 10 || p > 90) {
+          document.getElementById(id).setAttribute("opacity", "0");
+          return;
+        }
+        arrow(id, xOf(q1), yOf(p), xOf(q2), yOf(p));
+      }
+      function line(id, x1, y1, x2, y2) {
+        var el = document.getElementById(id);
+        el.setAttribute("x1", String(x1));
+        el.setAttribute("y1", String(y1));
+        el.setAttribute("x2", String(x2));
+        el.setAttribute("y2", String(y2));
+      }
+      function poly(id, pts) {
+        document.getElementById(id).setAttribute("points", pts.map(function (p) {
+          return p[0] + "," + p[1];
+        }).join(" "));
+      }
+      function label(id, x, y, text) {
+        var el = document.getElementById(id);
+        el.textContent = text;
+        el.setAttribute("x", String(x));
+        el.setAttribute("y", String(y));
+      }
+
+      function curve(state) {
+        var o = outcome(state);
+        var qEnd = Math.min(QMAX, o.qHoriz);
+        var pEnd = qEnd >= o.qHoriz - 0.2 ? 0 : o.pStar + (o.qStar - qEnd) / state.b;
+        var pTop = Math.min(PMAX, o.pint);
+        var qTop = o.qStar - state.b * (pTop - o.pStar);
+        var sBotQ = state.s > 0 ? state.s : 0;
+        var sBotP = state.s > 0 ? 0 : -state.s / 1.5;
+        var sTopQ = 1.5 * PMAX + state.s;
+        var sTopP = PMAX;
+        if (sTopQ > QMAX) { sTopQ = QMAX; sTopP = (QMAX - state.s) / 1.5; }
+        return { o: o, qEnd: qEnd, pEnd: pEnd, pTop: pTop, qTop: qTop, sBotQ: sBotQ, sBotP: sBotP, sTopQ: sTopQ, sTopP: sTopP };
+      }
+      function causes() {
+        var parts = [];
+        GROUPS.forEach(function (g) {
+          var opt = chosen(g, values);
+          if (opt && opt.cause) parts.push(opt.cause);
+        });
+        return parts.join(". ");
+      }
+
+      function draw(state) {
+        var c = curve(state);
+        var o = c.o;
+        var originState = { d: 0, s: 0, b: 1.5, m: 0 };
+        var base = curve(originState);
+        line("demand", xOf(c.qEnd), yOf(c.pEnd), xOf(Math.max(0, c.qTop)), yOf(c.pTop));
+        line("supply", xOf(c.sBotQ), yOf(c.sBotP), xOf(c.sTopQ), yOf(c.sTopP));
+
+        var csTop = c.pTop;
+        poly("cs", [
+          [xOf(Math.max(0, c.qTop)), yOf(csTop)],
+          [xOf(o.q), yOf(o.pc)],
+          [xOf(0), yOf(o.pc)],
+          [xOf(0), yOf(csTop)]
+        ]);
+        var qPs = o.qMarket;
+        var mcY = yOf(Math.max(0, o.mc));
+        var psPts = state.s > 0
+          ? [[xOf(0), yOf(o.pp)], [xOf(qPs), yOf(o.pp)], [xOf(qPs), mcY], [xOf(state.s), yOf(0)], [xOf(0), yOf(0)]]
+          : [[xOf(0), yOf(o.pp)], [xOf(qPs), yOf(o.pp)], [xOf(qPs), mcY], [xOf(0), yOf(Math.max(0, c.sBotP))]];
+        poly("ps", psPts);
+
+        var xq = xOf(o.q);
+        var gap = o.pp - o.mc > 4;
+        line("guide-b", 64, yOf(o.pc), xq, yOf(o.pc));
+        line("guide-s", 64, yOf(o.mc), xq, yOf(o.mc));
+        line("guide-v", xq, yOf(o.pc), xq, 352);
+        document.getElementById("guide-s").setAttribute("opacity", gap ? "0.45" : "0");
+        label("price-b", 56, yOf(o.pc) + 5, String(Math.round(o.pc)));
+        label("price-s", 56, yOf(o.mc) + 16, "");
+        label("q-label", Math.max(86, Math.min(560, xq)), 370, String(Math.round(o.q)));
+        label("wedge", xq + 8, yOf((o.pc + Math.max(0, o.mc)) / 2), "");
+        label("cs-label", 148, yOf((csTop + o.pc) / 2), "Consumer surplus");
+        var psMid = gap ? (o.pp + Math.max(0, o.mc)) / 2 : o.pp * 0.42;
+        label("ps-label", 150, yOf(Math.max(16, psMid)), "Producer surplus");
+        var sameD = Math.abs(state.d) < 0.2 && Math.abs(state.b - 1.5) < 0.02;
+        var sameS = Math.abs(state.s) < 0.2;
+        var pointMoved = Math.abs(o.pc - base.o.pc) > 0.6 || Math.abs(o.q - base.o.q) > 0.6;
+        var moved = pointMoved || !sameD || !sameS || Math.abs(state.m) > 0.2;
+        label("d-label", Math.min(600, xOf(c.qEnd) + 10), Math.min(344, yOf(c.pEnd) - 6), sameD ? "D" : "D1");
+        label("s-label", Math.min(600, xOf(c.sTopQ) + 10), yOf(c.sTopP) + 4, sameS ? "S" : "S1");
+        document.getElementById("dot-d").setAttribute("cx", String(xq));
+        document.getElementById("dot-d").setAttribute("cy", String(yOf(o.pc)));
+        document.getElementById("dot-s").setAttribute("cx", String(xq));
+        document.getElementById("dot-s").setAttribute("cy", String(yOf(Math.max(0, o.mc))));
+        document.getElementById("dot-s").setAttribute("opacity", gap ? "1" : "0");
+        label("e-new", Math.min(620, xq + 10), yOf(o.pc) - 10, pointMoved ? "E1" : "");
+        document.getElementById("move-note").textContent = moved ? causes() : "";
+
+        var oldBox = document.getElementById("original");
+        oldBox.setAttribute("opacity", moved ? "1" : "0");
+        document.getElementById("demand-old").setAttribute("opacity", sameD ? "0" : "0.5");
+        document.getElementById("supply-old").setAttribute("opacity", sameS ? "0" : "0.5");
+        line("demand-old", xOf(base.qEnd), yOf(base.pEnd), xOf(Math.max(0, base.qTop)), yOf(base.pTop));
+        line("supply-old", xOf(base.sBotQ), yOf(base.sBotP), xOf(base.sTopQ), yOf(base.sTopP));
+        var ox = xOf(base.o.q);
+        var oy = yOf(base.o.pc);
+        line("guide-old-p", 64, oy, ox, oy);
+        line("guide-old-q", ox, oy, ox, 352);
+        document.getElementById("guide-old-p").setAttribute("opacity", pointMoved ? "0.7" : "0");
+        document.getElementById("guide-old-q").setAttribute("opacity", pointMoved ? "0.7" : "0");
+        document.getElementById("dot-old").setAttribute("opacity", pointMoved ? "1" : "0");
+        document.getElementById("e-old").setAttribute("opacity", pointMoved ? "1" : "0");
+        if (pointMoved) arrow("move-path", ox, oy, xq, yOf(o.pc));
+        else document.getElementById("move-path").setAttribute("opacity", "0");
+        if (sameS) document.getElementById("shift-s").setAttribute("opacity", "0");
+        else {
+          var supplyMove = bestShift(function (st, p) { return supplyQ(st, p); }, 70, state, base.o.q, o.q);
+          if (supplyMove) shiftArrow("shift-s", supplyMove.q1, supplyMove.q2, supplyMove.p, [base.o.q, o.q]);
+          else document.getElementById("shift-s").setAttribute("opacity", "0");
+        }
+        if (sameD) document.getElementById("shift-d").setAttribute("opacity", "0");
+        else {
+          var demandMove = bestShift(function (st, p) { return demandQ(st, p); }, Math.abs(state.b - 1.5) > 0.02 ? 74 : 22, state, base.o.q, o.q);
+          if (demandMove) shiftArrow("shift-d", demandMove.q1, demandMove.q2, demandMove.p, [base.o.q, o.q]);
+          else document.getElementById("shift-d").setAttribute("opacity", "0");
+        }
+        document.getElementById("dot-old").setAttribute("cx", String(ox));
+        document.getElementById("dot-old").setAttribute("cy", String(oy));
+        label("e-old", ox - 16, oy - 8, pointMoved ? "E" : "");
+        label("old-price", 56, oy - 6, pointMoved ? String(Math.round(base.o.pc)) : "");
+        label("old-q", ox, 388, pointMoved ? String(Math.round(base.o.q)) : "");
+        label("d-old-label", Math.min(600, xOf(base.qEnd) - 16), Math.min(340, yOf(base.pEnd) + 16), sameD ? "" : "D");
+        label("s-old-label", Math.min(600, xOf(base.sTopQ) - 4), yOf(base.sTopP) + 18, sameS ? "" : "S");
+
+        var cs = consumerSurplus(o);
+        var ps = producerSurplus(o);
+        document.getElementById("stat-pc").textContent = money(o.pc);
+        document.getElementById("stat-pp").textContent = money(o.pp);
+        document.getElementById("stat-q").textContent = String(Math.round(o.q));
+        document.getElementById("stat-cs").textContent = money(cs);
+        document.getElementById("stat-ps").textContent = money(ps);
+        return { o: o, cs: cs, ps: ps };
+      }
+
+      function changed(before, after, name) {
+        if (Math.abs(after - before) < 1) return name + " stays at " + money(after);
+        return name + (after > before ? " rises from " : " falls from ") + money(before) + " to " + money(after);
+      }
+
+      function buttonsOff(off) {
+        busy = off;
+        document.getElementById("reset").disabled = off;
+        if (off) {
+          Array.prototype.forEach.call(document.querySelectorAll(".seg button"), function (btn) { btn.disabled = true; });
+          return;
+        }
+        var blocked = false;
+        Array.prototype.forEach.call(document.querySelectorAll(".seg button"), function (btn) {
+          var id = btn.getAttribute("data-force");
+          var v = Number(btn.getAttribute("data-v"));
+          if (values[id] === v || v === 0) {
+            btn.disabled = false;
+            btn.removeAttribute("title");
+            return;
+          }
+          var ok = fits(trial(id, v));
+          btn.disabled = !ok;
+          if (ok) btn.removeAttribute("title");
+          else {
+            blocked = true;
+            btn.title = "Another choice this way would move a curve off the diagram.";
+          }
+        });
+        document.getElementById("limit-note").hidden = !blocked;
+      }
+
+      function ease(t) { return t * t * (3 - 2 * t); }
+
+      function apply(reason) {
+        if (anim) cancelAnimationFrame(anim);
+        var before = draw(shown);
+        var end = totals(values);
+        var start = { d: shown.d, s: shown.s, b: shown.b, m: shown.m, cut: shown.cut || 0 };
+        buttonsOff(true);
+        var t0 = performance.now();
+        function frame(now) {
+          var k = ease(Math.min(1, (now - t0) / 480));
+          shown.d = start.d + (end.d - start.d) * k;
+          shown.s = start.s + (end.s - start.s) * k;
+          shown.b = start.b + (end.b - start.b) * k;
+          shown.m = start.m + (end.m - start.m) * k;
+          shown.cut = start.cut + (end.cut - start.cut) * k;
+          draw(shown);
+          if (k < 1) {
+            anim = requestAnimationFrame(frame);
+            return;
+          }
+          shown = end;
+          var done = draw(shown);
+          var priceLine = Math.abs(done.o.pp - done.o.pc) > 0.5
+            ? "The market price stays at " + money(done.o.pp) + ". This consumer pays " + money(done.o.pc) + " and buys " + area(done.o.q) + ". "
+            : "The price is " + money(done.o.pc) + " and quantity is " + area(done.o.q) + ". ";
+          storyEl.textContent = reason + " " + priceLine + changed(before.ps, done.ps, "Producer surplus") + ". " + changed(before.cs, done.cs, "Consumer surplus") + ".";
+          buttonsOff(false);
+          anim = 0;
+        }
+        anim = requestAnimationFrame(frame);
+      }
+
+      function paint(rootId, sides) {
+        var root = document.getElementById(rootId);
+        GROUPS.forEach(function (g) {
+          if (sides.indexOf(g.side) === -1) return;
+          var card = document.createElement("div");
+          card.className = "choice";
+          if (g.group) {
+            var heading = document.createElement("h3");
+            heading.textContent = g.group;
+            card.appendChild(heading);
+          }
+          if (g.hint) {
+            var hint = document.createElement("p");
+            hint.className = "hint";
+            hint.textContent = g.hint;
+            card.appendChild(hint);
+          }
+          var block = document.createElement("div");
+          block.className = "force";
+          var seg = document.createElement("div");
+          seg.className = "seg";
+          [{ v: 0, label: "Unchanged", text: "That technique is removed." }].concat(g.options).forEach(function (opt) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.textContent = opt.label;
+            btn.setAttribute("data-force", g.id);
+            btn.setAttribute("data-v", String(opt.v));
+            if (opt.v === 0) btn.className = "on";
+            btn.addEventListener("click", function () {
+              if (busy || values[g.id] === opt.v) return;
+              if (opt.v !== 0 && !fits(trial(g.id, opt.v))) {
+                buttonsOff(false);
+                return;
+              }
+              values[g.id] = opt.v;
+              Array.prototype.forEach.call(seg.querySelectorAll("button"), function (b) {
+                b.className = Number(b.getAttribute("data-v")) === opt.v ? "on" : "";
+              });
+              apply(opt.text);
+            });
+            seg.appendChild(btn);
+          });
+          block.appendChild(seg);
+          card.appendChild(block);
+          root.appendChild(card);
+        });
+      }
+
+      paint("demand-forces", ["d"]);
+      paint("supply-forces", ["s"]);
+      draw(shown);
+      buttonsOff(false);
+
+      function clearDiagram() {
+        if (anim) cancelAnimationFrame(anim);
+        anim = 0;
+        busy = false;
+        GROUPS.forEach(function (g) { values[g.id] = 0; });
+        shown = { d: 0, s: 0, b: 1.5, m: 0, cut: 0 };
+        Array.prototype.forEach.call(document.querySelectorAll(".seg button"), function (btn) {
+          btn.className = btn.getAttribute("data-v") === "0" ? "on" : "";
+        });
+        draw(shown);
+        storyEl.textContent = START;
+        buttonsOff(false);
+      }
+
+      function showActions(which) {
+        var consumerBtn = document.getElementById("show-consumer");
+        var producerBtn = document.getElementById("show-producer");
+        var current = consumerBtn.classList.contains("on") ? "consumer" : (producerBtn.classList.contains("on") ? "producer" : "");
+        if (current && current !== which) clearDiagram();
+        var consumer = which === "consumer";
+        document.getElementById("consumer-panel").hidden = !consumer;
+        document.getElementById("producer-panel").hidden = consumer;
+        consumerBtn.classList.toggle("on", consumer);
+        producerBtn.classList.toggle("on", !consumer);
+        consumerBtn.setAttribute("aria-pressed", consumer ? "true" : "false");
+        producerBtn.setAttribute("aria-pressed", consumer ? "false" : "true");
+      }
+
+      document.getElementById("show-consumer").addEventListener("click", function () { showActions("consumer"); });
+      document.getElementById("show-producer").addEventListener("click", function () { showActions("producer"); });
+      document.getElementById("reset").addEventListener("click", clearDiagram);
+    })();
+  </script>
+</body>
+</html>

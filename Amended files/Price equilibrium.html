@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Price and equilibrium</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #e4d9c8;
+      --paper: #f7f1e8;
+      --card: #fffaf3;
+      --accent: #9a3412;
+      --accent-soft: #f3e2d4;
+      --formula: var(--accent-soft);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .book { max-width: 1180px; margin: 0 auto; padding: 16px 16px 48px; }
+    .topic {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 22px 24px;
+      margin: 16px 0;
+    }
+    h1 { margin: 0 0 8px; font-size: 1.75rem; letter-spacing: -0.03em; }
+    .meta { color: var(--muted); font-size: 0.92rem; margin: 0 0 12px; }
+    .meta a { color: var(--accent); font-weight: 700; }
+    .lead { margin: 0 0 14px; }
+    .play {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.85fr);
+      gap: 18px;
+      align-items: start;
+    }
+    .chart-wrap {
+      background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 4px 4px 0;
+    }
+    svg.chart {
+      display: block; width: 100%; height: auto;
+    }
+    .panel { min-width: 0; }
+    .readout {
+      display: grid; grid-template-columns: 1fr; gap: 8px; margin: 0 0 8px;
+    }
+    .stat {
+      background: var(--formula); border-radius: 8px; padding: 8px 12px;
+    }
+    .stat span { display: block; color: var(--muted); font-size: 0.8rem; }
+    .stat strong { font-size: 1.05rem; }
+    .story { margin: 0 0 8px; min-height: 2.8em; font-size: 0.92rem; }
+    .price-row { margin: 4px 0 0; }
+    .price-row label { font-weight: 700; display: block; margin-bottom: 6px; }
+    .price-row input { width: 100%; }
+    .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .tools button {
+      font: inherit; font-weight: 700; cursor: pointer; border-radius: 8px;
+      background: var(--accent); color: #fffaf3; border: 0; padding: 8px 12px;
+    }
+    .tools button.ghost { background: #fff; color: var(--accent); border: 1px solid var(--line); }
+    .tools button.ghost:hover:not(:disabled) { background: var(--accent-soft); }
+    .tools button:disabled { opacity: 0.45; cursor: default; }
+    button:focus-visible, a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .steps { margin-top: 14px; }
+    .steps h2 { margin: 0 0 8px; font-size: 1.05rem; }
+    .step-list { display: flex; flex-direction: column; gap: 8px; }
+    .step-list button {
+      font: inherit; font-weight: 700; text-align: left; cursor: pointer;
+      background: #fff; color: var(--accent); border: 1px solid var(--line);
+      border-radius: 8px; padding: 8px 12px;
+    }
+    .step-list button:hover:not(:disabled) { background: var(--accent-soft); }
+    .step-list button.done {
+      background: #dcfce7; color: #166534; border-color: #86efac; opacity: 1; cursor: default;
+    }
+    .step-list button:disabled { opacity: 0.45; cursor: default; }
+    .step-list .ask { margin: 0; font-weight: 800; }
+    .step-list button.bad {
+      background: #ffe4e6; color: #9f1239; border-color: #9f1239;
+    }
+    @media (min-width: 861px) {
+      .chart-wrap { position: sticky; top: 16px; }
+    }
+    @media (max-width: 860px) {
+      .play { grid-template-columns: 1fr; }
+    }
+  </style>
+  <link rel="stylesheet" href="../diagram-economist.css" />
+</head>
+<body>
+  <div class="book">
+    <article class="topic">
+      <h1>Price and equilibrium</h1>
+      <p class="meta"><a href="../micro-diagrams.html">Back to interactive games</a></p>
+      <p class="lead">Move the slider to set a price that causes excess demand or supply. Answer the multiple choice questions correctly to return the price to the original equilibrium.</p>
+      <div class="play">
+      <div class="chart-wrap">
+        <svg class="chart" id="chart" viewBox="0 0 680 420" role="img" aria-labelledby="chart-title">
+          <title id="chart-title">A price change returning to equilibrium</title>
+          <line x1="64" y1="36" x2="64" y2="352" stroke="#1c1915" stroke-width="2" />
+          <polygon points="64,28 59,42 69,42" fill="#1c1915" />
+          <line x1="64" y1="352" x2="620" y2="352" stroke="#1c1915" stroke-width="2" />
+          <polygon points="632,352 618,347 618,357" fill="#1c1915" />
+          <defs>
+            <marker id="gap-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 Z" fill="#1c1915" />
+            </marker>
+          </defs>
+          <text x="74" y="44" fill="#5c5348" font-size="15" font-family="Financier Text, Georgia, Palatino Linotype, Palatino, serif">Price</text>
+          <text x="548" y="376" fill="#5c5348" font-size="15" font-family="Financier Text, Georgia, Palatino Linotype, Palatino, serif">Quantity</text>
+          <line id="demand" stroke="#1c1915" stroke-width="3" />
+          <line id="supply" stroke="#9a3412" stroke-width="3" />
+          <line id="along" stroke="#1c1915" stroke-width="7" stroke-linecap="round" opacity="0" />
+          <circle id="along-dot" r="7" fill="#1c1915" stroke="#fff" stroke-width="1.5" opacity="0" />
+          <line id="guide-h" stroke="#1c1915" stroke-width="1.5" stroke-dasharray="5 4" />
+          <line id="guide-v" stroke="#1c1915" stroke-width="1.5" stroke-dasharray="5 4" />
+          <line id="guide-v2" stroke="#1c1915" stroke-width="1.5" stroke-dasharray="5 4" opacity="0" />
+          <line id="gap" stroke="#1c1915" stroke-width="3" opacity="0" marker-start="url(#gap-arrow)" marker-end="url(#gap-arrow)" />
+          <text id="gap-label" fill="#9f1239" stroke="#fff" stroke-width="5" paint-order="stroke" font-size="18" font-weight="700" font-family="Financier Display, Georgia, Palatino Linotype, Palatino, serif" text-anchor="middle" opacity="0"></text>
+          <text id="price-label" fill="#1c1915" font-size="15" font-weight="700" font-family="Financier Text, Georgia, Palatino Linotype, Palatino, serif" text-anchor="end"></text>
+          <text id="q-label" fill="#1c1915" font-size="15" font-weight="700" font-family="Financier Text, Georgia, Palatino Linotype, Palatino, serif" text-anchor="middle" opacity="0"></text>
+          <circle id="eq" r="7" fill="#9a3412" stroke="#fff" stroke-width="1.5" />
+          <text id="d-label" fill="#1c1915" font-size="18" font-weight="700" font-family="Financier Display, Georgia, Palatino Linotype, Palatino, serif">D</text>
+          <text id="s-label" fill="#9a3412" font-size="18" font-weight="700" font-family="Financier Display, Georgia, Palatino Linotype, Palatino, serif">S</text>
+          <text id="e-label" fill="#9a3412" font-size="16" font-weight="700" font-family="Financier Display, Georgia, Palatino Linotype, Palatino, serif">E</text>
+        </svg>
+      </div>
+      <div class="panel">
+      <div class="readout" aria-live="polite">
+        <div class="stat"><span>Price</span><strong id="stat-p">£40</strong></div>
+        <div class="stat"><span>Quantity</span><strong id="stat-q">60</strong></div>
+        <div class="stat"><span>Market</span><strong id="stat-m">Equilibrium</strong></div>
+      </div>
+      <p class="story" id="story">The market starts in equilibrium at £40 and 60 units. Change the price, then press the steps in order.</p>
+      <div class="price-row">
+        <label for="price">Price of the good: <span id="price-now">£40</span></label>
+        <input id="price" type="range" min="8" max="92" step="1" value="40" />
+        <div class="tools">
+          <button type="button" class="ghost" id="reset">Reset</button>
+          <button type="button" class="ghost" id="save-diagram" data-file="price-equilibrium.png">Save diagram</button>
+        </div>
+      </div>
+      <div class="steps" id="steps" hidden>
+        <h2 id="steps-title">Excess demand</h2>
+        <div class="step-list" id="step-list"></div>
+      </div>
+      </div>
+      </div>
+    </article>
+  </div>
+  <script src="../equilibrium-save.js"></script>
+  <script>
+    (function () {
+      var QMAX = 140;
+      var P0 = 40;
+      var BASE_D = 100;
+      var BASE_S = 20;
+      var DEMAND_STEPS = [
+        {
+          label: "Sellers raise prices (to ration scarce stock)",
+          story: "Sellers raise prices to ration scarce stock.",
+          curve: "",
+          ask: "Question 1 of 4. When buyers want more than sellers are willing to supply at the current price, what do sellers do to reduce excess demand?",
+          options: [
+            { text: "Sellers raise prices (to ration scarce stock)", correct: true },
+            { text: "They cut prices to sell the scarce stock faster" },
+            { text: "They increase advertising" },
+            { text: "They make workers redundant" }
+          ]
+        },
+        {
+          label: "Competing buyers bid the price up",
+          story: "Competing buyers bid the price up.",
+          curve: "",
+          ask: "Question 2 of 4. If a shortage causes buyers to compete for limited stock, what happens to the market price?",
+          options: [
+            { text: "Competing buyers bid the price up", correct: true },
+            { text: "The market price falls as buyers wait" },
+            { text: "The market price stays at the shortage price" },
+            { text: "Sellers cut the price to clear unsold stock" }
+          ]
+        },
+        {
+          label: "Extension of supply (producers supply more as price rises)",
+          story: "The higher price causes an extension of supply: producers supply more as they move up the supply curve.",
+          curve: "s",
+          ask: "Question 3 of 4. As rising prices make production more profitable, how do producers respond along the supply curve?",
+          options: [
+            { text: "Extension of supply (producers supply more as price rises)", correct: true },
+            { text: "Contraction of supply (producers supply less as price rises)" },
+            { text: "The supply curve shifts to the right" },
+            { text: "Extension of demand" }
+          ]
+        },
+        {
+          label: "Contraction of demand (consumers buy less as price rises)",
+          story: "The higher price causes a contraction of demand: consumers buy less as they move up the demand curve.",
+          curve: "d",
+          ask: "Question 4 of 4. When price increases during a shortage, how do consumers adjust their quantity demanded?",
+          options: [
+            { text: "Contraction of demand (consumers buy less as price rises)", correct: true },
+            { text: "Extension of demand (consumers buy more as price rises)" },
+            { text: "The demand curve shifts to the right" },
+            { text: "Consumers buy the same quantity because the good is scarce" }
+          ]
+        }
+      ];
+      var SUPPLY_STEPS = [
+        {
+          label: "Sellers have unsold stock → they cut prices to attract buyers.",
+          story: "Sellers have unsold stock, so they cut prices to attract buyers.",
+          curve: "",
+          ask: "Question 1 of 4. What do firms typically do when the market price is set too high and they end up with excess supply?",
+          options: [
+            { text: "Sellers have unsold stock → they cut prices to attract buyers.", correct: true },
+            { text: "Increasing advertising" },
+            { text: "Make workers redundant" },
+            { text: "Buy more machines" }
+          ]
+        },
+        {
+          label: "Competing sellers undercut each other → price falls.",
+          story: "Competing sellers undercut each other, so the price falls.",
+          curve: "",
+          ask: "Question 2 of 4. If firms notice rival sellers lowering their prices, how are they likely to respond in order to maintain sales?",
+          options: [
+            { text: "Competing sellers undercut each other → price falls.", correct: true },
+            { text: "Firms attempt to buy out their rivals" },
+            { text: "Firms change the packaging of their products" },
+            { text: "Firms move into a new area of the country" }
+          ]
+        },
+        {
+          label: "Lower price → extension of demand (move down the demand curve).",
+          story: "The lower price causes an extension of demand: a move down the demand curve.",
+          curve: "d",
+          ask: "Question 3 of 4. When the price drops and consumers buy more of the good, what is this movement along the demand curve called?",
+          options: [
+            { text: "Extension of demand (move down the demand curve).", correct: true },
+            { text: "A shift (lowering prices)" },
+            { text: "Cross elasticity (Until equilibrium is reached)" },
+            { text: "Extension of supply" }
+          ]
+        },
+        {
+          label: "Lower price → contraction of supply (move down the supply curve).",
+          story: "The lower price causes a contraction of supply: a move down the supply curve.",
+          curve: "s",
+          ask: "Question 4 of 4. When the price of a good falls, what is the reaction of producers?",
+          options: [
+            { text: "Contraction of supply (move down the supply curve).", correct: true },
+            { text: "Firm cuts costs by making people redundant" },
+            { text: "Firm increases use of capital equipment" },
+            { text: "Firms objectives change to satisficing" }
+          ]
+        }
+      ];
+      var shownPrice = P0;
+      var manual = false;
+      var anim = 0;
+      var busy = false;
+      var stepFrom = P0;
+      var stepN = 0;
+      var stepKind = "";
+      var storyEl = document.getElementById("story");
+      var priceInput = document.getElementById("price");
+      var stepsBox = document.getElementById("steps");
+      var stepList = document.getElementById("step-list");
+
+      function money(n) { return "£" + String(Math.round(n)); }
+      function qty(n) { return String(Math.round(n)); }
+      function qd(p) { return BASE_D - p; }
+      function qs(p) { return BASE_S + p; }
+      function xOf(q) { return 64 + (Math.max(0, Math.min(QMAX, q)) / QMAX) * 540; }
+      function yOf(p) { return 352 - (p / 100) * 300; }
+      function ease(t) { return t * t * (3 - 2 * t); }
+      function excessName(gap) {
+        if (gap > 0.6) return "Excess demand";
+        if (gap < -0.6) return "Excess supply";
+        return "";
+      }
+
+      function line(id, x1, y1, x2, y2) {
+        var el = document.getElementById(id);
+        el.setAttribute("x1", String(x1));
+        el.setAttribute("y1", String(y1));
+        el.setAttribute("x2", String(x2));
+        el.setAttribute("y2", String(y2));
+      }
+
+      function pointOn(curve, p) {
+        return { x: xOf(curve === "d" ? qd(p) : qs(p)), y: yOf(p) };
+      }
+
+      function draw(price, labelQty, along) {
+        var qDem = qd(price);
+        var qSup = qs(price);
+        var gapN = qDem - qSup;
+        var excess = excessName(gapN);
+        var showGap = excess !== "" && (manual || labelQty);
+        var dBot = { x: xOf(qd(0)), y: yOf(0) };
+        var dTop = { x: xOf(qd(100)), y: yOf(100) };
+        var sBot = { x: xOf(qs(0)), y: yOf(0) };
+        var sTop = { x: xOf(qs(100)), y: yOf(100) };
+        line("demand", dBot.x, dBot.y, dTop.x, dTop.y);
+        line("supply", sBot.x, sBot.y, sTop.x, sTop.y);
+        document.getElementById("d-label").setAttribute("x", String(dBot.x + 8));
+        document.getElementById("d-label").setAttribute("y", String(dBot.y - 6));
+        document.getElementById("s-label").setAttribute("x", String(sTop.x + 8));
+        document.getElementById("s-label").setAttribute("y", String(sTop.y + 4));
+
+        var ex = xOf(60);
+        var ey = yOf(P0);
+        document.getElementById("eq").setAttribute("cx", String(ex));
+        document.getElementById("eq").setAttribute("cy", String(ey));
+        var eLabel = document.getElementById("e-label");
+        eLabel.setAttribute("x", String(ex + 10));
+        eLabel.setAttribute("y", String(ey - 10));
+        eLabel.setAttribute("opacity", showGap ? "0" : "1");
+
+        var priceY = yOf(showGap || labelQty ? price : P0);
+        var farQ = showGap || labelQty ? Math.max(qDem, qSup) : 60;
+        line("guide-h", 64, priceY, xOf(farQ), priceY);
+        var v1 = document.getElementById("guide-v");
+        var v2 = document.getElementById("guide-v2");
+        if (showGap || labelQty) {
+          line("guide-v", xOf(Math.min(qDem, qSup)), priceY, xOf(Math.min(qDem, qSup)), 352);
+          v1.setAttribute("opacity", "1");
+          if (Math.abs(qDem - qSup) > 0.6) {
+            line("guide-v2", xOf(Math.max(qDem, qSup)), priceY, xOf(Math.max(qDem, qSup)), 352);
+            v2.setAttribute("opacity", "1");
+          } else {
+            v2.setAttribute("opacity", "0");
+          }
+        } else {
+          line("guide-v", ex, ey, ex, 352);
+          v1.setAttribute("opacity", "1");
+          v2.setAttribute("opacity", "0");
+        }
+
+        var priceLabel = document.getElementById("price-label");
+        priceLabel.textContent = String(Math.round(showGap || labelQty ? price : P0));
+        priceLabel.setAttribute("x", "56");
+        priceLabel.setAttribute("y", String(priceY + 5));
+
+        var qtyLabel = document.getElementById("q-label");
+        if (!showGap || labelQty) {
+          qtyLabel.textContent = "60";
+          qtyLabel.setAttribute("x", String(ex));
+          qtyLabel.setAttribute("y", "370");
+          qtyLabel.setAttribute("opacity", "1");
+        } else {
+          qtyLabel.setAttribute("opacity", "0");
+        }
+
+        var gap = document.getElementById("gap");
+        var gapLabel = document.getElementById("gap-label");
+        if (showGap) {
+          var x1 = xOf(Math.min(qSup, qDem));
+          var x2 = xOf(Math.max(qSup, qDem));
+          line("gap", x1, priceY, x2, priceY);
+          gap.setAttribute("opacity", "1");
+          gapLabel.textContent = excess;
+          gapLabel.setAttribute("x", String((x1 + x2) / 2));
+          gapLabel.setAttribute("y", String(priceY > 320 ? priceY - 12 : priceY + 22));
+          gapLabel.setAttribute("opacity", "1");
+        } else {
+          gap.setAttribute("opacity", "0");
+          gapLabel.setAttribute("opacity", "0");
+        }
+
+        document.getElementById("stat-p").textContent = money(showGap || labelQty ? price : P0);
+        document.getElementById("stat-q").textContent = showGap ? qty(qDem) + " demanded, " + qty(qSup) + " supplied" : "60";
+        document.getElementById("stat-m").textContent = showGap ? excess : "Equilibrium";
+        document.getElementById("price-now").textContent = money(price);
+        var alongLine = document.getElementById("along");
+        var alongDot = document.getElementById("along-dot");
+        if (along && along.curve && Math.abs(along.toP - along.fromP) > 0.2) {
+          var a = pointOn(along.curve, along.fromP);
+          var b = pointOn(along.curve, along.toP);
+          var colour = along.curve === "d" ? "#1c1915" : "#9a3412";
+          line("along", a.x, a.y, b.x, b.y);
+          alongLine.setAttribute("stroke", colour);
+          alongLine.setAttribute("opacity", "1");
+          alongDot.setAttribute("cx", String(b.x));
+          alongDot.setAttribute("cy", String(b.y));
+          alongDot.setAttribute("fill", colour);
+          alongDot.setAttribute("opacity", "1");
+        } else {
+          alongLine.setAttribute("opacity", "0");
+          alongDot.setAttribute("opacity", "0");
+        }
+      }
+
+      function currentSteps() {
+        return stepKind === "Excess demand" ? DEMAND_STEPS : SUPPLY_STEPS;
+      }
+
+      function priceAt(n) {
+        return stepFrom + (P0 - stepFrom) * (n / 4);
+      }
+
+      function shuffle(list) {
+        var copy = list.slice();
+        for (var i = copy.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = copy[i];
+          copy[i] = copy[j];
+          copy[j] = t;
+        }
+        return copy;
+      }
+
+      function paintQuestion() {
+        var step = currentSteps()[stepN];
+        if (!step.shuffled) step.shuffled = shuffle(step.options);
+        stepList.innerHTML = "";
+        var ask = document.createElement("p");
+        ask.className = "ask";
+        ask.textContent = step.ask;
+        stepList.appendChild(ask);
+        var hint = stepKind === "Excess demand" ? "excess demand" : "excess supply";
+        step.shuffled.forEach(function (opt) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = opt.text;
+          btn.addEventListener("click", function () {
+            if (busy) return;
+            if (!opt.correct) {
+              btn.className = "bad";
+              btn.disabled = true;
+              storyEl.textContent = "Not this time. Choose the market force that reduces this " + hint + ".";
+              return;
+            }
+            runStep(stepN);
+          });
+          stepList.appendChild(btn);
+        });
+      }
+
+      function paintSteps() {
+        paintQuestion();
+      }
+
+      function showSteps(excess) {
+        if (!excess) {
+          stepsBox.hidden = true;
+          stepKind = "";
+          stepN = 0;
+          return;
+        }
+        if (stepKind !== excess) {
+          stepKind = excess;
+          stepN = 0;
+          stepFrom = shownPrice;
+          DEMAND_STEPS.forEach(function (step) { step.shuffled = null; });
+          SUPPLY_STEPS.forEach(function (step) { step.shuffled = null; });
+        }
+        document.getElementById("steps-title").textContent = excess;
+        stepsBox.hidden = false;
+        paintSteps();
+      }
+
+      function buttonsOff(off) {
+        busy = off;
+        priceInput.disabled = off;
+        document.getElementById("reset").disabled = off;
+        Array.prototype.forEach.call(stepList.querySelectorAll("button"), function (btn) {
+          if (off) btn.disabled = true;
+        });
+        if (!off) paintSteps();
+      }
+
+      function showManual() {
+        if (busy) return;
+        shownPrice = Number(priceInput.value);
+        var gapN = qd(shownPrice) - qs(shownPrice);
+        var excess = excessName(gapN);
+        manual = excess !== "";
+        stepKind = "";
+        stepN = 0;
+        stepFrom = shownPrice;
+        draw(shownPrice, false);
+        showSteps(excess);
+        if (!excess) {
+          storyEl.textContent = "At " + money(shownPrice) + ", quantity demanded equals quantity supplied. This price is the equilibrium.";
+          return;
+        }
+        var qDem = qd(shownPrice);
+        var qSup = qs(shownPrice);
+        storyEl.textContent = "At " + money(shownPrice) + ", quantity demanded is " + qty(qDem) + " and quantity supplied is " + qty(qSup) + ". " + excess + ". Choose the market force that reduces it.";
+      }
+
+      function runStep(i) {
+        if (busy || i !== stepN) return;
+        var steps = currentSteps();
+        var step = steps[i];
+        var fromP = priceAt(i);
+        var toP = priceAt(i + 1);
+        var last = i === steps.length - 1;
+        if (anim) cancelAnimationFrame(anim);
+        buttonsOff(true);
+        var t0 = performance.now();
+        function frame(now) {
+          var k = ease(Math.min(1, (now - t0) / 520));
+          shownPrice = fromP + (toP - fromP) * k;
+          priceInput.value = String(Math.round(shownPrice));
+          var along = step.curve ? { curve: step.curve, fromP: fromP, toP: shownPrice } : null;
+          draw(shownPrice, true, along);
+          storyEl.textContent = step.story;
+          if (k < 1) {
+            anim = requestAnimationFrame(frame);
+            return;
+          }
+          shownPrice = toP;
+          stepN = i + 1;
+          if (last) {
+            manual = false;
+            shownPrice = P0;
+            priceInput.value = String(P0);
+            draw(P0, false, step.curve ? { curve: step.curve, fromP: fromP, toP: P0 } : null);
+            storyEl.textContent = step.story + " Equilibrium is £40 and 60 units. The curves have not shifted.";
+            stepsBox.hidden = true;
+            stepKind = "";
+            stepN = 0;
+          } else {
+            manual = true;
+            draw(shownPrice, true, step.curve ? { curve: step.curve, fromP: fromP, toP: toP } : null);
+            storyEl.textContent = step.story + " Choose the next market force.";
+          }
+          buttonsOff(false);
+          anim = 0;
+        }
+        anim = requestAnimationFrame(frame);
+      }
+
+      function resetMarket() {
+        if (anim) cancelAnimationFrame(anim);
+        anim = 0;
+        busy = false;
+        manual = false;
+        shownPrice = P0;
+        priceInput.disabled = false;
+        priceInput.value = String(P0);
+        document.getElementById("reset").disabled = false;
+        stepsBox.hidden = true;
+        stepKind = "";
+        stepN = 0;
+        draw(P0, false);
+        storyEl.textContent = "The market starts in equilibrium at £40 and 60 units. Change the price, then press the steps in order.";
+      }
+
+      draw(P0, false);
+      priceInput.addEventListener("input", showManual);
+      document.getElementById("reset").addEventListener("click", resetMarket);
+    })();
+  </script>
+</body>
+</html>
