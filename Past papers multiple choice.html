@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Past paper multiple choice</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #e4d9c8;
+      --paper: #f7f1e8;
+      --card: #fffaf3;
+      --accent: #9a3412;
+      --accent-soft: #f3e2d4;
+      --right: #1f6b45;
+      --right-soft: #e5f4eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    a { color: inherit; }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 0 22px 64px; }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 22px 0 8px;
+    }
+    .mark {
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+      line-height: 1.15;
+    }
+    .mark span { color: var(--accent); }
+    header nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+    }
+    header nav a {
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.92rem;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 1px;
+      white-space: nowrap;
+    }
+    h1, h2, .score {
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      letter-spacing: -0.03em;
+    }
+    h1 {
+      margin: 28px 0 12px;
+      font-size: clamp(1.9rem, 4.6vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.12;
+    }
+    .lead, .hint, .topic, .clock-note {
+      color: var(--muted);
+    }
+    .lead { margin: 0 0 22px; max-width: 40em; }
+    .modes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 18px;
+    }
+    button, .option {
+      font: inherit;
+      cursor: pointer;
+    }
+    button:focus-visible, a:focus-visible, .option:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .modes button, .paper, .actions button {
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 700;
+    }
+    .modes button {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+    }
+    .modes button[aria-pressed="true"] {
+      background: var(--ink);
+      color: #fffaf3;
+      border-color: var(--ink);
+    }
+    .papers {
+      display: grid;
+      gap: 12px;
+    }
+    .paper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      text-align: left;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px 18px;
+    }
+    .paper:hover, .actions button.secondary:hover { background: var(--accent-soft); }
+    .paper strong {
+      display: block;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+    .paper span { color: var(--muted); font-weight: 600; font-size: 0.92rem; }
+    .bar {
+      height: 3px;
+      margin: 18px 0 0;
+      background: var(--line);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .bar > span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: var(--accent);
+    }
+    .progress-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 14px 0 0;
+    }
+    .progress {
+      margin: 0;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+    }
+    .timer {
+      margin: 0;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .timer.is-low {
+      color: #b91c1c;
+    }
+    .topic { margin: 4px 0 0; font-size: 0.92rem; }
+    .chart-wrap {
+      margin-top: 16px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 8px 8px 4px;
+    }
+    .chart-title {
+      margin: 4px 8px 0;
+      text-align: center;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-weight: 700;
+    }
+    svg.chart,
+    img.chart {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    #stem {
+      margin: 16px 0 0;
+      font-size: clamp(1.35rem, 3vw, 1.75rem);
+      line-height: 1.25;
+      font-weight: 700;
+    }
+    #stem:focus { outline: none; }
+    .options {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      text-align: left;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      line-height: 1.4;
+    }
+    .option .letter {
+      flex: 0 0 auto;
+      font-weight: 700;
+    }
+    .option.is-picked {
+      border-color: var(--ink);
+      background: var(--accent-soft);
+    }
+    .option.is-right {
+      border-color: var(--right);
+      background: var(--right-soft);
+    }
+    .option.is-wrong {
+      border-color: var(--accent);
+      background: #fde8e4;
+    }
+    .option:disabled { cursor: default; }
+    .why {
+      margin: 16px 0 0;
+      padding: 12px 14px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .actions button {
+      border: 0;
+      background: var(--ink);
+      color: #fffaf3;
+    }
+    .actions button:hover { background: #312a22; }
+    .actions button:disabled { background: #8a8175; cursor: default; }
+    .actions button.secondary {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+    .hint { margin: 18px 0 0; font-size: 0.92rem; }
+    .score {
+      margin: 12px 0 0;
+      font-size: clamp(3rem, 10vw, 4.5rem);
+      line-height: 1;
+      font-weight: 700;
+    }
+    #scoreHeading:focus { outline: none; }
+    .review {
+      list-style: none;
+      margin: 28px 0 0;
+      padding: 0;
+      display: grid;
+      gap: 14px;
+    }
+    .review li {
+      padding: 14px 14px 12px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    .review .review-stem { margin: 0 0 8px; font-weight: 700; }
+    .review p { margin: 0 0 6px; }
+    .review .why {
+      margin: 8px 0 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+    }
+    .miss { box-shadow: inset 3px 0 0 var(--accent); }
+    .hit { box-shadow: inset 3px 0 0 var(--right); }
+    .sr {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+  </style>
+  <link rel="stylesheet" href="diagram-economist.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="mark" href="Diagram Economist.html">The Diagram <span>Economist</span></a>
+      <nav>
+        <a href="Micro past papers.html">Micro papers</a>
+        <a href="Diagram Economist/exam-practice.html">Exam practice</a>
+      </nav>
+    </header>
+    <main>
+      <section id="setup">
+        <h1>Past paper multiple choice</h1>
+        <p class="lead">Macroeconomics multiple choice. Every question uses a diagram.</p>
+        <div class="modes" role="group" aria-label="How to sit the paper">
+          <button type="button" data-mode="practice" aria-pressed="true">Mark as I go</button>
+          <button type="button" data-mode="paper" aria-pressed="false">Sit the paper</button>
+        </div>
+        <div class="papers">
+          <button type="button" class="paper" data-paper="macro">
+            <strong>Macroeconomics</strong>
+            <span data-best="macro">8 questions</span>
+          </button>
+        </div>
+        <p class="hint">Each question has one minute. When the time runs out the paper moves on, answered or not. Mark as I go shows the answer after each question. Sit the paper waits until the end. Keys A to D choose an answer.</p>
+      </section>
+
+      <section id="quiz" hidden>
+        <div class="progress-row">
+          <p class="progress" id="progress">Question 1 of 3</p>
+          <p class="timer" id="timer" role="timer" aria-live="off" aria-atomic="true">1:00</p>
+        </div>
+        <div class="bar" aria-hidden="true"><span id="fill"></span></div>
+        <p class="topic" id="topic"></p>
+        <div class="chart-wrap" data-figure="ad" hidden>
+          <p class="chart-title">Figure 1</p>
+          <svg class="chart" viewBox="0 0 680 400" role="img" aria-label="Figure 1. Three aggregate demand curves, AD1, AD2 and AD3, one short-run aggregate supply curve and a vertical long-run aggregate supply curve at Y2. Y1 is left of long-run aggregate supply and Y3 is right of it.">
+            <line x1="78" y1="36" x2="78" y2="332" stroke="#1c1915" stroke-width="2" />
+            <polygon points="78,28 73,42 83,42" fill="#1c1915" />
+            <line x1="78" y1="332" x2="620" y2="332" stroke="#1c1915" stroke-width="2" />
+            <polygon points="632,332 618,327 618,337" fill="#1c1915" />
+            <text x="88" y="40" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">Price level</text>
+            <text x="250" y="376" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">Real national output</text>
+            <line x1="160" y1="310" x2="580" y2="80" stroke="#1c1915" stroke-width="2.5" />
+            <text x="588" y="78" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">SRAS</text>
+            <line x1="370" y1="52" x2="370" y2="332" stroke="#1c1915" stroke-width="2.5" />
+            <text x="370" y="42" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">LRAS</text>
+            <line x1="298" y1="154" x2="298" y2="332" stroke="#5c5348" stroke-width="1.5" stroke-dasharray="5 4" />
+            <line x1="442" y1="156" x2="442" y2="332" stroke="#5c5348" stroke-width="1.5" stroke-dasharray="5 4" />
+            <line x1="150" y1="160" x2="490" y2="330" stroke="#1c1915" stroke-width="2.5" />
+            <text x="498" y="328" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">AD1</text>
+            <line x1="150" y1="85" x2="590" y2="305" stroke="#1c1915" stroke-width="2.5" />
+            <text x="598" y="292" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">AD2</text>
+            <line x1="230" y1="50" x2="620" y2="245" stroke="#1c1915" stroke-width="2.5" />
+            <text x="628" y="232" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">AD3</text>
+            <text x="64" y="350" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">O</text>
+            <text x="298" y="350" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">Y1</text>
+            <text x="370" y="350" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">Y2</text>
+            <text x="442" y="350" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">Y3</text>
+          </svg>
+        </div>
+        <div class="chart-wrap" data-figure="as" hidden>
+          <p class="chart-title">Both supply curves shift right</p>
+          <svg class="chart" viewBox="0 0 680 400" role="img" aria-label="Two long-run aggregate supply curves and two short-run aggregate supply curves. LRAS1 is at Y1. LRAS2 is to the right, at Y2. SRAS2 is to the right of SRAS1.">
+            <line x1="78" y1="36" x2="78" y2="332" stroke="#1c1915" stroke-width="2" />
+            <polygon points="78,28 73,42 83,42" fill="#1c1915" />
+            <line x1="78" y1="332" x2="640" y2="332" stroke="#1c1915" stroke-width="2" />
+            <polygon points="652,332 638,327 638,337" fill="#1c1915" />
+            <text x="88" y="40" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">Price level</text>
+            <text x="430" y="376" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">Real national output</text>
+            <line x1="280" y1="64" x2="280" y2="332" stroke="#1c1915" stroke-width="2.5" />
+            <text x="280" y="54" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">LRAS1</text>
+            <line x1="400" y1="64" x2="400" y2="332" stroke="#1c1915" stroke-width="2.5" />
+            <text x="400" y="54" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">LRAS2</text>
+            <line x1="140" y1="300" x2="520" y2="60" stroke="#1c1915" stroke-width="2.5" />
+            <text x="528" y="58" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">SRAS1</text>
+            <line x1="220" y1="300" x2="620" y2="48" stroke="#1c1915" stroke-width="2.5" />
+            <text x="562" y="108" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">SRAS2</text>
+            <text x="64" y="350" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">O</text>
+            <text x="280" y="350" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">Y1</text>
+            <text x="400" y="350" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">Y2</text>
+          </svg>
+        </div>
+        <div class="chart-wrap" data-figure="ad-fall" hidden>
+          <p class="chart-title">Aggregate demand shifts left</p>
+          <svg class="chart" viewBox="0 0 680 400" role="img" aria-label="Two aggregate demand curves and one short-run aggregate supply curve. AD1 meets SRAS at price P1 and output Y1. AD2 meets SRAS at the lower price P2 and the lower output Y2.">
+            <line x1="78" y1="36" x2="78" y2="332" stroke="#1c1915" stroke-width="2" />
+            <polygon points="78,28 73,42 83,42" fill="#1c1915" />
+            <line x1="78" y1="332" x2="640" y2="332" stroke="#1c1915" stroke-width="2" />
+            <polygon points="652,332 638,327 638,337" fill="#1c1915" />
+            <text x="88" y="40" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">Price level</text>
+            <text x="430" y="376" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">Real national output</text>
+            <line x1="160" y1="300" x2="560" y2="100" stroke="#1c1915" stroke-width="2.5" />
+            <text x="568" y="96" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">SRAS</text>
+            <line x1="140" y1="156" x2="430" y2="330" stroke="#1c1915" stroke-width="2.5" />
+            <text x="438" y="322" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">AD2</text>
+            <line x1="260" y1="52" x2="600" y2="256" stroke="#1c1915" stroke-width="2.5" />
+            <text x="608" y="248" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">AD1</text>
+            <line x1="78" y1="160" x2="440" y2="160" stroke="#5c5348" stroke-width="1.5" stroke-dasharray="5 4" />
+            <line x1="78" y1="240" x2="280" y2="240" stroke="#5c5348" stroke-width="1.5" stroke-dasharray="5 4" />
+            <line x1="440" y1="160" x2="440" y2="332" stroke="#5c5348" stroke-width="1.5" stroke-dasharray="5 4" />
+            <line x1="280" y1="240" x2="280" y2="332" stroke="#5c5348" stroke-width="1.5" stroke-dasharray="5 4" />
+            <text x="70" y="164" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">P1</text>
+            <text x="70" y="244" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">P2</text>
+            <text x="64" y="350" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">O</text>
+            <text x="280" y="350" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">Y2</text>
+            <text x="440" y="350" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">Y1</text>
+          </svg>
+        </div>
+        <div class="chart-wrap" data-figure="lras-rd" hidden>
+          <p class="chart-title">Figure 8</p>
+          <svg class="chart" viewBox="0 0 680 400" role="img" aria-label="Figure 8. Aggregate demand with two vertical long-run aggregate supply curves. LRAS1 is to the left of LRAS2. Aggregate demand slopes down, crosses both long-run curves, and ends to the right of LRAS2.">
+            <line x1="78" y1="36" x2="78" y2="332" stroke="#1c1915" stroke-width="2" />
+            <polygon points="78,28 73,42 83,42" fill="#1c1915" />
+            <line x1="78" y1="332" x2="640" y2="332" stroke="#1c1915" stroke-width="2" />
+            <polygon points="652,332 638,327 638,337" fill="#1c1915" />
+            <text x="88" y="40" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">Price level</text>
+            <text x="430" y="376" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">Real national output</text>
+            <line x1="236" y1="52" x2="236" y2="332" stroke="#1c1915" stroke-width="2.5" />
+            <text x="236" y="42" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">LRAS&#8321;</text>
+            <line x1="381" y1="52" x2="381" y2="332" stroke="#1c1915" stroke-width="2.5" />
+            <text x="381" y="42" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">LRAS&#8322;</text>
+            <line x1="167" y1="111" x2="437" y2="269" stroke="#1c1915" stroke-width="2.5" />
+            <text x="446" y="278" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">AD</text>
+            <text x="64" y="350" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Segoe UI, Arial, sans-serif">0</text>
+          </svg>
+        </div>
+        <div class="chart-wrap" data-figure="ad-fiscal" hidden>
+          <p class="chart-title">Figure 2</p>
+          <svg class="chart" viewBox="0 0 680 400" role="img" aria-label="Figure 2. Two aggregate demand curves and one short-run aggregate supply curve. AD1 meets SRAS at price P1 and output Y1. AD2 meets SRAS at the lower price P2 and the lower output Y2.">
+            <line x1="78" y1="36" x2="78" y2="332" stroke="#1c1915" stroke-width="2" />
+            <polygon points="78,28 73,42 83,42" fill="#1c1915" />
+            <line x1="78" y1="332" x2="640" y2="332" stroke="#1c1915" stroke-width="2" />
+            <polygon points="652,332 638,327 638,337" fill="#1c1915" />
+            <text x="88" y="40" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">Price level</text>
+            <text x="430" y="376" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">Real national output</text>
+            <line x1="128" y1="224" x2="412" y2="78" stroke="#1c1915" stroke-width="2.5" />
+            <text x="420" y="72" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">SRAS</text>
+            <line x1="143" y1="64" x2="441" y2="228" stroke="#1c1915" stroke-width="2.5" />
+            <text x="450" y="236" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">AD&#8321;</text>
+            <line x1="100" y1="92" x2="399" y2="257" stroke="#1c1915" stroke-width="2.5" />
+            <text x="408" y="266" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">AD&#8322;</text>
+            <line x1="78" y1="143" x2="287" y2="143" stroke="#5c5348" stroke-width="1.5" stroke-dasharray="5 4" />
+            <line x1="78" y1="168" x2="238" y2="168" stroke="#5c5348" stroke-width="1.5" stroke-dasharray="5 4" />
+            <line x1="287" y1="143" x2="287" y2="332" stroke="#5c5348" stroke-width="1.5" stroke-dasharray="5 4" />
+            <line x1="238" y1="168" x2="238" y2="332" stroke="#5c5348" stroke-width="1.5" stroke-dasharray="5 4" />
+            <text x="70" y="148" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">P&#8321;</text>
+            <text x="70" y="173" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">P&#8322;</text>
+            <text x="64" y="350" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Segoe UI, Arial, sans-serif">0</text>
+            <text x="238" y="350" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">Y&#8322;</text>
+            <text x="287" y="350" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">Y&#8321;</text>
+          </svg>
+        </div>
+        <div class="chart-wrap" data-figure="as-growth" hidden>
+          <p class="chart-title">AS&#8321; to AS&#8322;</p>
+          <svg class="chart" viewBox="0 0 680 400" role="img" aria-label="Aggregate supply shifts from AS1 to AS2. Both curves are horizontal, then rise and become vertical. AS2 is to the right of AS1. An arrow points from AS1 to AS2. Aggregate demand slopes down and meets the horizontal section.">
+            <line x1="150" y1="97" x2="150" y2="310" stroke="#1c1915" stroke-width="2" />
+            <line x1="150" y1="310" x2="500" y2="310" stroke="#1c1915" stroke-width="2" />
+            <text x="138" y="118" text-anchor="end" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">Price</text>
+            <text x="138" y="136" text-anchor="end" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">level</text>
+            <text x="455" y="338" text-anchor="middle" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">Real</text>
+            <text x="455" y="358" text-anchor="middle" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">GDP</text>
+            <line x1="150" y1="243" x2="400" y2="243" stroke="#1c1915" stroke-width="2.5" />
+            <path d="M425 124 L425 168 C425 243 340 243 300 243" fill="none" stroke="#1c1915" stroke-width="2.5" stroke-linecap="round" />
+            <path d="M542 124 L542 155 C542 243 470 243 400 243" fill="none" stroke="#1c1915" stroke-width="2.5" stroke-linecap="round" />
+            <text x="425" y="112" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">AS&#8321;</text>
+            <text x="542" y="112" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">AS&#8322;</text>
+            <line x1="443" y1="128" x2="520" y2="128" stroke="#1c1915" stroke-width="2" />
+            <polygon points="534,128 518,122 518,134" fill="#1c1915" />
+            <line x1="150" y1="141" x2="292" y2="286" stroke="#1c1915" stroke-width="2.5" />
+            <text x="300" y="278" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">AD&#8321;</text>
+            <text x="138" y="328" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Segoe UI, Arial, sans-serif">0</text>
+          </svg>
+        </div>
+        <div class="chart-wrap" data-figure="ad-q27" hidden>
+          <p class="chart-title">Aggregate demand shifts right</p>
+          <svg class="chart" viewBox="0 0 680 400" role="img" aria-label="A Keynesian long-run aggregate supply curve, horizontal then vertical. Aggregate demand shifts right from AD1 to AD2. Both demand curves meet the rising part of the supply curve.">
+            <line x1="150" y1="104" x2="150" y2="320" stroke="#1c1915" stroke-width="2" />
+            <line x1="150" y1="320" x2="560" y2="320" stroke="#1c1915" stroke-width="2" />
+            <text x="138" y="128" text-anchor="end" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">Price</text>
+            <text x="138" y="146" text-anchor="end" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">level</text>
+            <text x="470" y="348" text-anchor="middle" fill="#5c5348" font-size="15" font-family="Georgia, Palatino Linotype, Palatino, serif">Real GDP</text>
+            <line x1="150" y1="271" x2="340" y2="271" stroke="#1c1915" stroke-width="2.5" />
+            <path d="M448 118 L448 220 C448 271 400 271 340 271" fill="none" stroke="#1c1915" stroke-width="2.5" stroke-linecap="round" />
+            <text x="448" y="106" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">LRAS</text>
+            <line x1="283" y1="188" x2="440" y2="301" stroke="#1c1915" stroke-width="2.5" />
+            <text x="448" y="296" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">AD&#8321;</text>
+            <line x1="327" y1="161" x2="510" y2="291" stroke="#1c1915" stroke-width="2.5" />
+            <text x="518" y="286" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">AD&#8322;</text>
+            <text x="138" y="338" text-anchor="end" fill="#1c1915" font-size="16" font-weight="700" font-family="Georgia, Palatino Linotype, Palatino, serif">O</text>
+          </svg>
+        </div>
+        <div class="chart-wrap" data-figure="oil-shock" hidden>
+          <p class="chart-title">An oil supply disruption</p>
+          <img class="chart" src="oil-supply-disruption.png" alt="Supply shifts left from S to S1. Demand is unchanged. The equilibrium moves from price P and quantity Q to a higher price P1 and a lower quantity Q1.">
+        </div>
+        <h2 id="stem" tabindex="-1"></h2>
+        <div class="options" id="options" role="group" aria-label="Answers"></div>
+        <p class="why" id="why" hidden></p>
+        <div class="actions">
+          <button type="button" id="next" hidden>Next question</button>
+        </div>
+      </section>
+
+      <section id="results" hidden>
+        <h2 id="scoreHeading" tabindex="-1">Your score</h2>
+        <p class="score" id="scoreLine">0 / 8</p>
+        <p id="scoreNote"></p>
+        <div class="actions">
+          <button type="button" id="again">Try this paper again</button>
+          <button type="button" class="secondary" id="backSetup">Choose another paper</button>
+        </div>
+        <ol class="review" id="review"></ol>
+      </section>
+      <p class="sr" id="live" aria-live="polite"></p>
+    </main>
+  </div>
+  <script src="Diagram Economist/past-papers.js?v=20261030timer"></script>
+</body>
+</html>
