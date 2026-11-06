@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stagflation</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #e4d9c8;
+      --paper: #f7f1e8;
+      --card: #fffaf3;
+      --accent: #9a3412;
+      --accent-soft: #f3e2d4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .wrap { max-width: 1480px; margin: 0 auto; padding: 28px 22px 72px; }
+    h1 {
+      margin: 0 0 8px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.85rem;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+    .lead {
+      box-sizing: border-box;
+      width: calc(100% + 44px);
+      margin: 0 -22px 22px;
+      padding: 22px 28px;
+      background: #f3e2d4;
+      color: var(--ink);
+      font-size: 1.05rem;
+      font-weight: 650;
+      line-height: 1.4;
+    }
+    .lead #btn-scenario {
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      padding: 6px 12px;
+      margin-left: 8px;
+      vertical-align: baseline;
+    }
+    .lead #btn-scenario:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    h2 {
+      margin: 0 0 4px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.2rem;
+      letter-spacing: -0.02em;
+    }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 18px;
+      margin: 0 0 16px;
+    }
+    .stage {
+      display: grid;
+      gap: 16px;
+      align-items: start;
+      margin: 0 0 16px;
+    }
+    @media (min-width: 1100px) {
+      .stage { grid-template-columns: minmax(320px, 440px) minmax(0, 1fr); }
+      .stage .diagram-column { position: sticky; top: 12px; }
+    }
+    .weight { margin-left: 6px; color: var(--accent); font-weight: 650; }
+    .policy-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 8px;
+      padding: 8px 10px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+    .policy-name { font-weight: 700; line-height: 1.3; }
+    .policy-row button {
+      flex: 0 0 auto;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 12px;
+    }
+    .policy-row button[aria-pressed="true"] {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      box-shadow: inset 4px 0 0 var(--accent);
+    }
+    .policy-row button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .chart-head { margin-bottom: 8px; }
+    .sub { margin: 0; color: var(--muted); font-size: 0.92rem; }
+    svg.chart { display: block; width: auto; max-width: 100%; height: auto; max-height: calc(100vh - 280px); margin: 0 auto; background: #fff; border-radius: 8px; }
+    svg.phillips-chart { display: block; width: 100%; height: auto; max-height: 300px; margin: 4px 0 8px; background: #fff; }
+    .shares {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 0 0 12px;
+    }
+    @media (min-width: 720px) {
+      .shares.live-readout { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+    .share {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .share span { display: block; color: var(--muted); font-size: 0.85rem; }
+    .share strong {
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.25rem;
+    }
+    .share.helped { border-color: #166534; }
+    .share.helped strong { color: #166534; }
+    .share.hurt { border-color: #9a3412; }
+    .share.hurt strong { color: #9a3412; }
+    .scenario-block { margin: 0 0 12px; padding: 12px; border-radius: 8px; }
+    .scenario-block h2 { margin-bottom: 6px; }
+    .scenario-block p { margin: 0; }
+    #scenario-story-text h3 {
+      margin: 14px 0 6px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+    #scenario-story-text h3:first-child { margin-top: 0; }
+    #scenario-story-text p { margin: 0 0 10px; }
+    #scenario-story-text p:last-child { margin-bottom: 0; }
+    #scenario-story-text ul { margin: 0 0 10px; padding-left: 1.25rem; }
+    #scenario-story-text li { margin: 0 0 4px; }
+    #scenario-story,
+    #scenario-steps {
+      box-sizing: border-box;
+      width: calc(100% + 44px);
+      margin-left: -22px;
+      margin-right: -22px;
+      padding: 16px 28px;
+    }
+    #scenario-story { background: var(--accent-soft); font-weight: 650; }
+    #scenario-steps {
+      background: #fff;
+      border: 1px solid var(--line);
+      font-weight: 650;
+      margin-bottom: 22px;
+    }
+    .group-label {
+      margin: 16px 0 8px;
+      color: var(--ink);
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.35;
+    }
+    .group-label:first-of-type { margin-top: 2px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+    .actions button {
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      padding: 8px 14px;
+    }
+    .actions button.ghost {
+      background: #fff;
+      color: var(--ink);
+      border-color: var(--line);
+    }
+    .actions button.shift {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+      color: #fff;
+    }
+    .actions button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .actions button.shift:focus-visible { outline-color: #1d4ed8; }
+    .actions button:disabled { opacity: 0.45; cursor: default; }
+    [hidden] { display: none !important; }
+    #scenario-story summary {
+      cursor: pointer;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    #scenario-story[open] summary { margin-bottom: 8px; }
+    .diagram.is-pending { box-shadow: 0 0 0 3px #1d4ed8; }
+    .shift-bar {
+      margin: 12px 0 0;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid #1d4ed8;
+      border-radius: 10px;
+    }
+    .explain {
+      margin: 0 0 12px;
+      padding: 12px;
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 0.98rem;
+    }
+    .aims { margin: 10px 0 0; padding-left: 1.2rem; }
+    .aims li { margin: 0 0 4px; }
+    .aims li.met { color: #166534; }
+    #btn-amend {
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      padding: 8px 14px;
+    }
+    #btn-amend:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .gap-box {
+      margin: 0 0 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+    }
+    .gap-box h2 { margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Stagflation</h1>
+    <p class="sub"><a href="macro-diagrams.html">Back to interactive games</a> · <a href="Conflict%20of%20objectives%20Inflation%20and%20unemployment.html">Conflict of objectives: Inflation and unemployment</a></p>
+    <p class="lead">Stagflation is high inflation and high unemployment together, with low economic growth and a negative output gap.<br>A policy that shifts aggregate demand left can cut inflation, but unemployment rises and growth weakens.<br>A policy that shifts aggregate demand right can cut unemployment, but inflation rises.<br>Supply-side policy acts on costs. Press for the scenario. <button type="button" id="btn-scenario">Scenario</button></p>
+
+    <details class="scenario-block" id="scenario-story" hidden>
+      <summary id="scenario-story-heading">Scenario</summary>
+      <div id="scenario-story-text">
+        <h3>Economic scenario</h3>
+        <p>An energy-price shock and higher import costs have raised firms' costs of production. Short-run aggregate supply has shifted left. Full-employment output is £3,040 billion. Real output has fallen to 5% below that, so the negative output gap is £152 billion. Unemployment is 8%. Inflation is 8%. Economic growth is −1.5%.</p>
+        <p>The inflation is cost-push. It has not been caused by excess demand. The economy has high inflation and high unemployment at the same time, with falling output. This is stagflation.</p>
+        <p>The Bank of England base rate is 4%. The government is running a budget deficit. The pound is weak, so imported energy stays expensive.</p>
+        <h3>Your task</h3>
+        <p>Bring the economy to all four of these results:</p>
+        <ul>
+          <li>Inflation at or below 4%.</li>
+          <li>Unemployment at or below 6%.</li>
+          <li>Economic growth at or above 0%.</li>
+          <li>A negative output gap of £76 billion or less.</li>
+        </ul>
+        <p>Read the negative output gap from the diagram first. Then choose policies. A tighter monetary policy shifts AD left and trades lower inflation for higher unemployment. Targeted support for energy costs, supply-side policy, a stronger pound and energy security can shift SRAS right, so output can rise while the price level falls.</p>
+      </div>
+    </details>
+
+    <section class="scenario-block" id="scenario-steps" hidden aria-label="Progress">
+      <p id="scenario-note"></p>
+      <ul class="aims" id="aims" hidden>
+        <li id="aim-inf">Inflation at or below 4%.</li>
+        <li id="aim-u">Unemployment at or below 6%.</li>
+        <li id="aim-g">Economic growth at or above 0%.</li>
+        <li id="aim-gap">Negative output gap of £76 billion or less.</li>
+      </ul>
+      <button type="button" id="btn-amend" hidden>Amend my policies</button>
+    </section>
+
+    <div class="stage">
+      <div class="controls">
+        <section class="panel" id="policy-panel" hidden aria-labelledby="policy-heading">
+          <h2 id="policy-heading">Policy choices</h2>
+          <p class="sub">Cost-push stagflation occurs when a negative supply shock causes both inflation and unemployment to rise at the same time.
+For example, a sharp increase in energy prices raises firms' production costs. As a result, short-run aggregate supply (SRAS) shifts left.</p>
+
+          <p class="group-label">Targeted fiscal support to reduce energy costs.</p>
+          <div class="policy-row">
+            <span class="policy-name">Energy bills for firms <span class="weight" data-policy="bills"></span></span>
+            <button type="button" data-choice="bills" aria-pressed="false">Subsidise energy bills</button>
+          </div>
+          <div class="policy-row">
+            <span class="policy-name">VAT on energy <span class="weight" data-policy="evat"></span></span>
+            <button type="button" data-choice="evat" aria-pressed="false">Cut energy VAT</button>
+          </div>
+
+          <p class="group-label">Supply-side policies to shift SRAS right.</p>
+          <div class="policy-row">
+            <span class="policy-name">Tax cuts for business <span class="weight" data-policy="biz"></span></span>
+            <button type="button" data-choice="biz" aria-pressed="false">Cut business tax</button>
+          </div>
+          <div class="policy-row">
+            <span class="policy-name">Investment in infrastructure <span class="weight" data-policy="infra"></span></span>
+            <button type="button" data-choice="infra" aria-pressed="false">Invest in infrastructure</button>
+          </div>
+          <div class="policy-row">
+            <span class="policy-name">Labour market flexibility <span class="weight" data-policy="flex"></span></span>
+            <button type="button" data-choice="flex" aria-pressed="false">Increase flexibility</button>
+          </div>
+
+          <p class="group-label">Moderately tight monetary policy to keep inflation expectations anchored.</p>
+          <div class="policy-row">
+            <span class="policy-name">Bank rate <span class="weight" data-policy="rates"></span></span>
+            <button type="button" data-choice="rates" aria-pressed="false">Raise Bank rate</button>
+          </div>
+
+          <p class="group-label">Measures to strengthen the pound and improve energy security.</p>
+          <div class="policy-row">
+            <span class="policy-name">The exchange rate <span class="weight" data-policy="pound"></span></span>
+            <button type="button" data-choice="pound" aria-pressed="false">Support the pound</button>
+          </div>
+          <div class="policy-row">
+            <span class="policy-name">Domestic energy supply <span class="weight" data-policy="secure"></span></span>
+            <button type="button" data-choice="secure" aria-pressed="false">Invest in energy security</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="diagram-column">
+        <section class="panel diagram" id="diagram-panel" hidden>
+          <div class="shares live-readout" id="live-readout">
+            <p class="share" id="box-gap"><span id="live-gap-label">Negative output gap</span> <strong id="live-gap">£152 billion</strong></p>
+            <p class="share" id="box-u"><span>Unemployment</span> <strong id="live-unemployment">8%</strong></p>
+            <p class="share" id="box-inf"><span>Inflation</span> <strong id="live-inflation">8%</strong></p>
+            <p class="share" id="box-g"><span>Economic growth</span> <strong id="live-growth">−1.5%</strong></p>
+          </div>
+
+          <section class="gap-box" id="phillips-box" aria-labelledby="phillips-heading" hidden>
+            <h2 id="phillips-heading">Short-run Phillips curve</h2>
+            <p class="sub" id="phillips-note"></p>
+            <svg id="phillips-chart" class="phillips-chart" viewBox="0 0 560 340" role="img" aria-labelledby="phillips-chart-title">
+              <title id="phillips-chart-title">Short-run Phillips curve</title>
+              <g id="phillips-draw"></g>
+            </svg>
+            <p class="sub">Unemployment and inflation are read from this curve. Demand-side policy moves the economy along it. Supply-side policy shifts it. When the curve has shifted, grey shows where it was after the shock.</p>
+          </section>
+
+          <div class="chart-head">
+            <h2>Aggregate demand and supply</h2>
+          </div>
+          <p class="explain" id="ad-label" aria-live="polite"></p>
+
+          <svg class="chart" id="ad-chart" viewBox="0 0 760 430" role="img" aria-labelledby="ad-chart-title">
+            <title id="ad-chart-title">Price level against real national output</title>
+            <line x1="72" y1="28" x2="72" y2="368" stroke="#1c1915" stroke-width="2.2"/>
+            <line x1="72" y1="368" x2="730" y2="368" stroke="#1c1915" stroke-width="2.2"/>
+            <polyline points="66,42 72,28 78,42" fill="none" stroke="#1c1915" stroke-width="2.2" stroke-linejoin="miter"/>
+            <polyline points="716,362 730,368 716,374" fill="none" stroke="#1c1915" stroke-width="2.2" stroke-linejoin="miter"/>
+            <text x="24" y="198" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle" transform="rotate(-90 24 198)">Price level</text>
+            <text x="60" y="390" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="end">0</text>
+            <text id="yfe-label" x="390" y="390" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle">Y<tspan baseline-shift="sub" font-size="11">fe</tspan></text>
+            <text x="708" y="404" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="end">Real national output</text>
+            <line id="lras-base" x1="390" y1="46" x2="390" y2="368" stroke="#b9aea0" stroke-width="2.2" stroke-dasharray="7 5" visibility="hidden"/>
+            <text id="lras-base-label" x="390" y="32" fill="#8a8074" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle" visibility="hidden">LRAS</text>
+            <line id="lras-current" x1="390" y1="46" x2="390" y2="368" stroke="#1c1915" stroke-width="2.2"/>
+            <text id="lras-label" x="390" y="32" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle">LRAS</text>
+            <line id="sras-base" stroke="#b9aea0" stroke-width="2.2" stroke-dasharray="7 5" visibility="hidden"/>
+            <text id="sras-base-label" fill="#8a8074" font-size="16" font-family="Segoe UI, sans-serif" visibility="hidden">SRAS</text>
+            <line id="sras-current" stroke="#1c1915" stroke-width="2.2"/>
+            <text id="sras-label" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif">SRAS1</text>
+            <line id="ad-base" stroke="#b9aea0" stroke-width="2.2" stroke-dasharray="7 5" visibility="hidden"/>
+            <text id="ad-base-label" fill="#8a8074" font-size="16" font-family="Segoe UI, sans-serif" visibility="hidden">AD</text>
+            <line id="ad-current" stroke="#1c1915" stroke-width="2.6"/>
+            <text id="ad-current-label" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif">AD</text>
+            <line id="p-line" stroke="#1c1915" stroke-width="1.8" stroke-dasharray="2 4"/>
+            <text id="p-label" x="64" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="end">P</text>
+            <line id="y-line" stroke="#1c1915" stroke-width="1.8" stroke-dasharray="2 4"/>
+            <text id="y-label" y="390" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle">Y</text>
+            <circle id="ad-dot" r="5.5" fill="#9a3412"/>
+            <rect id="gap-shade" fill="#9a3412" opacity="0.16"/>
+            <text id="gap-shade-title" fill="#9a3412" font-size="14" font-family="Segoe UI, sans-serif" font-weight="700" text-anchor="middle"></text>
+            <text id="gap-shade-amount" fill="#9a3412" font-size="14" font-family="Segoe UI, sans-serif" text-anchor="middle"></text>
+            <line id="ad-arrow" stroke="#9a3412" stroke-width="2.6" visibility="hidden"/>
+            <polygon id="ad-arrow-head" fill="#9a3412" visibility="hidden"/>
+            <line id="sras-arrow" stroke="#2563eb" stroke-width="2.6" visibility="hidden"/>
+            <polygon id="sras-arrow-head" fill="#2563eb" visibility="hidden"/>
+            <line id="as-arrow" stroke="#1c1915" stroke-width="2.6" visibility="hidden"/>
+            <polygon id="as-arrow-head" fill="#1c1915" visibility="hidden"/>
+          </svg>
+
+          <div class="actions shift-bar" id="shift-bar" hidden>
+            <button type="button" class="shift" id="btn-shift-ad" hidden>Shift AD</button>
+            <button type="button" class="shift" id="btn-shift-sras" hidden>Shift SRAS</button>
+            <button type="button" class="shift" id="btn-shift-lras" hidden>Shift LRAS</button>
+          </div>
+          <div class="actions">
+            <button type="button" class="ghost" id="btn-reset">Reset policies</button>
+            <button type="button" class="ghost" id="btn-save">Save diagram</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var adEqX = 390;
+      var adEqY = 178;
+      var adSlope = 0.70;
+      var axisY = 368;
+      var GDP_BILLIONS = 3040;
+      var SHOCK_GAP = GDP_BILLIONS * 0.05;
+      var GAP_SCALE = SHOCK_GAP / 100;
+      var AIM_GAP = 50 * GAP_SCALE;
+      var NATURAL_U = 4;
+      var BASE_INFLATION = 2;
+      var DEMAND_PULL = 0.5;
+      var SHOCK = { ad: 0, sras: -2 * SHOCK_GAP, lras: 0 };
+      var shown = { ad: SHOCK.ad, sras: SHOCK.sras, lras: SHOCK.lras };
+      var shiftOrigin = { ad: 0, sras: 0, lras: 0 };
+      var shiftFrame = 0;
+      var gapKnown = false;
+      var showPhillips = false;
+      var scenarioOn = false;
+
+      var POLICIES = [
+        {
+          name: "bills",
+          effect: { ad: 12, sras: 42, lras: 0 },
+          text: "A subsidy for firms' energy bills is government spending, so AD shifts right. It is aimed at the cost that caused the shock, so firms' costs fall and SRAS shifts right by more. The support is temporary, so productive capacity does not rise and LRAS does not shift. Inflation can ease and real output can rise. The budget deficit is larger, and the support is hard to withdraw."
+        },
+        {
+          name: "evat",
+          effect: { ad: 4, sras: 24, lras: 0 },
+          text: "Cutting VAT on energy lowers the price of energy, so firms' costs fall and SRAS shifts right. Households also have more left to spend, so AD shifts right a little. The cut is temporary and does not raise productive capacity, so LRAS does not shift. The budget deficit is larger."
+        },
+        {
+          name: "biz",
+          effect: { ad: 6, sras: 34, lras: 8 },
+          text: "A cut in corporation tax raises after-tax profits and investment incentives. Higher investment can improve productive capacity over time, so SRAS and LRAS shift right. AD also shifts right a little through investment. The budget deficit is larger."
+        },
+        {
+          name: "infra",
+          effect: { ad: 14, sras: 34, lras: 14 },
+          text: "Infrastructure spending is government spending, so AD shifts right in the short run and that can add to inflation. Better infrastructure then cuts business costs, so SRAS shifts right, and it raises productive capacity, so LRAS shifts right. The supply-side effect is what eases stagflation. It takes time."
+        },
+        {
+          name: "flex",
+          effect: { ad: 0, sras: 36, lras: 14 },
+          text: "Greater labour market flexibility reduces wage pressure and helps workers move into vacant jobs. SRAS shifts right and LRAS shifts right. Cost-push inflation falls and the negative output gap can narrow. Some workers have less job security. The effect is not instant."
+        },
+        {
+          name: "rates",
+          effect: { ad: -28, sras: 0, lras: 0 },
+          text: "A moderate rise in Bank rate keeps inflation expectations anchored. Consumption, investment and net exports fall, so AD shifts left, but by less than a sharp tightening. Inflation eases because demand is weaker. Real output falls, so the negative output gap widens and unemployment rises. Monetary policy does not remove the energy-cost shock, and LRAS does not shift."
+        },
+        {
+          name: "pound",
+          effect: { ad: -16, sras: 34, lras: 0 },
+          text: "A stronger pound makes imported energy and other inputs cheaper, so SRAS shifts right. Exports become dearer and imports cheaper, so net exports fall and AD shifts left. Inflation can fall for both reasons. A stronger pound does not raise productive capacity, so LRAS does not shift. The fall in net exports limits the rise in real output and can keep unemployment high."
+        },
+        {
+          name: "secure",
+          effect: { ad: 8, sras: 28, lras: 10 },
+          text: "Investment in domestic energy is spending now, so AD shifts right. Over time the economy imports less energy, so costs fall and SRAS shifts right, and productive capacity rises, so LRAS shifts right. Energy security takes time."
+        }
+      ];
+
+      var policyButtons = {};
+      document.querySelectorAll("#policy-panel button[data-choice]").forEach(function (button) {
+        policyButtons[button.getAttribute("data-choice")] = button;
+      });
+
+      function selected(name) {
+        var button = policyButtons[name];
+        return button && button.getAttribute("aria-pressed") === "true" ? "1" : "0";
+      }
+
+      function formatPercent(n) {
+        var rounded = Math.round(n * 10) / 10;
+        if (Math.abs(rounded - Math.round(rounded)) < 0.05) return Math.round(rounded) + "%";
+        return rounded.toFixed(1) + "%";
+      }
+
+      function formatGrowth(n) {
+        var rounded = Math.round(n * 10) / 10;
+        if (Object.is(rounded, -0)) rounded = 0;
+        var sign = rounded < 0 ? "−" : "";
+        return sign + Math.abs(rounded).toFixed(1) + "%";
+      }
+
+      function formatBillions(n) {
+        return "£" + Math.abs(Math.round(n)) + " billion";
+      }
+
+      function economy(adShift, srasShift, lrasShift) {
+        var crossX = adEqX + (adShift + srasShift) / 2;
+        var lrasX = adEqX + lrasShift;
+        var gap = lrasX - crossX;
+        var unemployment = Math.max(1, NATURAL_U + 0.04 * gap / GAP_SCALE);
+        var costPush = 8 * Math.max(0, -srasShift) / (2 * SHOCK_GAP);
+        var inflation = Math.max(0, phillipsInflation(unemployment, costPush));
+        var growth = -1.5 + (crossX - (adEqX - SHOCK_GAP)) * 0.03 / GAP_SCALE;
+        var crossY = adEqY - adSlope * (adShift - srasShift) / 2;
+        return {
+          crossX: crossX,
+          lrasX: lrasX,
+          crossY: crossY,
+          gap: gap,
+          unemployment: unemployment,
+          costPush: costPush,
+          inflation: inflation,
+          growth: growth
+        };
+      }
+
+      function chosenTotal() {
+        var total = { ad: 0, sras: 0, lras: 0 };
+        POLICIES.forEach(function (policy) {
+          if (selected(policy.name) !== "1") return;
+          total.ad += policy.effect.ad * GAP_SCALE;
+          total.sras += policy.effect.sras * GAP_SCALE;
+          total.lras += policy.effect.lras * GAP_SCALE;
+        });
+        return total;
+      }
+
+      function targetShift() {
+        var chosen = chosenTotal();
+        return {
+          ad: SHOCK.ad + chosen.ad,
+          sras: SHOCK.sras + chosen.sras,
+          lras: SHOCK.lras + chosen.lras
+        };
+      }
+
+      function pendingLabels() {
+        var target = targetShift();
+        var labels = [];
+        if (Math.abs(target.ad - shown.ad) >= 0.5) labels.push("Shift AD");
+        if (Math.abs(target.sras - shown.sras) >= 0.5) labels.push("Shift SRAS");
+        if (Math.abs(target.lras - shown.lras) >= 0.5) labels.push("Shift LRAS");
+        return labels;
+      }
+
+      function policyFullyOn(policy) {
+        if (selected(policy.name) !== "1") return false;
+        var target = targetShift();
+        if (policy.effect.ad && Math.abs(shown.ad - target.ad) >= 0.5) return false;
+        if (policy.effect.sras && Math.abs(shown.sras - target.sras) >= 0.5) return false;
+        if (policy.effect.lras && Math.abs(shown.lras - target.lras) >= 0.5) return false;
+        return true;
+      }
+
+      function targetsMet(state) {
+        return state.inflation <= 4.05
+          && state.unemployment <= 6.05
+          && state.growth >= -0.05
+          && state.gap <= AIM_GAP + 0.5;
+      }
+
+      function effectLabel(effect) {
+        var parts = [];
+        if (effect.ad > 0) parts.push("AD right");
+        if (effect.ad < 0) parts.push("AD left");
+        if (effect.sras > 0) parts.push("SRAS right");
+        if (effect.sras < 0) parts.push("SRAS left");
+        if (effect.lras > 0) parts.push("LRAS right");
+        if (effect.lras < 0) parts.push("LRAS left");
+        return parts.join(", ");
+      }
+
+      var policyByName = {};
+      POLICIES.forEach(function (policy) {
+        policyByName[policy.name] = policy;
+      });
+
+      function updateWeights() {
+        document.querySelectorAll("[data-policy]").forEach(function (el) {
+          var name = el.getAttribute("data-policy");
+          var policy = policyByName[name];
+          el.textContent = selected(name) === "1" && policy ? effectLabel(policy.effect) : "";
+        });
+      }
+
+      function lesson(state) {
+        var adMove = shown.ad - SHOCK.ad;
+        var srasMove = shown.sras - SHOCK.sras;
+        var supply = srasMove > 30;
+        var demandLeft = adMove < -20;
+        var demandRight = adMove > 20;
+        if (targetsMet(state)) return "The targets are met. Lower energy costs or supply-side policy shifted SRAS right, so real output could rise while the price level fell. Unemployment and inflation improved together. A tighter monetary policy on its own cannot do that when the cause is an energy-cost shock.";
+        if (supply && demandLeft) return "SRAS has shifted right, which eases cost-push inflation, but weaker demand is holding real output down. Unemployment stays high. Ease the demand cut, or add a further policy that shifts SRAS right.";
+        if (supply && demandRight && state.inflation > 4.05) return "SRAS has shifted right, but the rise in aggregate demand is adding inflation. The extra spending works against the fall in energy costs.";
+        if (supply) return "SRAS has shifted right, so cost-push inflation is lower and real output is higher. The targets are not all met yet. A second policy that cuts costs can go further.";
+        if (demandLeft) return "AD has shifted left. Inflation is lower. Unemployment is higher and growth is weaker. A moderately tighter Bank rate does not remove the energy-cost shock.";
+        if (demandRight) return "AD has shifted right. Unemployment is lower and growth is stronger. Inflation is higher, because demand-pull inflation is added to the cost-push shock.";
+        return "Choose a policy, then press the shift button under the diagram. A demand-side shift trades inflation against unemployment. A supply-side shift can ease both.";
+      }
+
+      function positionSentence(state) {
+        var gapText;
+        if (state.gap > 0.5) gapText = "There is a negative output gap of " + formatBillions(state.gap) + ".";
+        else if (state.gap < -0.5) gapText = "There is a positive output gap of " + formatBillions(state.gap) + ".";
+        else gapText = "Real output is at full-employment output.";
+        var inflationText = "Inflation is " + formatPercent(state.inflation) + ".";
+        var priceWords = "";
+        if (state.crossY < 104) {
+          priceWords = " The price level is higher than it was after the shock.";
+        } else if (state.crossY > 112) {
+          if (state.gap < -0.5 && state.inflation > 4.05) {
+            priceWords = " The price level is below the shock peak, but a positive output gap is adding demand-pull inflation.";
+          } else {
+            priceWords = " The price level is lower than it was after the shock, so cost-push pressure has eased.";
+          }
+        }
+        return gapText + " Unemployment is " + formatPercent(state.unemployment) + ". " + inflationText + " Economic growth is " + formatGrowth(state.growth) + "." + priceWords;
+      }
+
+      function explain(state) {
+        var parts = [];
+        var any = false;
+        POLICIES.forEach(function (policy) {
+          if (!policyFullyOn(policy)) return;
+          any = true;
+          parts.push(policy.text);
+        });
+        if (!any && sameShift(shown, SHOCK)) {
+          parts.push("A supply shock has shifted SRAS left, from SRAS to SRAS1. Real output is at Y, below full-employment output Yfe. The shaded distance is a negative output gap of £152 billion, which is 5% of GDP. The price level is high. Unemployment is 8%, inflation is 8% and economic growth is −1.5%. High inflation and high unemployment together, with low growth and a negative output gap, is stagflation.");
+        } else {
+          parts.push(positionSentence(state));
+        }
+        var labels = pendingLabels();
+        if (labels.length) parts.push("Press " + labels.join(" and ") + " to show this choice on the diagram.");
+        return parts.join(" ");
+      }
+
+      function setAim(id, met, text) {
+        var item = document.getElementById(id);
+        item.textContent = text;
+        item.className = met ? "met" : "";
+      }
+
+      function updateAims(state) {
+        var list = document.getElementById("aims");
+        list.hidden = !gapKnown;
+        if (!gapKnown) return;
+        var inflationMet = state.inflation <= 4.05;
+        setAim("aim-inf", inflationMet, inflationMet
+          ? "Inflation is " + formatPercent(state.inflation) + ". Aim met."
+          : "Inflation is " + formatPercent(state.inflation) + ". Aim: 4% or below.");
+        setAim("aim-u", state.unemployment <= 6.05, state.unemployment <= 6.05
+          ? "Unemployment is " + formatPercent(state.unemployment) + ". Aim met."
+          : "Unemployment is " + formatPercent(state.unemployment) + ". Aim: 6% or below.");
+        setAim("aim-g", state.growth >= -0.05, state.growth >= -0.05
+          ? "Economic growth is " + formatGrowth(state.growth) + ". Aim met."
+          : "Economic growth is " + formatGrowth(state.growth) + ". Aim: 0% or above.");
+        var gapMet = state.gap <= AIM_GAP + 0.5;
+        var gapLine = state.gap < -0.5
+          ? "There is a positive output gap of " + formatBillions(state.gap) + ". "
+          : "The negative output gap is " + formatBillions(Math.max(0, state.gap)) + ". ";
+        setAim("aim-gap", gapMet, gapLine + (gapMet ? "Aim met." : "Aim: £" + Math.round(AIM_GAP) + " billion or less."));
+      }
+
+      function tone(now, start, lowerIsBetter) {
+        if (Math.abs(now - start) < 0.05) return "";
+        return (lowerIsBetter ? now < start : now > start) ? "helped" : "hurt";
+      }
+
+      function updateReadout(state) {
+        var gapLabel = document.getElementById("live-gap-label");
+        if (state.gap > 0.5) gapLabel.textContent = "Negative output gap";
+        else if (state.gap < -0.5) gapLabel.textContent = "Positive output gap";
+        else gapLabel.textContent = "Output gap";
+        document.getElementById("live-gap").textContent = state.gap < -0.5 || state.gap > 0.5 ? formatBillions(state.gap) : "£0 billion";
+        document.getElementById("live-unemployment").textContent = formatPercent(state.unemployment);
+        document.getElementById("live-inflation").textContent = formatPercent(state.inflation);
+        document.getElementById("live-growth").textContent = formatGrowth(state.growth);
+        document.getElementById("box-gap").className = "share " + tone(state.gap, SHOCK_GAP, true);
+        document.getElementById("box-u").className = "share " + tone(state.unemployment, 8, true);
+        document.getElementById("box-inf").className = "share " + tone(state.inflation, 8, true);
+        document.getElementById("box-g").className = "share " + tone(state.growth, -1.5, false);
+      }
+
+      function phillipsInflation(unemployment, costPush) {
+        return BASE_INFLATION + DEMAND_PULL * (NATURAL_U - unemployment) + costPush;
+      }
+
+      function drawPhillips(state) {
+        var left = 78, right = 516, top = 28, bottom = 268, uMax = 24, piMax = 14;
+        function xOf(u) { return left + (Math.max(0, Math.min(uMax, u)) / uMax) * (right - left); }
+        function yOf(pi) { return bottom - (Math.max(0, Math.min(piMax, pi)) / piMax) * (bottom - top); }
+        function curvePoints(costPush) {
+          var pts = [];
+          var u;
+          var started = false;
+          for (u = 2; u <= uMax + 0.001; u += 0.12) {
+            var pi = phillipsInflation(u, costPush);
+            if (pi > piMax) continue;
+            if (pi < 0) {
+              var above = phillipsInflation(u - 0.12, costPush);
+              if (above > 0) {
+                var zero = u - 0.12 + 0.12 * above / (above - pi);
+                pts.push(xOf(zero).toFixed(1) + "," + yOf(0).toFixed(1));
+              }
+              break;
+            }
+            if (!started && u > 2) {
+              var prev = phillipsInflation(u - 0.12, costPush);
+              if (prev > piMax) {
+                var edge = u - 0.12 + 0.12 * (prev - piMax) / (prev - pi);
+                pts.push(xOf(edge).toFixed(1) + "," + yOf(piMax).toFixed(1));
+              }
+            }
+            started = true;
+            pts.push(xOf(u).toFixed(1) + "," + yOf(Math.max(0, pi)).toFixed(1));
+          }
+          return pts;
+        }
+        var parts = [];
+        function add(markup) { parts.push(markup); }
+        add('<line x1="' + left + '" y1="' + (top - 14) + '" x2="' + left + '" y2="' + bottom + '" stroke="#1c1915" stroke-width="1.8"/>');
+        add('<line x1="' + left + '" y1="' + bottom + '" x2="' + (right + 16) + '" y2="' + bottom + '" stroke="#1c1915" stroke-width="1.8"/>');
+        add('<polyline points="' + (left - 6) + ',' + (top - 2) + ' ' + left + ',' + (top - 14) + ' ' + (left + 6) + ',' + (top - 2) + '" fill="none" stroke="#1c1915" stroke-width="1.8" stroke-linejoin="miter"/>');
+        add('<polyline points="' + (right + 4) + ',' + (bottom - 6) + ' ' + (right + 16) + ',' + bottom + ' ' + (right + 4) + ',' + (bottom + 6) + '" fill="none" stroke="#1c1915" stroke-width="1.8" stroke-linejoin="miter"/>');
+        add('<text x="16" y="150" fill="#1c1915" font-size="15" font-family="Segoe UI, sans-serif" text-anchor="middle" transform="rotate(-90 16 150)">Inflation %</text>');
+        add('<text x="297" y="318" fill="#1c1915" font-size="15" font-family="Segoe UI, sans-serif" text-anchor="middle">Unemployment %</text>');
+        var tick;
+        for (tick = 0; tick <= 12; tick += 2) {
+          add('<line x1="' + (left - 6) + '" y1="' + yOf(tick) + '" x2="' + left + '" y2="' + yOf(tick) + '" stroke="#1c1915" stroke-width="1.3"/>');
+          add('<text x="' + (left - 10) + '" y="' + (yOf(tick) + 5) + '" fill="#1c1915" font-size="14" font-family="Segoe UI, sans-serif" text-anchor="end">' + tick + '</text>');
+        }
+        for (tick = 0; tick <= 20; tick += 4) {
+          add('<line x1="' + xOf(tick) + '" y1="' + bottom + '" x2="' + xOf(tick) + '" y2="' + (bottom + 6) + '" stroke="#1c1915" stroke-width="1.3"/>');
+          add('<text x="' + xOf(tick) + '" y="' + (bottom + 22) + '" fill="#1c1915" font-size="14" font-family="Segoe UI, sans-serif" text-anchor="middle">' + tick + '</text>');
+        }
+        if (Math.abs(state.costPush - 8) >= 0.15) {
+          add('<polyline points="' + curvePoints(8).join(" ") + '" fill="none" stroke="#b9aea0" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>');
+        }
+        add('<polyline points="' + curvePoints(state.costPush).join(" ") + '" fill="none" stroke="#1c1915" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>');
+        var markU = state.unemployment;
+        var markPi = state.inflation;
+        var x = xOf(markU);
+        var y = yOf(markPi);
+        add('<line x1="' + x + '" y1="' + bottom + '" x2="' + x + '" y2="' + y + '" stroke="#1c1915" stroke-width="1.3" stroke-dasharray="6 4"/>');
+        add('<line x1="' + left + '" y1="' + y + '" x2="' + x + '" y2="' + y + '" stroke="#1c1915" stroke-width="1.3" stroke-dasharray="6 4"/>');
+        add('<circle cx="' + x + '" cy="' + y + '" r="4" fill="#9a3412"/>');
+        document.getElementById("phillips-draw").innerHTML = parts.join("");
+        var note = document.getElementById("phillips-note");
+        if (Math.abs(state.costPush - 8) < 0.15 && Math.abs(state.unemployment - 8) < 0.3) {
+          note.textContent = "Unemployment is " + formatPercent(state.unemployment) + " and inflation is " + formatPercent(state.inflation) + ". That point is on the curve: high unemployment and high inflation together.";
+        } else if (shown.sras > SHOCK.sras + 30) {
+          note.textContent = "The black curve has shifted down because costs are lower. Inflation is " + formatPercent(state.inflation) + " at " + formatPercent(state.unemployment) + " unemployment. This is a shift of the curve, not only a move along it.";
+        } else {
+          note.textContent = "Unemployment is " + formatPercent(state.unemployment) + " and inflation is " + formatPercent(state.inflation) + ". A move along the black curve trades one for the other.";
+        }
+      }
+
+      function clipSegment(yFromX, xFromY) {
+        var bounds = { l: 110, r: 700, t: 40, b: 340 };
+        var hits = [];
+        function add(x, y) {
+          if (x < bounds.l - 0.5 || x > bounds.r + 0.5 || y < bounds.t - 0.5 || y > bounds.b + 0.5) return;
+          var i;
+          for (i = 0; i < hits.length; i += 1) {
+            if (Math.abs(hits[i][0] - x) < 0.5 && Math.abs(hits[i][1] - y) < 0.5) return;
+          }
+          hits.push([x, y]);
+        }
+        [bounds.l, bounds.r].forEach(function (x) { add(x, yFromX(x)); });
+        [bounds.t, bounds.b].forEach(function (y) { add(xFromY(y), y); });
+        hits.sort(function (a, b) { return a[0] - b[0]; });
+        if (hits.length < 2) return null;
+        return [hits[0], hits[hits.length - 1]];
+      }
+
+      function adY(x, shift) { return adEqY + adSlope * (x - shift - adEqX); }
+      function srasY(x, shift) { return adEqY - adSlope * (x - shift - adEqX); }
+
+      function visibleAd(shift) {
+        return clipSegment(
+          function (x) { return adY(x, shift); },
+          function (y) { return (y - adEqY) / adSlope + shift + adEqX; }
+        );
+      }
+
+      function visibleSras(shift) {
+        return clipSegment(
+          function (x) { return srasY(x, shift); },
+          function (y) { return shift + adEqX + (adEqY - y) / adSlope; }
+        );
+      }
+
+      function placeSrasLabel(textEl, segment, title, faded) {
+        var end = segment[1];
+        textEl.setAttribute("x", (end[0] - 8).toFixed(1));
+        textEl.setAttribute("y", (end[1] + 2).toFixed(1));
+        textEl.setAttribute("text-anchor", "end");
+        textEl.textContent = title;
+        textEl.setAttribute("fill", faded ? "#8a8074" : "#1c1915");
+        textEl.setAttribute("visibility", "visible");
+      }
+
+      function placeLabel(textEl, point, title, faded) {
+        var labelX = point[0] + 12;
+        var labelY = point[1] + 8;
+        var anchor = "start";
+        if (labelX > 700) {
+          labelX = point[0] - 10;
+          anchor = "end";
+        }
+        if (labelY > 400) labelY = 400;
+        if (labelY < 24) labelY = 24;
+        textEl.setAttribute("x", labelX.toFixed(1));
+        textEl.setAttribute("y", labelY.toFixed(1));
+        textEl.setAttribute("text-anchor", anchor);
+        textEl.textContent = title;
+        textEl.setAttribute("fill", faded ? "#8a8074" : "#1c1915");
+        textEl.setAttribute("visibility", "visible");
+      }
+
+      function setLine(id, segment) {
+        var line = document.getElementById(id);
+        if (!segment) {
+          line.setAttribute("visibility", "hidden");
+          return;
+        }
+        line.setAttribute("visibility", "visible");
+        line.setAttribute("x1", segment[0][0].toFixed(1));
+        line.setAttribute("y1", segment[0][1].toFixed(1));
+        line.setAttribute("x2", segment[1][0].toFixed(1));
+        line.setAttribute("y2", segment[1][1].toFixed(1));
+      }
+
+      function showShiftArrow(arrow, head, fromX, toX, y, maxLength) {
+        var delta = toX - fromX;
+        var visible = Math.abs(delta) >= 8;
+        var start = fromX;
+        var end = toX;
+        if (visible && maxLength && Math.abs(delta) > maxLength) {
+          var direction = delta < 0 ? -1 : 1;
+          end = toX;
+          start = toX - direction * maxLength;
+        }
+        arrow.setAttribute("x1", start.toFixed(1));
+        arrow.setAttribute("y1", y.toFixed(1));
+        arrow.setAttribute("x2", end.toFixed(1));
+        arrow.setAttribute("y2", y.toFixed(1));
+        arrow.setAttribute("visibility", visible ? "visible" : "hidden");
+        var dir = end < start ? -1 : 1;
+        head.setAttribute("points", end.toFixed(1) + "," + y.toFixed(1) + " " + (end - dir * 12).toFixed(1) + "," + (y - 6).toFixed(1) + " " + (end - dir * 12).toFixed(1) + "," + (y + 6).toFixed(1));
+        head.setAttribute("visibility", visible ? "visible" : "hidden");
+      }
+
+      function markOutputGap(state) {
+        var shade = document.getElementById("gap-shade");
+        var title = document.getElementById("gap-shade-title");
+        var amount = document.getElementById("gap-shade-amount");
+        var width = Math.abs(state.lrasX - state.crossX);
+        if (width < 8) {
+          shade.setAttribute("visibility", "hidden");
+          title.setAttribute("visibility", "hidden");
+          amount.setAttribute("visibility", "hidden");
+          return;
+        }
+        var left = Math.min(state.crossX, state.lrasX);
+        var top = Math.min(state.crossY, axisY);
+        shade.setAttribute("x", left.toFixed(1));
+        shade.setAttribute("y", top.toFixed(1));
+        shade.setAttribute("width", width.toFixed(1));
+        shade.setAttribute("height", Math.max(8, axisY - top).toFixed(1));
+        shade.setAttribute("visibility", "visible");
+        title.textContent = state.gap >= 0 ? "Negative gap" : "Positive gap";
+        amount.textContent = formatBillions(state.gap);
+        var mid = left + width / 2;
+        var labelY = Math.min(axisY - 36, Math.max(top + 28, top + (axisY - top) * 0.55));
+        title.setAttribute("x", mid.toFixed(1));
+        title.setAttribute("y", labelY.toFixed(1));
+        amount.setAttribute("x", mid.toFixed(1));
+        amount.setAttribute("y", (labelY + 18).toFixed(1));
+        title.setAttribute("visibility", "visible");
+        amount.setAttribute("visibility", "visible");
+      }
+
+      function drawDiagram(adShift, lrasShift, srasShift, origin) {
+        var state = economy(adShift, srasShift, lrasShift);
+        var srasReference = Math.abs(srasShift - SHOCK.sras) < 0.5 ? 0 : SHOCK.sras;
+        var srasBase = visibleSras(srasReference);
+        setLine("sras-base", srasBase);
+        if (srasBase) {
+          placeSrasLabel(
+            document.getElementById("sras-base-label"),
+            srasBase,
+            Math.abs(srasReference) < 0.5 ? "SRAS" : "SRAS1",
+            true
+          );
+        } else {
+          document.getElementById("sras-base-label").setAttribute("visibility", "hidden");
+        }
+        var srasNow = visibleSras(srasShift);
+        setLine("sras-current", srasNow);
+        if (srasNow) {
+          var srasName = Math.abs(srasShift - SHOCK.sras) < 0.5 ? "SRAS1" : "SRAS2";
+          placeSrasLabel(document.getElementById("sras-label"), srasNow, srasName, false);
+        }
+        var adMoved = Math.abs(adShift) >= 0.5;
+        var adNow = visibleAd(adShift);
+        setLine("ad-current", adNow);
+        if (adNow) placeLabel(document.getElementById("ad-current-label"), adNow[1], adMoved ? "AD1" : "AD", false);
+        if (adMoved) {
+          var adWas = visibleAd(0);
+          setLine("ad-base", adWas);
+          if (adWas) {
+            placeLabel(document.getElementById("ad-base-label"), adWas[1], "AD", true);
+            var adBaseLabel = document.getElementById("ad-base-label");
+            adBaseLabel.setAttribute("y", (Number(adBaseLabel.getAttribute("y")) - 22).toFixed(1));
+          }
+        } else {
+          document.getElementById("ad-base").setAttribute("visibility", "hidden");
+          document.getElementById("ad-base-label").setAttribute("visibility", "hidden");
+        }
+        var lrasX = Math.max(96, Math.min(700, adEqX + lrasShift));
+        var lras = document.getElementById("lras-current");
+        lras.setAttribute("x1", lrasX.toFixed(1));
+        lras.setAttribute("x2", lrasX.toFixed(1));
+        var lrasLabel = document.getElementById("lras-label");
+        lrasLabel.textContent = Math.abs(lrasShift) >= 0.5 ? "LRAS1" : "LRAS";
+        var srasBesideLras = (srasNow && Math.abs(srasNow[1][0] - lrasX) < 70) || (srasBase && Math.abs(srasBase[1][0] - lrasX) < 70);
+        var lrasToTheRight = Math.abs(lrasShift) >= 0.5 || srasBesideLras;
+        lrasLabel.setAttribute("text-anchor", lrasToTheRight ? "start" : "middle");
+        lrasLabel.setAttribute("x", (lrasToTheRight ? lrasX + 8 : lrasX).toFixed(1));
+        lrasLabel.setAttribute("y", "30");
+        document.getElementById("yfe-label").setAttribute("x", lrasX.toFixed(1));
+        var lrasMoved = Math.abs(lrasShift) >= 0.5;
+        document.getElementById("lras-base").setAttribute("visibility", lrasMoved ? "visible" : "hidden");
+        var lrasBaseLabel = document.getElementById("lras-base-label");
+        lrasBaseLabel.setAttribute("visibility", lrasMoved ? "visible" : "hidden");
+        if (lrasMoved) {
+          lrasBaseLabel.setAttribute("text-anchor", "end");
+          lrasBaseLabel.setAttribute("x", (adEqX - 8).toFixed(1));
+          lrasBaseLabel.setAttribute("y", "96");
+        }
+
+        var dot = document.getElementById("ad-dot");
+        dot.setAttribute("cx", state.crossX.toFixed(1));
+        dot.setAttribute("cy", state.crossY.toFixed(1));
+        var pLine = document.getElementById("p-line");
+        pLine.setAttribute("x1", "72");
+        pLine.setAttribute("x2", Math.max(80, state.crossX - 8).toFixed(1));
+        pLine.setAttribute("y1", state.crossY.toFixed(1));
+        pLine.setAttribute("y2", state.crossY.toFixed(1));
+        document.getElementById("p-label").setAttribute("y", (state.crossY + 5).toFixed(1));
+        var yLine = document.getElementById("y-line");
+        var yLabel = document.getElementById("y-label");
+        if (Math.abs(state.crossX - lrasX) > 12) {
+          yLine.setAttribute("visibility", "visible");
+          yLabel.setAttribute("visibility", "visible");
+          yLine.setAttribute("x1", state.crossX.toFixed(1));
+          yLine.setAttribute("x2", state.crossX.toFixed(1));
+          yLine.setAttribute("y1", Math.min(axisY, state.crossY + 8).toFixed(1));
+          yLine.setAttribute("y2", String(axisY));
+          yLabel.setAttribute("x", state.crossX.toFixed(1));
+        } else {
+          yLine.setAttribute("visibility", "hidden");
+          yLabel.setAttribute("visibility", "hidden");
+        }
+        markOutputGap(state);
+
+        var arrowY = adEqY - 36;
+        var fromX = adEqX + (arrowY - adEqY) / adSlope;
+        var srasArrowY = 128;
+        function srasXAt(y, shift) { return adEqX + (adEqY - y) / adSlope + shift; }
+        var guard = 0;
+        while (guard < 14) {
+          var targetX = srasXAt(srasArrowY, srasShift);
+          if (targetX < 156 && srasArrowY > 68) srasArrowY -= 8;
+          else if (targetX > 640 && srasArrowY < 300) srasArrowY += 8;
+          else break;
+          guard += 1;
+        }
+        var srasFromX = adEqX + (adEqY - srasArrowY) / adSlope;
+        showShiftArrow(document.getElementById("ad-arrow"), document.getElementById("ad-arrow-head"), fromX + origin.ad, fromX + adShift, arrowY);
+        showShiftArrow(document.getElementById("sras-arrow"), document.getElementById("sras-arrow-head"), srasFromX + origin.sras, srasFromX + srasShift, srasArrowY, 72);
+        showShiftArrow(document.getElementById("as-arrow"), document.getElementById("as-arrow-head"), adEqX + origin.lras, adEqX + lrasShift, axisY - 18);
+      }
+
+      function updateShiftBar() {
+        var labels = pendingLabels();
+        var map = { "Shift AD": "btn-shift-ad", "Shift SRAS": "btn-shift-sras", "Shift LRAS": "btn-shift-lras" };
+        Object.keys(map).forEach(function (label) {
+          document.getElementById(map[label]).hidden = !gapKnown || labels.indexOf(label) === -1;
+        });
+        var bar = document.getElementById("shift-bar");
+        bar.hidden = !gapKnown || labels.length === 0;
+        document.getElementById("diagram-panel").classList.toggle("is-pending", gapKnown && labels.length > 0);
+      }
+
+      function updateUI() {
+        if (!scenarioOn) return;
+        var state = economy(shown.ad, shown.sras, shown.lras);
+        updateReadout(state);
+        updateAims(state);
+        document.getElementById("phillips-box").hidden = !gapKnown || !showPhillips;
+        if (gapKnown && showPhillips) drawPhillips(state);
+        updateWeights();
+        updateShiftBar();
+        var pending = pendingLabels();
+        var note = lesson(state);
+        if (gapKnown && pending.length && !targetsMet(state)) {
+          note += " Press " + pending.join(" and ") + ".";
+        }
+        document.getElementById("scenario-note").textContent = note;
+        var movedFromShock = !sameShift(shown, SHOCK);
+        var shiftsFinished = gapKnown && pending.length === 0 && movedFromShock;
+        document.getElementById("policy-panel").hidden = shiftsFinished;
+        document.getElementById("btn-amend").hidden = !gapKnown || targetsMet(state) || !movedFromShock;
+        var message = explain(state);
+        document.getElementById("ad-label").textContent = message;
+        document.getElementById("ad-chart").setAttribute("aria-label", message);
+      }
+
+      function sameShift(a, b) {
+        return Math.abs(a.ad - b.ad) < 0.5 && Math.abs(a.lras - b.lras) < 0.5 && Math.abs(a.sras - b.sras) < 0.5;
+      }
+
+      function setShiftButtons(disabled) {
+        ["btn-shift-ad", "btn-shift-sras", "btn-shift-lras"].forEach(function (id) {
+          document.getElementById(id).disabled = disabled;
+        });
+      }
+
+      function animateShift(target) {
+        var start = { ad: shown.ad, lras: shown.lras, sras: shown.sras };
+        if (sameShift(start, target)) {
+          updateUI();
+          return;
+        }
+        if (shiftFrame) cancelAnimationFrame(shiftFrame);
+        shiftOrigin = { ad: start.ad, lras: start.lras, sras: start.sras };
+        setShiftButtons(true);
+        var began = performance.now();
+        function frame(now) {
+          var t = Math.min(1, (now - began) / 700);
+          var eased = 1 - Math.pow(1 - t, 3);
+          drawDiagram(
+            start.ad + (target.ad - start.ad) * eased,
+            start.lras + (target.lras - start.lras) * eased,
+            start.sras + (target.sras - start.sras) * eased,
+            shiftOrigin
+          );
+          if (t < 1) {
+            shiftFrame = requestAnimationFrame(frame);
+          } else {
+            shiftFrame = 0;
+            shown = { ad: target.ad, lras: target.lras, sras: target.sras };
+            drawDiagram(shown.ad, shown.lras, shown.sras, shiftOrigin);
+            setShiftButtons(false);
+            updateUI();
+          }
+        }
+        shiftFrame = requestAnimationFrame(frame);
+      }
+
+      function shiftCurve(curve) {
+        showPhillips = false;
+        document.getElementById("phillips-box").hidden = true;
+        var target = targetShift();
+        var next = { ad: shown.ad, sras: shown.sras, lras: shown.lras };
+        next[curve] = target[curve];
+        if (sameShift(next, target)) document.getElementById("policy-panel").hidden = true;
+        animateShift(next);
+      }
+
+      function clearPolicies() {
+        Object.keys(policyButtons).forEach(function (name) {
+          policyButtons[name].setAttribute("aria-pressed", "false");
+        });
+        updateWeights();
+      }
+
+      function showScenario() {
+        if (shiftFrame) cancelAnimationFrame(shiftFrame);
+        shiftFrame = 0;
+        setShiftButtons(false);
+        scenarioOn = true;
+        gapKnown = true;
+        showPhillips = true;
+        shown = { ad: SHOCK.ad, sras: SHOCK.sras, lras: SHOCK.lras };
+        shiftOrigin = { ad: 0, sras: 0, lras: 0 };
+        clearPolicies();
+        var story = document.getElementById("scenario-story");
+        story.hidden = false;
+        story.open = true;
+        document.getElementById("scenario-steps").hidden = false;
+        document.getElementById("diagram-panel").hidden = false;
+        document.getElementById("policy-panel").hidden = false;
+        drawDiagram(SHOCK.ad, SHOCK.lras, SHOCK.sras, shiftOrigin);
+        updateUI();
+        story.scrollIntoView({ block: "nearest" });
+      }
+
+      function resetPolicies() {
+        if (!scenarioOn) return;
+        if (shiftFrame) cancelAnimationFrame(shiftFrame);
+        shiftFrame = 0;
+        setShiftButtons(false);
+        clearPolicies();
+        shown = { ad: SHOCK.ad, sras: SHOCK.sras, lras: SHOCK.lras };
+        shiftOrigin = { ad: 0, sras: 0, lras: 0 };
+        showPhillips = true;
+        drawDiagram(SHOCK.ad, SHOCK.lras, SHOCK.sras, shiftOrigin);
+        updateUI();
+      }
+
+      document.getElementById("btn-scenario").addEventListener("click", showScenario);
+      document.getElementById("policy-panel").addEventListener("click", function (event) {
+        var button = event.target.closest("button[data-choice]");
+        if (!button) return;
+        var buttonTop = button.getBoundingClientRect().top;
+        button.setAttribute("aria-pressed", button.getAttribute("aria-pressed") === "true" ? "false" : "true");
+        updateWeights();
+        updateUI();
+        function holdPage() {
+          var drift = button.getBoundingClientRect().top - buttonTop;
+          if (Math.abs(drift) > 0.5) window.scrollBy(0, drift);
+        }
+        holdPage();
+        requestAnimationFrame(holdPage);
+      });
+      document.getElementById("btn-shift-ad").addEventListener("click", function () { shiftCurve("ad"); });
+      document.getElementById("btn-shift-sras").addEventListener("click", function () { shiftCurve("sras"); });
+      document.getElementById("btn-shift-lras").addEventListener("click", function () { shiftCurve("lras"); });
+      document.getElementById("btn-amend").addEventListener("click", function () {
+        if (!scenarioOn) return;
+        if (shiftFrame) cancelAnimationFrame(shiftFrame);
+        shiftFrame = 0;
+        setShiftButtons(false);
+        var scrollX = window.scrollX;
+        var scrollY = window.scrollY;
+        shown = { ad: SHOCK.ad, sras: SHOCK.sras, lras: SHOCK.lras };
+        shiftOrigin = { ad: 0, sras: 0, lras: 0 };
+        showPhillips = true;
+        drawDiagram(SHOCK.ad, SHOCK.lras, SHOCK.sras, shiftOrigin);
+        updateUI();
+        window.scrollTo(scrollX, scrollY);
+      });
+      document.getElementById("btn-reset").addEventListener("click", resetPolicies);
+      document.getElementById("btn-save").addEventListener("click", function () {
+        var svg = document.getElementById("ad-chart");
+        var clone = svg.cloneNode(true);
+        clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        var background = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        background.setAttribute("width", "760");
+        background.setAttribute("height", "430");
+        background.setAttribute("fill", "#fffaf3");
+        clone.insertBefore(background, clone.firstChild);
+        var xml = new XMLSerializer().serializeToString(clone);
+        var url = URL.createObjectURL(new Blob([xml], { type: "image/svg+xml;charset=utf-8" }));
+        var image = new Image();
+        image.onload = function () {
+          var scale = 2;
+          var canvas = document.createElement("canvas");
+          canvas.width = 760 * scale;
+          canvas.height = 430 * scale;
+          var context = canvas.getContext("2d");
+          context.fillStyle = "#fffaf3";
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          canvas.toBlob(function (png) {
+            var fileUrl = URL.createObjectURL(png);
+            var link = document.createElement("a");
+            link.href = fileUrl;
+            link.download = "stagflation.png";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(fileUrl);
+          }, "image/png");
+        };
+        image.onerror = function () { URL.revokeObjectURL(url); };
+        image.src = url;
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,2408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Conflict of objectives: Inflation and unemployment</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #e4d9c8;
+      --paper: #f7f1e8;
+      --card: #fffaf3;
+      --accent: #9a3412;
+      --accent-soft: #f3e2d4;
+    }
+    * { box-sizing: border-box; }
+    html { overflow-anchor: none; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .wrap { max-width: 1480px; margin: 0 auto; padding: 28px 22px 72px; }
+    h1 {
+      margin: 0 0 8px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.85rem;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+    .lead {
+      box-sizing: border-box;
+      width: calc(100% + 44px);
+      margin: 0 -22px 22px;
+      padding: 22px 28px;
+      background: #f3e2d4;
+      color: var(--ink);
+      font-size: 1.05rem;
+      font-weight: 650;
+      line-height: 1.4;
+    }
+    .lead #btn-scenario {
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      padding: 6px 12px;
+      margin-left: 8px;
+      vertical-align: baseline;
+    }
+    .lead #btn-scenario:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    h2 {
+      margin: 0 0 4px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.2rem;
+      letter-spacing: -0.02em;
+    }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 18px;
+      margin: 0 0 16px;
+    }
+    .factors {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    #policy-choices[hidden] { display: none; }
+    @media (min-width: 860px) {
+      .factors { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    .stage {
+      display: grid;
+      gap: 16px;
+      align-items: start;
+      margin: 0 0 16px;
+    }
+    .stage .factors { grid-template-columns: 1fr; }
+    #demand-choices {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      align-items: stretch;
+    }
+    #demand-choices > #spend-note { grid-column: 1 / -1; order: -1; }
+    #spend-fields { display: contents; }
+    @media (max-width: 719px) {
+      #demand-choices { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 959px) {
+      .stage { display: flex; flex-direction: column; }
+      .stage .diagram-column { order: -1; }
+    }
+    @media (min-width: 960px) {
+      .stage { grid-template-columns: minmax(280px, 380px) minmax(0, 1fr); }
+      .stage .diagram-column {
+        position: sticky;
+        top: 8px;
+        align-self: start;
+        max-height: calc(100vh - 16px);
+        overflow: auto;
+      }
+      body.is-finished .stage { display: block; }
+      body.is-finished .stage .diagram-column { position: static; max-height: none; overflow: visible; }
+    }
+    #final-task {
+      margin: 0 0 16px;
+      padding: 16px 18px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    #final-task h2 { margin: 0 0 8px; font-family: Georgia, "Palatino Linotype", Palatino, serif; font-size: 1.35rem; }
+    #final-task ul { margin: 0 0 12px; padding-left: 1.2rem; }
+    #final-task li { margin: 0 0 4px; }
+    #final-task p { margin: 0; }
+    #btn-amend {
+      margin-top: 14px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      padding: 10px 16px;
+    }
+    #btn-amend:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    body.is-finished #phillips-box > p { display: none; }
+    .choice-card {
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+      background: #fff;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+    .choice-card-title {
+      margin: 0 0 10px;
+      padding: 0;
+      font-weight: 700;
+      font-size: 1rem;
+      line-height: 1.3;
+    }
+    fieldset {
+      margin: 0;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+      background: #fff;
+      min-width: 0;
+    }
+    legend {
+      padding: 0 4px;
+      font-weight: 700;
+    }
+    .weight { margin-left: 6px; color: var(--accent); }
+    .choice { display: flex; flex-direction: column; gap: 8px; }
+    .choice + .choice { margin-top: 8px; }
+    .choice label {
+      position: relative;
+      display: block;
+      text-align: left;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+      cursor: pointer;
+      font-weight: 650;
+      font-size: 1rem;
+      line-height: 1.3;
+    }
+    #demand-choices .choice-card {
+      height: 100%;
+    }
+    #demand-choices .choice-card-title {
+      text-align: center;
+    }
+    #demand-choices .choice-card .choice {
+      flex: 1 1 auto;
+      justify-content: center;
+    }
+    .choice input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .choice label:has(input:checked) {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      box-shadow: inset 4px 0 0 var(--accent);
+    }
+    .choice label:has(input:focus-visible) {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .chart-head { margin: 0 0 8px; }
+    .sub { margin: 0; color: var(--muted); font-size: 0.92rem; }
+    #chart-block { margin: 0 0 4px; }
+    svg.chart {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      max-height: min(560px, calc(100vh - 200px));
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 8px;
+    }
+    svg.phillips-chart {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 260px;
+      margin: 4px 0 8px;
+      background: #fff;
+    }
+    body.is-finished svg.chart { max-height: min(640px, calc(100vh - 160px)); }
+    .note { margin: 12px 0 0; color: var(--muted); font-size: 0.92rem; }
+    #trade-note p { margin: 8px 0 0; }
+    .scenario-block {
+      margin: 0 0 12px;
+      padding: 12px;
+      border-radius: 8px;
+    }
+    .scenario-block h2 { margin-bottom: 6px; }
+    .scenario-block p { margin: 0; }
+    #scenario-story-text h3 {
+      margin: 14px 0 6px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+    #scenario-story-text h3:first-child { margin-top: 0; }
+    #scenario-story-text p { margin: 0 0 10px; }
+    #scenario-story-text p:last-child { margin-bottom: 0; }
+    #scenario-story-text ul { margin: 0 0 10px; padding-left: 1.25rem; }
+    #scenario-story-text li { margin: 0 0 4px; }
+    #gap-lesson h3 {
+      margin: 8px 0;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.05rem;
+    }
+    #scenario-story,
+    #scenario-steps {
+      box-sizing: border-box;
+      width: calc(100% + 44px);
+      margin-left: -22px;
+      margin-right: -22px;
+      padding: 16px 28px;
+    }
+    #scenario-story {
+      background: var(--accent-soft);
+      font-weight: 650;
+    }
+    #scenario-steps {
+      background: #fff;
+      border: 1px solid var(--line);
+      font-weight: 650;
+      margin-bottom: 22px;
+    }
+    .gap-box {
+      margin: 0 0 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+    }
+    .gap-box h2 { margin-bottom: 6px; }
+    .gap-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .gap-mult {
+      margin: 0;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.35rem;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+    #gap-box.is-concealed { display: none; }
+    .gap-figure {
+      margin: 0 0 10px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.7rem;
+      line-height: 1.1;
+    }
+    .macro-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 0 0 10px;
+    }
+    .macro-pair p {
+      margin: 0;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+    }
+    .macro-pair span { display: block; color: var(--muted); font-size: 0.82rem; }
+    .macro-pair strong {
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.45rem;
+    }
+    .choice label:has(input:disabled) {
+      opacity: 0.45;
+      cursor: default;
+    }
+    .calc-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: flex-end;
+      margin-top: 8px;
+    }
+    .calc-row label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-weight: 650;
+      font-size: 0.92rem;
+    }
+    .calc-row input {
+      font: inherit;
+      width: 7rem;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+    }
+    .calc-row button {
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid #1d4ed8;
+      background: #1d4ed8;
+      color: #fff;
+      padding: 8px 14px;
+    }
+    .calc-row button:focus-visible,
+    .calc-row input:focus-visible {
+      outline: 2px solid #1d4ed8;
+      outline-offset: 2px;
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+    .actions button {
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      padding: 8px 14px;
+    }
+    .actions button.ghost {
+      background: #fff;
+      color: var(--ink);
+      border-color: var(--line);
+    }
+    .actions button.shift {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+      color: #fff;
+    }
+    .actions button[aria-expanded="true"] {
+      background: var(--accent-soft);
+      color: var(--ink);
+      border-color: var(--accent);
+    }
+    .actions button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .actions button.shift:focus-visible { outline-color: #1d4ed8; }
+    .actions button:disabled { opacity: 0.45; cursor: default; }
+    [hidden] { display: none !important; }
+    #scenario-story summary {
+      cursor: pointer;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    #scenario-story[open] summary { margin-bottom: 8px; }
+    #btn-next {
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid #1d4ed8;
+      background: #1d4ed8;
+      color: #fff;
+      padding: 8px 14px;
+      margin-top: 12px;
+    }
+    .live-readout { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 12px; }
+    .diagram.is-pending { box-shadow: 0 0 0 3px #1d4ed8; }
+    .shift-bar {
+      margin: 12px 0 0;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid #1d4ed8;
+      border-radius: 10px;
+    }
+    .explain {
+      margin: 12px 0 0;
+      padding: 12px;
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 0.98rem;
+    }
+    .panel.diagram { padding-top: 14px; }
+    .controls .panel { max-height: calc(100vh - 24px); overflow: auto; }
+    @media (max-width: 959px) {
+      .controls .panel { max-height: none; overflow: visible; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Conflict of objectives: Inflation and unemployment</h1>
+    <p class="sub"><a href="macro-diagrams.html">Back to interactive games</a> · <a href="Stagflation.html">Stagflation</a></p>
+    <p class="lead">Government objectives for inflation conflict with Government objective for unemployment.<br>A policy that cuts unemployment by shifting aggregate demand to the right also raises the price level.<br>A policy that cuts inflation by shifting aggregate demand to the left raises unemployment.<br>Press for the first scenario. <button type="button" id="btn-scenario">Scenario</button></p>
+    <details class="scenario-block" id="scenario-story" hidden>
+      <summary id="scenario-story-heading">Scenario</summary>
+      <div id="scenario-story-text"></div>
+    </details>
+    <section class="scenario-block" id="scenario-steps" hidden aria-labelledby="scenario-steps-heading">
+      <h2 id="scenario-steps-heading">What to do</h2>
+      <p id="scenario-note"></p>
+      <button type="button" id="btn-next" hidden>Next</button>
+    </section>
+
+    <div class="stage">
+      <div class="controls">
+        <section class="panel" id="panel-unemployment" aria-labelledby="unemployment-heading" hidden>
+          <h2 id="unemployment-heading">Reducing unemployment at the expense of inflation</h2>
+          <p class="sub" id="jobs-intro">Before choosing policies, work out the negative output gap and the multiplier beside the diagram. One leads to the other. Then choose a government injection and make your policy choices.</p>
+          <div class="factors" id="policy-choices" hidden>
+            <p class="sub" id="round-note" hidden></p>
+            <div id="demand-choices">
+            <div class="choice-card" role="group" aria-labelledby="jobs-rates-title">
+              <p class="choice-card-title" id="jobs-rates-title">Interest rates <span class="weight" data-policy="jobs-rates"></span></p>
+              <div class="choice" role="radiogroup" aria-label="Interest rates for unemployment">
+                <label><input type="radio" name="jobs-rates" value="2"> Increase by 0.5%</label>
+                <label><input type="radio" name="jobs-rates" value="-2"> Increase by 0.25%</label>
+                <label><input type="radio" name="jobs-rates" value="0" checked> Current rate 4%</label>
+                <label><input type="radio" name="jobs-rates" value="-1"> Decrease by 0.25%</label>
+                <label><input type="radio" name="jobs-rates" value="1"> Decrease by 0.5%</label>
+              </div>
+            </div>
+            <p class="sub" id="spend-note"></p>
+            <div id="spend-fields" hidden>
+            <div class="choice-card" role="group" aria-labelledby="spending-on-infrastructure-title">
+              <p class="choice-card-title" id="spending-on-infrastructure-title">Spending on infrastructure</p>
+              <div class="choice" role="radiogroup" aria-label="Spending on infrastructure">
+                <label><input type="radio" name="spend-infra" value="0" checked> None</label>
+                <label><input type="radio" name="spend-infra" value="2"> £2 billion</label>
+                <label><input type="radio" name="spend-infra" value="4"> £4 billion</label>
+              </div>
+            </div>
+            <div class="choice-card" role="group" aria-labelledby="spending-on-welfare-title">
+              <p class="choice-card-title" id="spending-on-welfare-title">Spending on welfare</p>
+              <div class="choice" role="radiogroup" aria-label="Spending on welfare">
+                <label><input type="radio" name="spend-welfare" value="0" checked> None</label>
+                <label><input type="radio" name="spend-welfare" value="3"> £3 billion</label>
+                <label><input type="radio" name="spend-welfare" value="6"> £6 billion</label>
+              </div>
+            </div>
+            <div class="choice-card" role="group" aria-labelledby="spending-on-public-sector-employment-title">
+              <p class="choice-card-title" id="spending-on-public-sector-employment-title">Spending on public sector employment</p>
+              <div class="choice" role="radiogroup" aria-label="Spending on public sector employment">
+                <label><input type="radio" name="spend-jobs" value="0" checked> None</label>
+                <label><input type="radio" name="spend-jobs" value="2"> £2 billion</label>
+                <label><input type="radio" name="spend-jobs" value="5"> £5 billion</label>
+              </div>
+            </div>
+            </div>
+            <div class="choice-card" role="group" aria-labelledby="tax-title">
+              <p class="choice-card-title" id="tax-title">TAX</p>
+              <div class="choice" role="radiogroup" aria-label="Direct tax">
+                <label><input type="radio" name="jobs-tax-direct" value="1"> Decrease in direct tax £20 billion</label>
+                <label><input type="radio" name="jobs-tax-direct" value="0" checked> No change</label>
+              </div>
+              <div class="choice" role="radiogroup" aria-label="Indirect tax">
+                <label><input type="radio" name="jobs-tax-indirect" value="1"> Decrease in indirect tax £25 billion</label>
+                <label><input type="radio" name="jobs-tax-indirect" value="0" checked> No change</label>
+              </div>
+            </div>
+            <div class="choice-card" role="group" aria-labelledby="reduce-current-account-title">
+              <p class="choice-card-title" id="reduce-current-account-title">Reduce current account <span class="weight" data-policy="jobs-ca"></span></p>
+              <div class="choice" role="radiogroup" aria-label="Reduce current account">
+                <label><input type="radio" name="jobs-ca" value="1"> Boost exports</label>
+                <label><input type="radio" name="jobs-ca" value="2"> Reduce import dependence</label>
+                <label><input type="radio" name="jobs-ca" value="0" checked> No change</label>
+              </div>
+            </div>
+            </div>
+            <div id="sras-round" hidden>
+              <div class="choice-card" role="group" aria-labelledby="costs-and-short-run-aggregate-supply-title">
+              <p class="choice-card-title" id="costs-and-short-run-aggregate-supply-title">Costs and short-run aggregate supply</p>
+              <div class="choice" role="radiogroup" aria-label="Costs that shift SRAS inward">
+                  <label><input type="radio" name="jobs-costs" value="0" checked> No change</label>
+                  <label><input type="radio" name="jobs-costs" value="1"> Wage costs rise</label>
+                  <label><input type="radio" name="jobs-costs" value="2"> Wage and raw material costs rise</label>
+                </div>
+            </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="panel-inflation" aria-labelledby="inflation-heading" hidden>
+          <h2 id="inflation-heading">Low inflation</h2>
+          <p class="sub">Higher interest rates, lower government spending or a stronger pound reduce inflation. Real output falls, so unemployment rises. A stronger pound also makes imported inputs cheaper, so SRAS shifts right.</p>
+          <div class="factors">
+            <div class="choice-card" role="group" aria-labelledby="inflation-rates-title">
+              <p class="choice-card-title" id="inflation-rates-title">Interest rates <span class="weight" data-policy="inflation-rates"></span></p>
+              <div class="choice" role="radiogroup" aria-label="Interest rates for low inflation">
+                <label><input type="radio" name="inflation-rates" value="-1"> Increase by 0.25%</label>
+                <label><input type="radio" name="inflation-rates" value="0" checked> Current rate 4%</label>
+                <label><input type="radio" name="inflation-rates" value="1"> Increase by 0.5%</label>
+              </div>
+            </div>
+            <div class="choice-card" role="group" aria-labelledby="government-spending-title">
+              <p class="choice-card-title" id="government-spending-title">Government spending <span class="weight" data-policy="inflation-g"></span></p>
+              <div class="choice" role="radiogroup" aria-label="Government spending for low inflation">
+                <label><input type="radio" name="inflation-g" value="-1"> Rise</label>
+                <label><input type="radio" name="inflation-g" value="0" checked> Neutral</label>
+                <label><input type="radio" name="inflation-g" value="1"> Cut</label>
+              </div>
+            </div>
+            <div class="choice-card" role="group" aria-labelledby="exchange-rate-title">
+              <p class="choice-card-title" id="exchange-rate-title">Exchange rate <span class="weight" data-policy="inflation-fx"></span></p>
+              <div class="choice" role="radiogroup" aria-label="Exchange rate for low inflation">
+                <label><input type="radio" name="inflation-fx" value="-1"> Depreciation</label>
+                <label><input type="radio" name="inflation-fx" value="0" checked> Neutral</label>
+                <label><input type="radio" name="inflation-fx" value="1"> Appreciation</label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="panel-ease" aria-labelledby="ease-heading" hidden>
+          <h2 id="ease-heading">Supply-side policy</h2>
+          <p class="sub">Training, investment and technology shift LRAS right, and lower unit costs shift SRAS right. Output can rise and the price level can fall together, so the trade-off between unemployment and inflation is eased.</p>
+          <div class="factors">
+            <div class="choice-card" role="group" aria-labelledby="education-and-training-title">
+              <p class="choice-card-title" id="education-and-training-title">Education and training <span class="weight" data-policy="ease-training"></span></p>
+              <div class="choice" role="radiogroup" aria-label="Education and training">
+                <label><input type="radio" name="ease-training" value="-1"> Weak</label>
+                <label><input type="radio" name="ease-training" value="0" checked> Neutral</label>
+                <label><input type="radio" name="ease-training" value="1"> Strong</label>
+              </div>
+            </div>
+            <div class="choice-card" role="group" aria-labelledby="investment-and-technology-title">
+              <p class="choice-card-title" id="investment-and-technology-title">Investment and technology <span class="weight" data-policy="ease-tech"></span></p>
+              <div class="choice" role="radiogroup" aria-label="Investment and technology">
+                <label><input type="radio" name="ease-tech" value="-1"> Low</label>
+                <label><input type="radio" name="ease-tech" value="0" checked> Neutral</label>
+                <label><input type="radio" name="ease-tech" value="1"> High</label>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="diagram-column">
+      <section class="panel diagram" id="diagram-panel" hidden>
+        <section id="final-task" hidden>
+          <h2>Your task was:</h2>
+          <ul>
+            <li id="task-unemployment">Reduce unemployment from its current level. <span id="task-unemployment-figure"></span></li>
+            <li id="task-inflation">Keep inflation at an acceptable rate. <span id="task-inflation-figure"></span></li>
+            <li id="task-deficit">Avoid creating excessive pressure on the government's budget deficit. <span id="task-deficit-figure"></span></li>
+            <li id="task-pound">Take account of the effects of a weak pound on the economy. <span id="task-pound-figure"></span></li>
+          </ul>
+          <p>Check the diagram to establish what objectives you achieved and if there was a trade off with inflation.</p>
+          <button type="button" id="btn-amend">Amend my choices</button>
+        </section>
+        <div class="macro-pair live-readout" id="live-readout" hidden>
+          <p><span id="live-gap-label">Negative output gap</span> <strong id="live-gap">£100 billion</strong></p>
+          <p><span>Unemployment</span> <strong id="live-unemployment">7%</strong></p>
+          <p><span>Inflation</span> <strong id="live-inflation">2%</strong></p>
+        </div>
+        <section class="gap-box" id="positive-gap" hidden aria-labelledby="positive-heading">
+          <h2 id="positive-heading">Positive output gap</h2>
+          <div class="macro-pair" aria-label="Unemployment and inflation">
+            <p><span>Unemployment</span> <strong id="positive-unemployment">2%</strong></p>
+            <p><span>Inflation</span> <strong id="positive-inflation">8%</strong></p>
+          </div>
+        </section>
+
+        <div id="chart-block">
+          <div class="chart-head">
+            <h2>Aggregate demand and supply</h2>
+          </div>
+          <svg class="chart" id="ad-chart" viewBox="0 0 760 430" role="img" aria-labelledby="ad-chart-title">
+            <title id="ad-chart-title">Price level against real national output, with AD, SRAS and LRAS</title>
+            <line x1="72" y1="28" x2="72" y2="368" stroke="#1c1915" stroke-width="2.2"/>
+            <line x1="72" y1="368" x2="730" y2="368" stroke="#1c1915" stroke-width="2.2"/>
+            <polyline points="66,42 72,28 78,42" fill="none" stroke="#1c1915" stroke-width="2.2" stroke-linejoin="miter"/>
+            <polyline points="716,362 730,368 716,374" fill="none" stroke="#1c1915" stroke-width="2.2" stroke-linejoin="miter"/>
+            <text x="24" y="198" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle" transform="rotate(-90 24 198)">Price level</text>
+            <text x="60" y="390" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="end">0</text>
+            <text id="yfe-label" x="390" y="390" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle">Y<tspan baseline-shift="sub" font-size="11">fe</tspan></text>
+            <text x="708" y="404" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="end">Real national output</text>
+            <line id="lras-base" x1="390" y1="46" x2="390" y2="368" stroke="#b9aea0" stroke-width="2.2" stroke-dasharray="7 5" visibility="hidden"/>
+            <text id="lras-base-label" x="390" y="32" fill="#8a8074" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle" visibility="hidden">LRAS</text>
+            <line id="lras-current" x1="390" y1="46" x2="390" y2="368" stroke="#1c1915" stroke-width="2.2"/>
+            <text id="lras-label" x="390" y="32" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif">LRAS</text>
+            <line id="sras-base" x1="176" y1="328" x2="576" y2="48" stroke="#b9aea0" stroke-width="2.2" stroke-dasharray="7 5" visibility="hidden"/>
+            <text id="sras-base-label" x="584" y="44" fill="#8a8074" font-size="16" font-family="Segoe UI, sans-serif" visibility="hidden">SRAS</text>
+            <line id="sras-current" x1="176" y1="328" x2="576" y2="48" stroke="#1c1915" stroke-width="2.2"/>
+            <text id="sras-label" x="584" y="44" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif">SRAS</text>
+            <line id="ad-base" x1="204" y1="48" x2="604" y2="328" stroke="#b9aea0" stroke-width="2.2" stroke-dasharray="7 5" visibility="hidden"/>
+            <text id="ad-base-label" x="616" y="336" fill="#8a8074" font-size="16" font-family="Segoe UI, sans-serif" visibility="hidden">AD</text>
+            <line id="ad-current" x1="204" y1="48" x2="604" y2="328" stroke="#1c1915" stroke-width="2.6"/>
+            <text id="ad-current-label" x="616" y="336" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif">AD</text>
+            <line id="p-line" stroke="#1c1915" stroke-width="1.8" stroke-dasharray="2 4" visibility="hidden"/>
+            <text id="p-label" x="64" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="end" visibility="hidden">P</text>
+            <line id="y-line" stroke="#1c1915" stroke-width="1.8" stroke-dasharray="2 4" visibility="hidden"/>
+            <text id="y-label" y="390" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle" visibility="hidden">Y</text>
+            <circle id="ad-dot" r="5.5" fill="#9a3412" visibility="hidden"/>
+            <rect id="gap-shade" fill="#9a3412" opacity="0.16" visibility="hidden"/>
+            <text id="gap-shade-title" fill="#9a3412" font-size="14" font-family="Segoe UI, sans-serif" font-weight="700" text-anchor="middle" visibility="hidden"></text>
+            <text id="gap-shade-amount" fill="#9a3412" font-size="14" font-family="Segoe UI, sans-serif" text-anchor="middle" visibility="hidden"></text>
+            <line id="ad-arrow" stroke="#9a3412" stroke-width="2.6" visibility="hidden"/>
+            <polygon id="ad-arrow-head" fill="#9a3412" visibility="hidden"/>
+            <line id="sras-arrow" stroke="#2563eb" stroke-width="2.6" visibility="hidden"/>
+            <polygon id="sras-arrow-head" fill="#2563eb" visibility="hidden"/>
+            <line id="as-arrow" stroke="#1c1915" stroke-width="2.6" visibility="hidden"/>
+            <polygon id="as-arrow-head" fill="#1c1915" visibility="hidden"/>
+          </svg>
+          <div class="actions shift-bar" id="shift-bar" hidden>
+            <button type="button" class="shift" id="btn-shift-ad" hidden>Shift AD</button>
+            <button type="button" class="shift" id="btn-shift-sras" hidden>Shift SRAS</button>
+            <button type="button" class="shift" id="btn-shift-lras" hidden>Shift LRAS</button>
+          </div>
+          <div class="actions">
+            <button type="button" class="ghost" id="btn-reset">Reset</button>
+            <button type="button" class="ghost" id="btn-save">Save diagram</button>
+          </div>
+          <p class="explain" id="ad-label" aria-live="polite">AD, SRAS and LRAS meet at full-employment output. A demand-side cut in unemployment shifts AD right and raises the price level.</p>
+          <div class="note" id="trade-note" aria-live="polite"></div>
+        </div>
+
+        <div id="multiplier-slot" hidden>
+          <section class="gap-box" id="gap-lesson" aria-labelledby="gap-lesson-heading">
+            <h2 id="gap-lesson-heading">Negative output gap</h2>
+            <p class="sub">Read the diagram: real output Y is left of Yfe. Work out the size of the negative output gap first. The multiplier comes next.</p>
+            <div id="gap-size-ask">
+              <div class="calc-row">
+                <label>Negative output gap (£ billion)
+                  <input id="gap-size" type="text" inputmode="decimal" autocomplete="off">
+                </label>
+                <button type="button" id="btn-check-gap-size">Check</button>
+              </div>
+            </div>
+            <p class="sub" id="gap-size-note"></p>
+          </section>
+          <section class="gap-box" id="multiplier-box" hidden aria-labelledby="multiplier-heading">
+            <h2 id="multiplier-heading">The multiplier</h2>
+            <p class="sub">The multiplier = 1 ÷ (1 − MPC). Of each extra £1 of income, households spend 50p, so the marginal propensity to consume is 0.5. A multiplier near 2 is typical in normal conditions.</p>
+            <fieldset id="mpc-step">
+              <legend>1 − MPC</legend>
+              <p class="sub">Work out 1 − 0.5.</p>
+              <div class="calc-row">
+                <label>1 − MPC
+                  <input id="mpc-gap" type="text" inputmode="decimal" autocomplete="off">
+                </label>
+                <button type="button" id="btn-check-gap">Check</button>
+              </div>
+              <p class="sub" id="mpc-gap-note"></p>
+            </fieldset>
+            <fieldset id="k-step" hidden>
+              <legend>Size of the multiplier</legend>
+              <p class="sub">The multiplier is 1 ÷ 0.5.</p>
+              <div class="calc-row">
+                <label>Multiplier
+                  <input id="k-answer" type="text" inputmode="decimal" autocomplete="off">
+                </label>
+                <button type="button" id="btn-check-k">Check</button>
+              </div>
+              <p class="sub" id="k-note"></p>
+            </fieldset>
+          </section>
+          <section class="gap-box" id="gap-box" hidden aria-labelledby="gap-heading">
+            <div class="gap-head">
+              <div>
+                <h2 id="gap-heading">Size of negative output gap</h2>
+                <p class="gap-figure" id="gap-amount">£100 billion</p>
+              </div>
+              <p class="gap-mult" id="gap-multiplier">Multiplier is × 2</p>
+            </div>
+            <div class="macro-pair" aria-label="Unemployment and inflation">
+              <p><span>Unemployment</span> <strong id="gap-unemployment">7%</strong></p>
+              <p><span>Inflation</span> <strong id="gap-inflation">2%</strong></p>
+            </div>
+            <fieldset id="inject-field">
+              <legend>Size of government injection</legend>
+              <p class="sub">The multiplier has correctly been calculated as 2, choose a £10 billion, £20 billion or £30 billion government injection.</p>
+              <div class="choice" role="radiogroup" aria-label="Government injection">
+                <label><input type="radio" name="inject" value="10" disabled> £10 billion</label>
+                <label><input type="radio" name="inject" value="20" disabled> £20 billion</label>
+                <label><input type="radio" name="inject" value="30" disabled> £30 billion</label>
+              </div>
+            </fieldset>
+            <p class="sub" id="gap-result">Calculate the negative output gap, then the multiplier. Then choose a government injection of £10 billion, £20 billion or £30 billion.</p>
+          </section>
+        </div>
+        <section class="gap-box" id="phillips-box" hidden aria-labelledby="phillips-heading">
+          <h2 id="phillips-heading">Short-run Phillips curve</h2>
+          <p class="sub" id="phillips-ask"></p>
+          <svg id="phillips-chart" class="phillips-chart" viewBox="0 0 560 370" role="img" aria-labelledby="phillips-chart-title">
+            <title id="phillips-chart-title">Short-run Phillips curve of unemployment against inflation</title>
+            <g id="phillips-draw"></g>
+          </svg>
+          <p class="sub">Inflation is read from this curve. At 7% unemployment the curve meets 2% inflation. At 2% unemployment the curve meets 10.2% inflation. The dashed lines mark the unemployment rate and the inflation rate after the policy choice.</p>
+        </section>
+      </section>
+      </div>
+    </div>
+
+  </div>
+  <script>
+    (function () {
+      var HOW_TO = "Choose a setting other than Neutral. The red label names the curve. Press Shift AD, Shift SRAS or Shift LRAS under the diagram to show the policy. The notes describe the trade-off between low inflation and reducing unemployment.";
+      var adEqX = 390;
+      var adEqY = 178;
+      var adSlope = 0.70;
+      var axisY = 368;
+      var shownShifts = { ad: 0, lras: 0, sras: 0 };
+      var scenarioBase = { ad: 0, lras: 0, sras: 0 };
+      var choiceRound = 0;
+      var roundPending = false;
+      var injectionChoice = 0;
+      var injectionLocked = false;
+      var injectionFixed = false;
+      var multiplierKnown = false;
+      var gapKnown = false;
+      var phillipsVisible = false;
+      var supplyRound = false;
+      var roundComplete = false;
+      var gameFinished = false;
+      var amending = false;
+      var choiceMemory = {
+        "spend-infra": "0",
+        "spend-welfare": "0",
+        "spend-jobs": "0",
+        "jobs-rates": "0",
+        "jobs-tax-direct": "0",
+        "jobs-tax-indirect": "0",
+        "jobs-ca": "0",
+        "jobs-costs": "0"
+      };
+      var appliedChoice = {
+        "spend-infra": "0",
+        "spend-welfare": "0",
+        "spend-jobs": "0",
+        "jobs-rates": "0",
+        "jobs-tax-direct": "0",
+        "jobs-tax-indirect": "0",
+        "jobs-ca": "0",
+        "jobs-costs": "0"
+      };
+      var shiftFrame = 0;
+      var shiftOrigin = { ad: 0, lras: 0, sras: 0 };
+      var applied = {};
+      var chosenNames = {};
+      var scenarioOn = false;
+      var scenarioIndex = 0;
+
+      function fx(ad, sras, lras) {
+        return { ad: ad || 0, sras: sras || 0, lras: lras || 0 };
+      }
+
+      var POLICIES = [
+        {
+          name: "jobs-rates",
+          effects: { "1": fx(50, 0, 0), "-1": fx(25, 0, 0), "2": fx(-50, 0, 0), "-2": fx(-25, 0, 0) },
+          copy: {
+            "1": {
+              choice: "Interest rates were decreased by 0.5%.",
+              line: "A 0.5% cut stimulates consumption, investment and net exports, so AD shifts right, but by less than a 1% cut. Depending on business and consumer confidence, that reduces a £100 billion negative output gap by about £20 billion to £30 billion. This model uses £25 billion. Unemployment falls a little and the price level rises a little.",
+            },
+            "-1": {
+              choice: "Interest rates were decreased by 0.25%.",
+              line: "A 0.25% cut stimulates consumption, investment and net exports, so AD shifts right by only a small amount. Depending on business and consumer confidence, that reduces a £100 billion negative output gap by about £10 billion to £15 billion. This model uses £12.5 billion. Unemployment and the price level change only slightly.",
+            },
+            "2": {
+              choice: "Interest rates were increased by 0.5%.",
+              line: "A 0.5% rise discourages consumption, investment and net exports, so AD shifts left. Depending on business and consumer confidence, that withdraws about £20 billion to £30 billion of demand. This model uses £25 billion. Unemployment rises a little and the price level falls a little.",
+            },
+            "-2": {
+              choice: "Interest rates were increased by 0.25%.",
+              line: "A 0.25% rise discourages consumption, investment and net exports, so AD shifts left by only a small amount. Depending on business and consumer confidence, that withdraws about £10 billion to £15 billion of demand. This model uses £12.5 billion. Unemployment and the price level change only slightly.",
+            }
+          }
+        },
+        {
+          name: "jobs-ca",
+          effects: { "1": fx(60, 0, 0), "2": fx(50, 0, 0) },
+          copy: {
+            "1": {
+              choice: "Exports were boosted.",
+              line: "Higher exports raise net exports, so the current account deficit narrows and AD shifts right. This model adds £30 billion of aggregate demand. Unemployment falls and the price level rises.",
+            },
+            "2": {
+              choice: "Import dependence was reduced.",
+              line: "Households and firms buy fewer imports and more UK output, so the current account deficit narrows and AD shifts right. This model adds £25 billion of aggregate demand. Unemployment falls and the price level rises.",
+            }
+          }
+        },
+        {
+          name: "jobs-tax-direct",
+          effects: { "1": fx(80, 0, 0) },
+          copy: {
+            "1": {
+              choice: "Direct tax was decreased by £20 billion.",
+              line: "A £20 billion cut in direct tax raises disposable income, so AD shifts right. This model adds £40 billion of aggregate demand. Spending and the price level rise. Unemployment falls as real output rises.",
+            }
+          }
+        },
+        {
+          name: "jobs-tax-indirect",
+          effects: { "1": fx(100, 40, 0) },
+          copy: {
+            "1": {
+              choice: "Indirect tax was decreased by £25 billion.",
+              line: "A £25 billion cut in indirect tax cuts firms' costs, so SRAS shifts right, and real incomes rise, so AD shifts right. This model adds £50 billion of aggregate demand. The SRAS shift raises real output by a further £20 billion, so together they close about £70 billion of a £100 billion negative output gap. Unemployment falls, and the price level can be lower.",
+            }
+          }
+        },
+        {
+          name: "jobs-costs",
+          effects: { "1": fx(0, -1, 0), "2": fx(0, -1, 0) },
+          copy: {
+            "1": {
+              choice: "Wage costs rose.",
+              line: "The positive output gap puts upward pressure on wages. SRAS shifts inward, to the left, part of the way back toward full employment. Real output falls and the price level rises."
+            },
+            "2": {
+              choice: "Wage and raw material costs rose.",
+              line: "The positive output gap raises wage costs and raw material costs. SRAS shifts inward, to the left, until real output is back at full employment. The price level is higher."
+            }
+          }
+        },
+        {
+          name: "inflation-rates",
+          effects: { "1": fx(-50, 0, 0), "-1": fx(-25, 0, 0) },
+          copy: {
+            "1": {
+              choice: "Interest rates were increased by 0.5%.",
+              line: "A 0.5% rise discourages consumption, investment and net exports, so AD shifts left by a modest amount. Depending on confidence, that withdraws about £20 billion to £30 billion of demand. This model uses £25 billion. Inflation eases a little and unemployment rises a little.",
+            },
+            "-1": {
+              choice: "Interest rates were increased by 0.25%.",
+              line: "A 0.25% rise discourages consumption, investment and net exports, so AD shifts left only slightly. Depending on confidence, that withdraws about £10 billion to £15 billion of demand. This model uses £12.5 billion. Inflation and unemployment change only slightly.",
+            }
+          }
+        },
+        {
+          name: "inflation-g",
+          effects: { "1": fx(-150, 0, 0), "-1": fx(150, 0, 0) },
+          copy: {
+            "1": {
+              line: "A cut in government spending shifts AD left. This model withdraws about £75 billion of aggregate demand from a £100 billion positive output gap. The price level falls. Unemployment rises because the demand for labour is derived from the demand for output.",
+            },
+            "-1": {
+              line: "A rise in government spending shifts AD right. This model adds about £75 billion of aggregate demand. Unemployment falls and the price level rises. Low inflation is traded off against fewer jobless workers.",
+            }
+          }
+        },
+        {
+          name: "inflation-fx",
+          effects: { "1": fx(-180, 40, 0), "-1": fx(180, -40, 0) },
+          copy: {
+            "1": {
+              line: "An appreciation makes imported inputs cheaper, so SRAS shifts right a little, and it cuts net exports, so AD shifts left by more. This model withdraws about £90 billion of aggregate demand and adds about £20 billion of real output on the supply side, so a £100 billion positive output gap narrows but does not vanish. The price level falls. Export firms sell less, so unemployment rises.",
+            },
+            "-1": {
+              line: "A depreciation boosts net exports, so AD shifts right by more, and it makes imported inputs dearer, so SRAS shifts left a little. This model adds about £90 billion of aggregate demand and cuts about £20 billion of real output on the supply side. Output and jobs can rise. The price level rises, so low inflation is traded off.",
+            }
+          }
+        },
+        {
+          name: "ease-training",
+          effects: { "1": fx(0, 160, 80), "-1": fx(0, -160, -80) },
+          copy: {
+            "1": {
+              line: "Training raises the quality of labour, so LRAS shifts right, and unit costs fall, so SRAS shifts right. The economy can produce more at a lower price level. Unemployment can fall and inflation can fall together, so the short-run trade-off is eased. The gain takes time.",
+            },
+            "-1": {
+              line: "Weaker training shifts LRAS and SRAS left. Productive capacity falls, the price level rises and unemployment is higher. Both objectives become harder to achieve.",
+            }
+          }
+        },
+        {
+          name: "ease-tech",
+          effects: { "1": fx(0, 160, 80), "-1": fx(0, -160, -80) },
+          copy: {
+            "1": {
+              line: "More investment and better technology shift LRAS and SRAS right. Potential output rises and the price level falls, so unemployment and inflation can improve together. Labour-saving technology can displace some workers at first, before the new jobs appear.",
+            },
+            "-1": {
+              line: "Less investment and weaker technology shift LRAS and SRAS left. The price level rises and fewer workers are needed to produce the smaller capacity output. Both low inflation and low unemployment are harder to achieve.",
+            }
+          }
+        }
+      ];
+
+      function selected(name) {
+        var input = document.querySelector('input[name="' + name + '"]:checked');
+        return input ? input.value : "0";
+      }
+
+      function findPolicy(name) {
+        var i;
+        for (i = 0; i < POLICIES.length; i += 1) {
+          if (POLICIES[i].name === name) return POLICIES[i];
+        }
+        return null;
+      }
+
+      function policyReady(policy) {
+        var value = selected(policy.name);
+        if (value === "0") return false;
+        var effect = policy.effects[value];
+        var flags = applied[policy.name] || {};
+        if (effect.ad && !flags.ad) return false;
+        if (effect.sras && !flags.sras) return false;
+        if (effect.lras && !flags.lras) return false;
+        return true;
+      }
+
+      function readyPursue(name) {
+        return selected(name) === "1" && policyReady(findPolicy(name));
+      }
+
+      var MULTIPLIER = 2;
+      var GAP_BILLIONS = 100;
+
+      function injectionBillions() {
+        var input = document.querySelector('input[name="inject"]:checked');
+        return input ? Number(input.value) : 0;
+      }
+
+      function spendValue(name) {
+        var input = document.querySelector('input[name="' + name + '"]:checked');
+        return input ? Number(input.value) : 0;
+      }
+
+      function spendSum() {
+        return spendValue("spend-infra") + spendValue("spend-welfare") + spendValue("spend-jobs");
+      }
+
+      function incomeChangeBillions() {
+        return spendSum() * MULTIPLIER;
+      }
+
+      function scenarioOneActive() {
+        return scenarioOn && scenarioIndex === 0 && scenarioBase.ad < 0;
+      }
+
+      function injectionPixels() {
+        if (!scenarioOneActive()) return 0;
+        return (incomeChangeBillions() / GAP_BILLIONS) * Math.abs(scenarioBase.ad);
+      }
+
+      function pixelsToGapBillions(pixels) {
+        if (!scenarioBase.ad) return 0;
+        return Math.round(pixels * GAP_BILLIONS / -scenarioBase.ad * 10) / 10;
+      }
+
+      function fillFinalTask() {
+        var gap = gapBillions();
+        var unemployment = Math.round(unemploymentRate(gap) * 10) / 10;
+        var inflation = Math.round(phillipsInflation(unemployment) * 10) / 10;
+        document.getElementById("task-unemployment-figure").textContent = "Unemployment was 7% it is now " + formatPercent(unemployment) + ".";
+        document.getElementById("task-inflation-figure").textContent = "Inflation was 2% it is now " + formatPercent(inflation) + ".";
+        document.getElementById("task-deficit-figure").textContent = "£" + injectionChoice + " billion.";
+        var rateImpact = {
+          "1": "Interest rates were decreased by 0.5%. The pound depreciates.",
+          "-1": "Interest rates were decreased by 0.25%. The pound depreciates slightly.",
+          "2": "Interest rates were increased by 0.5%. The pound appreciates.",
+          "-2": "Interest rates were increased by 0.25%. The pound appreciates slightly.",
+          "0": "Interest rates were left at 4%. The exchange rate does not change."
+        };
+        document.getElementById("task-pound-figure").textContent = rateImpact[selected("jobs-rates")] || rateImpact["0"];
+      }
+
+      function gapBillions() {
+        var startGapPx = -scenarioBase.ad / 2;
+        if (startGapPx <= 0) return GAP_BILLIONS;
+        var gapPx = shownShifts.lras - (shownShifts.ad + shownShifts.sras) / 2;
+        return Math.round((GAP_BILLIONS * gapPx) / startGapPx);
+      }
+
+      function describeGap(gap) {
+        if (gap > GAP_BILLIONS) return "The negative output gap rises from £100 billion to £" + gap + " billion.";
+        if (gap === GAP_BILLIONS) return "The negative output gap stays at £100 billion.";
+        if (gap > 0) return "The negative output gap falls from £100 billion to £" + gap + " billion.";
+        if (gap === 0) return "The negative output gap of £100 billion is closed.";
+        return "The £100 billion negative output gap is closed, and there is a positive output gap of £" + (-gap) + " billion.";
+      }
+
+      function formatPercent(n) {
+        var rounded = Math.round(n * 10) / 10;
+        if (Math.abs(rounded - Math.round(rounded)) < 0.05) return Math.round(rounded) + "%";
+        return rounded.toFixed(1) + "%";
+      }
+
+      function unemploymentRate(gap) {
+        return 4 + 3 * (gap / GAP_BILLIONS);
+      }
+
+      var PHILLIPS_CURVE = [
+        [1.6, 12], [2, 10.2], [3, 7.6], [4, 5.6], [5, 4.2],
+        [6, 3], [7, 2], [8, 1.45], [9, 1.05]
+      ];
+
+      function phillipsSlopes() {
+        var curve = PHILLIPS_CURVE;
+        var n = curve.length;
+        var delta = [];
+        var i;
+        for (i = 0; i < n - 1; i += 1) {
+          delta.push((curve[i + 1][1] - curve[i][1]) / (curve[i + 1][0] - curve[i][0]));
+        }
+        var m = [delta[0]];
+        for (i = 1; i < n - 1; i += 1) m.push((delta[i - 1] + delta[i]) / 2);
+        m.push(delta[n - 2]);
+        for (i = 0; i < n - 1; i += 1) {
+          if (delta[i] === 0) {
+            m[i] = 0;
+            m[i + 1] = 0;
+          } else {
+            var a = m[i] / delta[i];
+            var b = m[i + 1] / delta[i];
+            var hypot = a * a + b * b;
+            if (hypot > 9) {
+              var scale = 3 / Math.sqrt(hypot);
+              m[i] = scale * a * delta[i];
+              m[i + 1] = scale * b * delta[i];
+            }
+          }
+        }
+        return m;
+      }
+
+      function phillipsInflation(unemployment) {
+        var curve = PHILLIPS_CURVE;
+        var u = Math.max(unemployment, curve[0][0]);
+        var last = curve[curve.length - 1];
+        if (u >= last[0]) return last[1];
+        var slopes = phillipsSlopes();
+        var i;
+        for (i = 0; i < curve.length - 1; i += 1) {
+          if (u <= curve[i + 1][0]) break;
+        }
+        var x0 = curve[i][0];
+        var x1 = curve[i + 1][0];
+        var y0 = curve[i][1];
+        var y1 = curve[i + 1][1];
+        var h = x1 - x0;
+        var t = h ? (u - x0) / h : 0;
+        var t2 = t * t;
+        var t3 = t2 * t;
+        var h00 = 2 * t3 - 3 * t2 + 1;
+        var h10 = t3 - 2 * t2 + t;
+        var h01 = -2 * t3 + 3 * t2;
+        var h11 = t3 - t2;
+        return h00 * y0 + h10 * h * slopes[i] + h01 * y1 + h11 * h * slopes[i + 1];
+      }
+
+      function inflationRate(gap) {
+        return phillipsInflation(Math.round(unemploymentRate(gap) * 10) / 10);
+      }
+
+      function describeTradeoff(gap) {
+        if (gap >= GAP_BILLIONS) return "Unemployment is 7% and inflation is 2%.";
+        return "Unemployment falls from 7% to " + formatPercent(unemploymentRate(gap)) + ". Inflation rises from 2% to " + formatPercent(inflationRate(gap)) + ".";
+      }
+
+      function describeOutput(gap) {
+        if (gap > 0) return "Y is closer to Yfe and the price level is higher.";
+        if (gap === 0) return "Y is at Yfe and the price level is higher than it was at 7% unemployment.";
+        return "Y is above Yfe and the price level is higher.";
+      }
+
+      function spendSentence() {
+        var parts = [];
+        if (spendValue("spend-infra")) parts.push("£" + spendValue("spend-infra") + " billion on infrastructure");
+        if (spendValue("spend-welfare")) parts.push("£" + spendValue("spend-welfare") + " billion on welfare");
+        if (spendValue("spend-jobs")) parts.push("£" + spendValue("spend-jobs") + " billion on public sector employment");
+        if (!parts.length) return "No spending has been allocated yet.";
+        var list = parts.length === 1 ? parts[0] : parts.slice(0, -1).join(", ") + " and " + parts[parts.length - 1];
+        return "Spending is " + list + ". £" + spendSum() + " billion is injected.";
+      }
+
+      function scenarioOneGate() {
+        return !scenarioOn || scenarioIndex === 0;
+      }
+
+      function updatePolicyGate() {
+        var ready = multiplierKnown && injectionFixed;
+        var lesson = document.getElementById("gap-lesson");
+        if (lesson) lesson.hidden = !scenarioOn || scenarioIndex !== 0 || injectionFixed;
+        var choices = document.getElementById("policy-choices");
+        if (choices) choices.hidden = scenarioOneGate() && !ready;
+        var intro = document.getElementById("jobs-intro");
+        if (intro) intro.hidden = scenarioOneGate() && ready;
+      }
+
+      function updateSpendLimits() {
+        var cap = injectionFixed ? injectionChoice : 0;
+        var allow = injectionFixed && !injectionLocked;
+        var fields = document.getElementById("spend-fields");
+        if (fields) fields.hidden = !multiplierKnown;
+        ["spend-infra", "spend-welfare", "spend-jobs"].forEach(function (name) {
+          var current = spendValue(name);
+          document.querySelectorAll('input[name="' + name + '"]').forEach(function (input) {
+            var value = Number(input.value);
+            var over = cap > 0 && (spendSum() - current + value) > cap;
+            input.disabled = !multiplierKnown || !allow || over;
+          });
+        });
+        var note = document.getElementById("spend-note");
+        updatePolicyGate();
+        if (!note) return;
+        if (scenarioOneGate() && !(multiplierKnown && injectionFixed)) {
+          note.hidden = true;
+          return;
+        }
+        note.hidden = false;
+        if (supplyRound) {
+          note.hidden = true;
+          return;
+        }
+        if (!multiplierKnown) {
+          note.hidden = true;
+        } else if (!injectionFixed) {
+          note.textContent = "Choose the size of the government injection below.";
+        } else if (injectionLocked) {
+          note.textContent = "The injection is £" + injectionChoice + " billion. This choice is shown on the diagram.";
+        } else {
+          note.textContent = "Make one choice in each section, then press Shift AD. The diagram does not move until then. Infrastructure, welfare and public sector employment together cannot exceed £" + injectionChoice + " billion.";
+        }
+      }
+
+      function updateRoundPhase() {
+        var note = document.getElementById("round-note");
+        var srasBox = document.getElementById("sras-round");
+        var demand = document.getElementById("demand-choices");
+        supplyRound = false;
+        if (srasBox) srasBox.hidden = true;
+        if (demand) demand.hidden = false;
+        if (note) note.hidden = true;
+      }
+
+      function positiveRates(adShift, srasShift, lrasShift) {
+        var startPx = scenarioBase.ad / 2;
+        var gapPx = (adShift + srasShift) / 2 - lrasShift;
+        var scale = startPx > 0 ? gapPx / startPx : 1;
+        return { unemployment: 4 - 2 * scale, inflation: 4 + 4 * scale };
+      }
+
+      function updatePositiveGap() {
+        var box = document.getElementById("positive-gap");
+        if (!box || box.hidden) return;
+        var rates = positiveRates(shownShifts.ad, shownShifts.sras, shownShifts.lras);
+        document.getElementById("positive-unemployment").textContent = formatPercent(rates.unemployment);
+        document.getElementById("positive-inflation").textContent = formatPercent(rates.inflation);
+      }
+
+      function updateGapBox() {
+        var box = document.getElementById("gap-box");
+        if (!box) return;
+        box.hidden = !(scenarioOn && scenarioIndex === 0 && multiplierKnown);
+        document.getElementById("multiplier-slot").hidden = !(scenarioOn && scenarioIndex === 0 && !injectionFixed);
+        var multiplierBox = document.getElementById("multiplier-box");
+        if (multiplierBox) multiplierBox.hidden = !(scenarioOn && scenarioIndex === 0 && gapKnown && !injectionFixed);
+        if (box.hidden) {
+          updateSpendLimits();
+          return;
+        }
+        var gap = gapBillions();
+        var amount = document.getElementById("gap-amount");
+        if (gap > 0) amount.textContent = "£" + gap + " billion";
+        else if (gap === 0) amount.textContent = "£0 billion";
+        else amount.textContent = "£" + (-gap) + " billion positive";
+        document.getElementById("gap-unemployment").textContent = formatPercent(unemploymentRate(gap));
+        document.getElementById("gap-inflation").textContent = formatPercent(inflationRate(gap));
+        document.getElementById("gap-multiplier").textContent = "Multiplier is × " + MULTIPLIER;
+        var result = document.getElementById("gap-result");
+        if (!gapKnown && !injectionFixed && !choiceRound) {
+          result.textContent = "First calculate the negative output gap from the diagram. Then calculate the multiplier and choose a government injection.";
+        } else if (!multiplierKnown && !injectionFixed) {
+          result.textContent = "The negative output gap is £100 billion. Now calculate the multiplier, then choose a government injection of £10 billion, £20 billion or £30 billion.";
+        } else if (!injectionFixed) {
+          result.textContent = "Choose a government injection of £10 billion, £20 billion or £30 billion. Then make one choice in each section and press Shift AD.";
+        } else if (!choiceRound) {
+          result.textContent = "Make one choice in each section, then press Shift AD. Infrastructure, welfare and public sector employment together cannot exceed £" + injectionChoice + " billion.";
+        } else if (roundPending) {
+          result.textContent = "Make one choice in each section, then press Shift AD. The diagram does not move until then. Infrastructure, welfare and public sector employment together cannot exceed £" + injectionChoice + " billion.";
+        } else {
+          var spent = spendSum() ? spendSentence() + " The multiplier is " + MULTIPLIER + ", so real national income rises by £" + incomeChangeBillions() + " billion. " : "";
+          result.textContent = "The government injection is still £" + injectionChoice + " billion. " + spent + describeGap(gap) + " " + describeTradeoff(gap) + " " + describeOutput(gap);
+        }
+        var hideInjectionDetail = injectionFixed;
+        box.classList.toggle("is-concealed", hideInjectionDetail);
+        document.getElementById("gap-multiplier").hidden = false;
+        document.getElementById("inject-field").hidden = !multiplierKnown || hideInjectionDetail;
+        result.hidden = hideInjectionDetail;
+        updateSpendLimits();
+      }
+
+      var scenarios = [
+        {
+          start: { ad: -200, lras: 0, sras: 0 },
+          opening: "The economy is in a position of unemployment. The negative output gap is £100 billion. Unemployment is 7% and inflation is 2%. Real output is at Y, below full-employment output Yfe. The price level is P.",
+          storyTitle: "Scenario",
+          story: "scenario",
+          storyHtml: "<h3>Economic Scenario</h3><p>The UK economy is experiencing an unemployment rate of 7% and an inflation rate of 2%. Because unemployment is relatively high, the economy is operating below its productive capacity, creating a negative output gap as shown on the diagram.</p><p>The government is currently running a budget deficit, meaning it is spending more than it receives in tax revenue. At the same time, the pound is weak, making imports more expensive but helping UK exports become more competitive overseas.</p><p>The government's main objective is to reduce unemployment and increase economic growth. However, policies that boost demand and create jobs may also increase inflationary pressure. Policymakers must therefore balance the benefits of lower unemployment against the risk of higher inflation and a larger budget deficit.</p><h3>Your Task</h3><p>Using the economic information provided, choose a combination of policies that will:</p><ul><li>Reduce unemployment from its current level.</li><li>Keep inflation at an acceptable rate.</li><li>Avoid creating excessive pressure on the government's budget deficit.</li><li>Take account of the effects of a weak pound on the economy.</li></ul><p>Can you find a policy mix that achieves a reasonable balance between economic growth, employment, inflation, and government finances?</p>",
+          task: "First calculate the negative output gap from the diagram. Then calculate the multiplier.",
+          success: "Unemployment falls because AD has shifted right. The price level is higher than P, so low inflation is traded off. This is the short-run Phillips curve trade-off. Press Next to continue.",
+          pass: function () {
+            if (spendSum() > 0 && applied.inject && Math.abs(shownShifts.ad - (scenarioBase.ad + injectionPixels())) < 1) return true;
+            var currentAccount = (selected("jobs-ca") === "1" || selected("jobs-ca") === "2") && policyReady(findPolicy("jobs-ca"));
+            return (readyPursue("jobs-rates") || readyPursue("jobs-tax-direct") || readyPursue("jobs-tax-indirect") || currentAccount) && shownShifts.ad > scenarioBase.ad + 40;
+          }
+        },
+        {
+          start: { ad: 200, lras: 0, sras: 0 },
+          opening: "The economy is operating above its long-run potential. There is a positive output gap. Unemployment is 2% and inflation is 8%. Real output is at Y, above full-employment output Yfe. The price level is P.",
+          storyTitle: "Scenario 2 of 3",
+          story: "Unemployment is 2% and inflation is 8%. This is in part due to the economy operating above its long run potential. The diagram shows a positive output gap. Currently the Government has a budget deficit, the Bank of England base rate is 4% and the pound is strong.",
+          task: "Raise interest rates or cut government spending, then press Shift AD under the diagram. An appreciation also needs Shift SRAS. Watch what happens to unemployment.",
+          success: "Inflation is lower. Unemployment rises because real output is lower. Cutting inflation with demand-side policy, or with a stronger pound, trades off jobs. Press Next to continue.",
+          pass: function () {
+            if ((readyPursue("inflation-rates") || readyPursue("inflation-g")) && shownShifts.ad < scenarioBase.ad - 40) return true;
+            return readyPursue("inflation-fx") && shownShifts.ad < scenarioBase.ad - 40 && shownShifts.sras > scenarioBase.sras + 20;
+          }
+        },
+        {
+          task: "Choose strong education or high investment and technology, then press Shift SRAS and Shift LRAS under the diagram. Both objectives can improve together.",
+          success: "The trade-off is eased. LRAS and SRAS have shifted right, so real output is higher and the price level is lower. Unemployment can fall without higher inflation. Press Next to finish.",
+          pass: function () {
+            return (readyPursue("ease-training") || readyPursue("ease-tech")) && shownShifts.lras > 40 && shownShifts.sras > 40;
+          }
+        }
+      ];
+
+      function clamp(n, limit) {
+        return Math.max(-limit, Math.min(limit, n));
+      }
+
+      function chosenShift() {
+        var total = { ad: 0, sras: 0, lras: 0 };
+        POLICIES.forEach(function (policy) {
+          if (policy.name === "jobs-costs") return;
+          var value = selected(policy.name);
+          if (value === "0") return;
+          var effect = policy.effects[value];
+          total.ad += effect.ad;
+          total.sras += effect.sras;
+          total.lras += effect.lras;
+        });
+        total.ad += injectionPixels();
+        var cost = selected("jobs-costs");
+        if (cost === "1" || cost === "2") {
+          var needed = scenarioBase.lras * 2 - scenarioBase.ad - total.ad - total.sras;
+          total.sras += cost === "2" ? needed : needed / 2;
+        }
+        total.ad = clamp(total.ad, 320);
+        total.sras = clamp(total.sras, 280);
+        total.lras = clamp(total.lras, 160);
+        return total;
+      }
+
+      function effectLabel(effect) {
+        var parts = [];
+        if (effect.ad > 0) parts.push("AD right");
+        if (effect.ad < 0) parts.push("AD left");
+        if (effect.sras > 0) parts.push("SRAS right");
+        if (effect.sras < 0) parts.push("SRAS left");
+        if (effect.lras > 0) parts.push("LRAS right");
+        if (effect.lras < 0) parts.push("LRAS left");
+        return parts.join(", ");
+      }
+
+      function updateWeights() {
+        document.querySelectorAll("[data-policy]").forEach(function (el) {
+          var policy = findPolicy(el.getAttribute("data-policy"));
+          var value = selected(policy.name);
+          el.textContent = value === "0" ? "" : effectLabel(policy.effects[value]);
+        });
+      }
+
+      function fillNote(lines, pending) {
+        var note = document.getElementById("trade-note");
+        while (note.firstChild) note.removeChild(note.firstChild);
+        if (!lines.length && !pending.length) {
+          note.textContent = HOW_TO;
+          return;
+        }
+        lines.forEach(function (line) {
+          var p = document.createElement("p");
+          p.textContent = line;
+          note.appendChild(p);
+        });
+        if (pending.length) {
+          var hint = document.createElement("p");
+          hint.textContent = "Press " + pending.join(" and ") + " to show this policy on the diagram.";
+          note.appendChild(hint);
+        }
+      }
+
+      function updateCards() {
+        var lines = [];
+        POLICIES.forEach(function (policy) {
+          if (!policyReady(policy)) return;
+          var pack = policy.copy[selected(policy.name)];
+          lines.push(pack.line);
+        });
+        var pending = [];
+        var chosen = chosenShift();
+        var target = {
+          ad: scenarioBase.ad + chosen.ad,
+          sras: scenarioBase.sras + chosen.sras,
+          lras: scenarioBase.lras + chosen.lras
+        };
+        if (scenarioOneActive()) {
+          if (Math.abs(target.ad - shownShifts.ad) >= 0.5 || Math.abs(target.sras - shownShifts.sras) >= 0.5 || Math.abs(target.lras - shownShifts.lras) >= 0.5) pending.push("Shift AD");
+        } else {
+          if (Math.abs(target.ad - shownShifts.ad) >= 0.5) pending.push("Shift AD");
+          if (Math.abs(target.sras - shownShifts.sras) >= 0.5) pending.push("Shift SRAS");
+          if (Math.abs(target.lras - shownShifts.lras) >= 0.5) pending.push("Shift LRAS");
+        }
+        if (!lines.length && !pending.length) {
+          document.getElementById("trade-note").textContent = "";
+        } else {
+          fillNote(lines, pending);
+        }
+        updateGapBox();
+        updatePositiveGap();
+        updateScenario();
+        updatePolicyGate();
+        syncLiveReadout();
+        updatePhillipsTask();
+        updateRoundPhase();
+        updateShiftVisibility(pending);
+        applyFinalLayout();
+      }
+
+      function applyFinalLayout() {
+        var task = document.getElementById("final-task");
+        var lead = document.querySelector(".lead");
+        var controls = document.querySelector(".controls");
+        if (amending) {
+          document.body.classList.remove("is-finished");
+          if (task) task.hidden = true;
+          if (lead) lead.hidden = true;
+          if (controls) controls.hidden = false;
+          document.getElementById("scenario-story").hidden = true;
+          document.getElementById("scenario-steps").hidden = true;
+          document.getElementById("multiplier-slot").hidden = true;
+          document.getElementById("panel-unemployment").hidden = false;
+          document.getElementById("diagram-panel").hidden = false;
+          document.getElementById("live-readout").hidden = false;
+          document.getElementById("phillips-box").hidden = false;
+          return;
+        }
+        if (!gameFinished) {
+          document.body.classList.remove("is-finished");
+          if (task) task.hidden = true;
+          if (lead) lead.hidden = false;
+          if (controls) controls.hidden = false;
+          return;
+        }
+        if (!document.body.classList.contains("is-finished")) window.scrollTo(0, 0);
+        document.body.classList.add("is-finished");
+        if (task) task.hidden = false;
+        if (lead) lead.hidden = true;
+        if (controls) controls.hidden = true;
+        document.getElementById("scenario-story").hidden = true;
+        document.getElementById("scenario-steps").hidden = true;
+        document.getElementById("multiplier-slot").hidden = true;
+        document.getElementById("positive-gap").hidden = true;
+        document.getElementById("shift-bar").hidden = true;
+        document.getElementById("live-readout").hidden = false;
+        document.getElementById("phillips-box").hidden = false;
+        document.getElementById("diagram-panel").hidden = false;
+        fillFinalTask();
+      }
+
+      function amendChoices() {
+        amending = true;
+        gameFinished = false;
+        roundComplete = false;
+        setInjectionLocked(false);
+        updateCards();
+        var heading = document.getElementById("unemployment-heading");
+        if (heading) heading.scrollIntoView({ block: "start" });
+      }
+
+      function clearFinalPage() {
+        gameFinished = false;
+        roundComplete = false;
+        amending = false;
+        document.body.classList.remove("is-finished");
+        var lead = document.querySelector(".lead");
+        if (lead) lead.hidden = false;
+        var controls = document.querySelector(".controls");
+        if (controls) controls.hidden = false;
+        var task = document.getElementById("final-task");
+        if (task) task.hidden = true;
+      }
+
+      function syncLiveReadout() {
+        var readout = document.getElementById("live-readout");
+        if (!readout) return;
+        readout.hidden = gameFinished ? false : (!scenarioOn || scenarioIndex > 1);
+        if (readout.hidden) return;
+        if (scenarioIndex === 1) {
+          var rates = positiveRates(shownShifts.ad, shownShifts.sras, shownShifts.lras);
+          var startPx = scenarioBase.ad / 2;
+          var gapPx = (shownShifts.ad + shownShifts.sras) / 2 - shownShifts.lras;
+          var billions = startPx ? Math.round(100 * gapPx / startPx) : 0;
+          document.getElementById("live-gap-label").textContent = "Positive output gap";
+          document.getElementById("live-gap").textContent = "£" + billions + " billion";
+          document.getElementById("live-unemployment").textContent = formatPercent(rates.unemployment);
+          document.getElementById("live-inflation").textContent = formatPercent(rates.inflation);
+          return;
+        }
+        var gap = gapBillions();
+        document.getElementById("live-gap-label").textContent = gap < 0 ? "Positive output gap" : gap > 0 ? "Negative output gap" : "Full employment";
+        document.getElementById("live-gap").textContent = "£" + Math.abs(gap) + " billion";
+        document.getElementById("live-unemployment").textContent = formatPercent(unemploymentRate(gap));
+        document.getElementById("live-inflation").textContent = formatPercent(inflationRate(gap));
+      }
+
+      function resetPhillips() {
+        phillipsVisible = false;
+        var box = document.getElementById("phillips-box");
+        if (box) box.hidden = true;
+      }
+
+      function drawPhillips(unemployment, inflation) {
+        var left = 78, right = 516, top = 28, bottom = 292, uMax = 9, piMax = 12;
+        function xOf(u) { return left + (Math.max(0, Math.min(uMax, u)) / uMax) * (right - left); }
+        function yOf(pi) { return bottom - (Math.max(0, Math.min(piMax, pi)) / piMax) * (bottom - top); }
+        var parts = [];
+        function add(markup) { parts.push(markup); }
+        add('<line x1="' + left + '" y1="' + (top - 14) + '" x2="' + left + '" y2="' + bottom + '" stroke="#1c1915" stroke-width="1.8"/>');
+        add('<line x1="' + left + '" y1="' + bottom + '" x2="' + (right + 16) + '" y2="' + bottom + '" stroke="#1c1915" stroke-width="1.8"/>');
+        add('<polyline points="' + (left - 6) + ',' + (top - 2) + ' ' + left + ',' + (top - 14) + ' ' + (left + 6) + ',' + (top - 2) + '" fill="none" stroke="#1c1915" stroke-width="1.8" stroke-linejoin="miter"/>');
+        add('<polyline points="' + (right + 4) + ',' + (bottom - 6) + ' ' + (right + 16) + ',' + bottom + ' ' + (right + 4) + ',' + (bottom + 6) + '" fill="none" stroke="#1c1915" stroke-width="1.8" stroke-linejoin="miter"/>');
+        add('<text x="16" y="160" fill="#1c1915" font-size="15" font-family="Segoe UI, sans-serif" text-anchor="middle" transform="rotate(-90 16 160)">Inflation %</text>');
+        add('<text x="297" y="350" fill="#1c1915" font-size="15" font-family="Segoe UI, sans-serif" text-anchor="middle">Unemployment rate %</text>');
+        var tick = 0;
+        for (tick = 0; tick <= piMax; tick += 2) {
+          add('<line x1="' + (left - 6) + '" y1="' + yOf(tick) + '" x2="' + left + '" y2="' + yOf(tick) + '" stroke="#1c1915" stroke-width="1.3"/>');
+          add('<text x="' + (left - 10) + '" y="' + (yOf(tick) + 5) + '" fill="#1c1915" font-size="14" font-family="Segoe UI, sans-serif" text-anchor="end">' + tick + '</text>');
+        }
+        for (tick = 1; tick <= uMax; tick += 1) {
+          add('<line x1="' + xOf(tick) + '" y1="' + bottom + '" x2="' + xOf(tick) + '" y2="' + (bottom + 6) + '" stroke="#1c1915" stroke-width="1.3"/>');
+          add('<text x="' + xOf(tick) + '" y="' + (bottom + 22) + '" fill="#1c1915" font-size="14" font-family="Segoe UI, sans-serif" text-anchor="middle">' + tick + '</text>');
+        }
+        var pts = [];
+        var u = 1;
+        for (u = 1.6; u <= uMax + 0.001; u += 0.05) {
+          pts.push(xOf(u).toFixed(1) + "," + yOf(phillipsInflation(u)).toFixed(1));
+        }
+        add('<polyline points="' + pts.join(" ") + '" fill="none" stroke="#1c1915" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>');
+        var x = xOf(unemployment);
+        var y = yOf(inflation);
+        add('<line x1="' + x + '" y1="' + bottom + '" x2="' + x + '" y2="' + y + '" stroke="#1c1915" stroke-width="1.3" stroke-dasharray="6 4"/>');
+        add('<line x1="' + left + '" y1="' + y + '" x2="' + x + '" y2="' + y + '" stroke="#1c1915" stroke-width="1.3" stroke-dasharray="6 4"/>');
+        add('<circle cx="' + x + '" cy="' + y + '" r="3.5" fill="#1c1915"/>');
+        document.getElementById("phillips-draw").innerHTML = parts.join("");
+      }
+
+      function updatePhillipsTask() {
+        var box = document.getElementById("phillips-box");
+        if (!box) return;
+        if (!scenarioOneActive() && !gameFinished) {
+          box.hidden = true;
+          return;
+        }
+        if (gameFinished || Math.abs(gapBillions() - GAP_BILLIONS) > 0.05) phillipsVisible = true;
+        box.hidden = gameFinished ? false : !phillipsVisible;
+        if (box.hidden) return;
+        var unemployment = Math.round(unemploymentRate(gapBillions()) * 10) / 10;
+        var inflation = Math.round(phillipsInflation(unemployment) * 10) / 10;
+        document.getElementById("phillips-ask").textContent = "Unemployment is " + formatPercent(unemployment) + ". Inflation is " + formatPercent(inflation) + ".";
+        drawPhillips(unemployment, inflation);
+      }
+
+      function updateShiftVisibility(pending) {
+        var map = { "Shift AD": "btn-shift-ad", "Shift SRAS": "btn-shift-sras", "Shift LRAS": "btn-shift-lras" };
+        Object.keys(map).forEach(function (label) {
+          document.getElementById(map[label]).hidden = !scenarioOn || pending.indexOf(label) === -1;
+        });
+        var bar = document.getElementById("shift-bar");
+        var showBar = scenarioOn && pending.length > 0;
+        if (bar) bar.hidden = !showBar;
+        var diagram = document.getElementById("diagram-panel");
+        if (diagram) diagram.classList.toggle("is-pending", scenarioOn && pending.length > 0);
+      }
+
+      function updateScenario() {
+        var story = document.getElementById("scenario-story");
+        var steps = document.getElementById("scenario-steps");
+        var note = document.getElementById("scenario-note");
+        var next = document.getElementById("btn-next");
+        if (!scenarioOn) {
+          story.hidden = true;
+          steps.hidden = true;
+          return;
+        }
+        var item = scenarios[scenarioIndex];
+        if (item.story || item.storyHtml) {
+          story.hidden = false;
+          document.getElementById("scenario-story-heading").textContent = item.storyTitle || "Scenario";
+          var storyBody = document.getElementById("scenario-story-text");
+          if (item.storyHtml) storyBody.innerHTML = item.storyHtml;
+          else storyBody.textContent = item.story;
+          if (scenarioIndex === 0 && multiplierKnown && injectionFixed && story.dataset.folded !== "1") {
+            story.open = false;
+            story.dataset.folded = "1";
+          }
+        } else {
+          story.hidden = true;
+        }
+        var working = scenarioIndex === 0 && multiplierKnown && injectionFixed && !item.pass();
+        steps.hidden = working;
+        if (item.pass()) {
+          note.textContent = typeof item.success === "function" ? item.success() : item.success;
+          next.hidden = false;
+          next.disabled = false;
+        } else if (scenarioIndex === 0 && multiplierKnown) {
+          note.textContent = "Choose a government injection of £10 billion, £20 billion or £30 billion.";
+          next.hidden = true;
+          next.disabled = true;
+        } else if (scenarioIndex === 0 && gapKnown) {
+          note.textContent = "The negative output gap is £100 billion. Now calculate the multiplier.";
+          next.hidden = true;
+          next.disabled = true;
+        } else if (scenarioIndex === 0) {
+          note.textContent = "First calculate the negative output gap from the diagram. Then calculate the multiplier.";
+          next.hidden = true;
+          next.disabled = true;
+        } else {
+          note.textContent = item.task;
+          next.hidden = true;
+          next.disabled = true;
+        }
+      }
+
+      function appliedReasons() {
+        var reasons = [];
+        POLICIES.forEach(function (policy) {
+          if (!policyReady(policy)) return;
+          var pack = policy.copy[selected(policy.name)];
+          if (!pack) return;
+          reasons.push(pack.choice ? pack.choice + " " + pack.line : pack.line);
+        });
+        if (applied.inject && spendSum() > 0) {
+          var categories = [];
+          if (spendValue("spend-infra")) categories.push("£" + spendValue("spend-infra") + " billion on infrastructure");
+          if (spendValue("spend-welfare")) categories.push("£" + spendValue("spend-welfare") + " billion on welfare");
+          if (spendValue("spend-jobs")) categories.push("£" + spendValue("spend-jobs") + " billion on public sector employment");
+          var list = categories.length === 1 ? categories[0] : categories.slice(0, -1).join(", ") + " and " + categories[categories.length - 1];
+          reasons.push("Government spending injects £" + spendSum() + " billion (" + list + "). The multiplier is " + MULTIPLIER + ", so this injection raises real national income and aggregate demand by £" + incomeChangeBillions() + " billion.");
+        }
+        return reasons;
+      }
+
+      function combinedDemandSentence(liveGap) {
+        var bits = [];
+        var srasPixels = 0;
+        POLICIES.forEach(function (policy) {
+          if (!policyReady(policy)) return;
+          var effect = policy.effects[selected(policy.name)] || fx(0, 0, 0);
+          if (policy.name !== "jobs-costs") srasPixels += effect.sras || 0;
+          var ad = effect.ad || 0;
+          if (!ad) return;
+          var pack = policy.copy[selected(policy.name)];
+          var name = pack && pack.choice ? pack.choice.replace(/\.$/, "") : "This policy";
+          var amount = Math.abs(pixelsToGapBillions(ad));
+          bits.push(name + ". This " + (ad > 0 ? "adds £" : "withdraws £") + amount + " billion of aggregate demand");
+        });
+        if (applied.inject && spendSum() > 0) {
+          bits.push("the £" + spendSum() + " billion government injection, multiplied by " + MULTIPLIER + ", adds £" + incomeChangeBillions() + " billion of aggregate demand");
+        }
+        if (bits.length < 2) return "";
+        var net = pixelsToGapBillions(appliedDemandPixels());
+        var way = net > 0 ? "raise" : net < 0 ? "reduce" : "leave unchanged";
+        var sentence = "Every chosen button is included. " + bits.join("; ") + ". Together they " + way + " aggregate demand by £" + Math.abs(net) + " billion.";
+        if (Math.abs(srasPixels) >= 1) {
+          sentence += " A supply-side shift also changes real output by about £" + Math.abs(pixelsToGapBillions(srasPixels)) + " billion, so the output gap does not move one-for-one with AD.";
+        } else {
+          sentence += " With no supply-side shift, that AD total is also the change in the output gap.";
+        }
+        return sentence + " " + describeGap(liveGap);
+      }
+
+      function appliedDemandPixels() {
+        var pixels = 0;
+        POLICIES.forEach(function (policy) {
+          if (!policyReady(policy)) return;
+          pixels += policy.effects[selected(policy.name)].ad || 0;
+        });
+        if (applied.inject && spendSum() > 0) pixels += injectionPixels();
+        return pixels;
+      }
+
+      function gapOutcome(crossX, lrasX) {
+        var startedBelow = scenarioBase.ad + scenarioBase.sras < scenarioBase.lras - 0.5;
+        var startedAbove = scenarioBase.ad + scenarioBase.sras > scenarioBase.lras + 0.5;
+        if (Math.abs(crossX - lrasX) <= 0.5) return "Short-run output is at full-employment output.";
+        if (crossX < lrasX - 0.5) {
+          return (startedBelow ? "Short-run output is still below" : "Short-run output is below") + " full-employment output. This is a negative output gap.";
+        }
+        return (startedAbove ? "Short-run output is still above" : "Short-run output is above") + " full-employment output. This is a positive output gap.";
+      }
+
+      function adY(x, shift) {
+        return adEqY + adSlope * (x - shift - adEqX);
+      }
+
+      function srasY(x, shift) {
+        return adEqY - adSlope * (x - shift - adEqX);
+      }
+
+      function clipSegment(yFromX, xFromY) {
+        var bounds = { l: 110, r: 700, t: 40, b: 340 };
+        var hits = [];
+        function add(x, y) {
+          if (x < bounds.l - 0.5 || x > bounds.r + 0.5 || y < bounds.t - 0.5 || y > bounds.b + 0.5) return;
+          var i;
+          for (i = 0; i < hits.length; i += 1) {
+            if (Math.abs(hits[i][0] - x) < 0.5 && Math.abs(hits[i][1] - y) < 0.5) return;
+          }
+          hits.push([x, y]);
+        }
+        [bounds.l, bounds.r].forEach(function (x) { add(x, yFromX(x)); });
+        [bounds.t, bounds.b].forEach(function (y) { add(xFromY(y), y); });
+        hits.sort(function (a, b) { return a[0] - b[0]; });
+        if (hits.length < 2) return null;
+        return [hits[0], hits[hits.length - 1]];
+      }
+
+      function visibleAd(shift) {
+        return clipSegment(
+          function (x) { return adY(x, shift); },
+          function (y) { return (y - adEqY) / adSlope + shift + adEqX; }
+        );
+      }
+
+      function visibleSras(shift) {
+        return clipSegment(
+          function (x) { return srasY(x, shift); },
+          function (y) { return shift + adEqX + (adEqY - y) / adSlope; }
+        );
+      }
+
+      function placeAdLabel(textEl, point, title, faded) {
+        var labelX = point[0] + 12;
+        var labelY = point[1] + 8;
+        var anchor = "start";
+        if (labelX > 700) {
+          labelX = point[0] - 10;
+          anchor = "end";
+        }
+        if (labelY > 400) labelY = 400;
+        if (labelY < 24) labelY = 24;
+        textEl.setAttribute("x", labelX.toFixed(1));
+        textEl.setAttribute("y", labelY.toFixed(1));
+        textEl.setAttribute("text-anchor", anchor);
+        textEl.textContent = title;
+        textEl.setAttribute("fill", faded ? "#8a8074" : "#1c1915");
+        textEl.setAttribute("visibility", "visible");
+      }
+
+      function setLine(id, segment) {
+        if (!segment) return;
+        var line = document.getElementById(id);
+        line.setAttribute("x1", segment[0][0].toFixed(1));
+        line.setAttribute("y1", segment[0][1].toFixed(1));
+        line.setAttribute("x2", segment[1][0].toFixed(1));
+        line.setAttribute("y2", segment[1][1].toFixed(1));
+      }
+
+      function showShiftArrow(arrow, head, fromX, toX, y) {
+        var visible = Math.abs(toX - fromX) >= 8;
+        arrow.setAttribute("x1", fromX.toFixed(1));
+        arrow.setAttribute("y1", y.toFixed(1));
+        arrow.setAttribute("x2", toX.toFixed(1));
+        arrow.setAttribute("y2", y.toFixed(1));
+        arrow.setAttribute("visibility", visible ? "visible" : "hidden");
+        var dir = toX < fromX ? -1 : 1;
+        head.setAttribute("points", toX.toFixed(1) + "," + y.toFixed(1) + " " + (toX - dir * 12).toFixed(1) + "," + (y - 6).toFixed(1) + " " + (toX - dir * 12).toFixed(1) + "," + (y + 6).toFixed(1));
+        head.setAttribute("visibility", visible ? "visible" : "hidden");
+      }
+
+      function markOutputGap(crossX, crossY, lrasX) {
+        var shade = document.getElementById("gap-shade");
+        var title = document.getElementById("gap-shade-title");
+        var amount = document.getElementById("gap-shade-amount");
+        if (!shade || !title || !amount) return;
+        var width = Math.abs(lrasX - crossX);
+        var scale = scenarioBase.ad ? -scenarioBase.ad / 2 : 0;
+        if (width < 1 || !scale) {
+          shade.setAttribute("visibility", "hidden");
+          title.setAttribute("visibility", "hidden");
+          amount.setAttribute("visibility", "hidden");
+          return;
+        }
+        var left = Math.min(crossX, lrasX);
+        var top = Math.min(crossY, axisY);
+        shade.setAttribute("x", left.toFixed(1));
+        shade.setAttribute("y", top.toFixed(1));
+        shade.setAttribute("width", width.toFixed(1));
+        shade.setAttribute("height", Math.max(8, axisY - top).toFixed(1));
+        shade.setAttribute("visibility", "visible");
+        var billions = Math.round((GAP_BILLIONS * (lrasX - crossX) / scale) * 10) / 10;
+        var figure = Math.abs(billions - Math.round(billions)) < 0.05 ? String(Math.abs(Math.round(billions))) : Math.abs(billions).toFixed(1);
+        title.textContent = billions >= 0 ? "Negative gap" : "Positive gap";
+        amount.textContent = "£" + figure + " billion";
+        var mid = left + width / 2;
+        var labelY = Math.min(axisY - 36, Math.max(top + 20, top + (axisY - top) * 0.45));
+        title.setAttribute("x", mid.toFixed(1));
+        title.setAttribute("y", labelY.toFixed(1));
+        amount.setAttribute("x", mid.toFixed(1));
+        amount.setAttribute("y", (labelY + 18).toFixed(1));
+        title.setAttribute("visibility", "visible");
+        amount.setAttribute("visibility", "visible");
+      }
+
+      function drawDiagram(adShift, lrasShift, srasShift, origin) {
+        origin = origin || { ad: 0, lras: 0, sras: 0 };
+        var adMoved = Math.abs(adShift) >= 0.5;
+        var lrasMoved = Math.abs(lrasShift) >= 0.5;
+        var srasMoved = Math.abs(srasShift) >= 0.5;
+        var adSegment = visibleAd(adShift);
+        setLine("ad-current", adSegment);
+        var adFromStart = scenarioOn && Math.abs(adShift - scenarioBase.ad) >= 0.5;
+        if (adSegment) placeAdLabel(document.getElementById("ad-current-label"), adSegment[1], adFromStart ? "AD\u2081" : "AD", false);
+        if (adFromStart) {
+          var baseSegment = visibleAd(scenarioBase.ad);
+          setLine("ad-base", baseSegment);
+          document.getElementById("ad-base").setAttribute("visibility", "visible");
+          document.getElementById("ad-base-label").setAttribute("visibility", "visible");
+          if (baseSegment) placeAdLabel(document.getElementById("ad-base-label"), baseSegment[1], "AD", true);
+        } else {
+          document.getElementById("ad-base").setAttribute("visibility", "hidden");
+          document.getElementById("ad-base-label").setAttribute("visibility", "hidden");
+        }
+        var srasSegment = visibleSras(srasShift);
+        setLine("sras-current", srasSegment);
+        if (srasSegment) placeAdLabel(document.getElementById("sras-label"), srasSegment[1], srasMoved ? "SRAS\u2081" : "SRAS", false);
+        document.getElementById("sras-base").setAttribute("visibility", srasMoved ? "visible" : "hidden");
+        document.getElementById("sras-base-label").setAttribute("visibility", srasMoved ? "visible" : "hidden");
+        var lrasX = Math.max(96, Math.min(700, adEqX + lrasShift));
+        var lras = document.getElementById("lras-current");
+        lras.setAttribute("x1", lrasX.toFixed(1));
+        lras.setAttribute("x2", lrasX.toFixed(1));
+        lras.setAttribute("y2", String(axisY));
+        var lrasLabel = document.getElementById("lras-label");
+        lrasLabel.textContent = lrasMoved ? "LRAS\u2081" : "LRAS";
+        lrasLabel.setAttribute("x", lrasX.toFixed(1));
+        document.getElementById("lras-base").setAttribute("visibility", lrasMoved ? "visible" : "hidden");
+        document.getElementById("lras-base-label").setAttribute("visibility", lrasMoved ? "visible" : "hidden");
+        document.getElementById("yfe-label").setAttribute("x", lrasX.toFixed(1));
+        var crossX = adEqX + (adShift + srasShift) / 2;
+        var crossY = adEqY - adSlope * (adShift - srasShift) / 2;
+        var dot = document.getElementById("ad-dot");
+        var yLine = document.getElementById("y-line");
+        var yLabel = document.getElementById("y-label");
+        var pLine = document.getElementById("p-line");
+        var pLabel = document.getElementById("p-label");
+        if (adMoved || srasMoved || lrasMoved) {
+          dot.setAttribute("cx", crossX.toFixed(1));
+          dot.setAttribute("cy", crossY.toFixed(1));
+          dot.setAttribute("visibility", "visible");
+          var pEnd = Math.max(72, crossX - 8);
+          pLine.setAttribute("x1", "72");
+          pLine.setAttribute("x2", pEnd.toFixed(1));
+          pLine.setAttribute("y1", crossY.toFixed(1));
+          pLine.setAttribute("y2", crossY.toFixed(1));
+          pLine.setAttribute("visibility", "visible");
+          pLabel.setAttribute("y", (crossY + 5).toFixed(1));
+          pLabel.setAttribute("visibility", "visible");
+        } else {
+          dot.setAttribute("visibility", "hidden");
+          pLine.setAttribute("visibility", "hidden");
+          pLabel.setAttribute("visibility", "hidden");
+        }
+        if ((adMoved || srasMoved || lrasMoved) && Math.abs(crossX - lrasX) > 0.5) {
+          yLine.setAttribute("x1", crossX.toFixed(1));
+          yLine.setAttribute("x2", crossX.toFixed(1));
+          yLine.setAttribute("y1", Math.min(axisY, crossY + 8).toFixed(1));
+          yLine.setAttribute("y2", String(axisY));
+          yLine.setAttribute("visibility", "visible");
+          if (Math.abs(crossX - lrasX) >= 36) {
+            yLabel.setAttribute("text-anchor", "middle");
+            yLabel.setAttribute("x", crossX.toFixed(1));
+          } else if (crossX < lrasX) {
+            yLabel.setAttribute("text-anchor", "end");
+            yLabel.setAttribute("x", (lrasX - 22).toFixed(1));
+          } else {
+            yLabel.setAttribute("text-anchor", "start");
+            yLabel.setAttribute("x", (lrasX + 22).toFixed(1));
+          }
+          yLabel.setAttribute("visibility", "visible");
+        } else {
+          yLine.setAttribute("visibility", "hidden");
+          yLabel.setAttribute("visibility", "hidden");
+        }
+        var arrowY = adEqY - 36;
+        var fromX = adEqX + (arrowY - adEqY) / adSlope;
+        var srasArrowY = 220;
+        var srasFromX = adEqX + (adEqY - srasArrowY) / adSlope;
+        showShiftArrow(document.getElementById("ad-arrow"), document.getElementById("ad-arrow-head"), fromX + origin.ad, fromX + adShift, arrowY);
+        showShiftArrow(document.getElementById("sras-arrow"), document.getElementById("sras-arrow-head"), srasFromX + origin.sras, srasFromX + srasShift, srasArrowY);
+        showShiftArrow(document.getElementById("as-arrow"), document.getElementById("as-arrow-head"), adEqX + origin.lras, adEqX + lrasShift, axisY - 18);
+        markOutputGap(crossX, crossY, lrasX);
+        var parts = [];
+        if (!adMoved && !srasMoved && !lrasMoved) {
+          parts.push("AD, SRAS and LRAS meet at full-employment output, Yfe.");
+        } else {
+          if (adMoved) parts.push(adShift > 0 ? "AD is to the right of its starting equilibrium." : "AD is to the left of its starting equilibrium.");
+          if (srasMoved) parts.push(srasShift > 0 ? "SRAS is to the right of its starting equilibrium." : "SRAS is to the left of its starting equilibrium.");
+          if (lrasMoved) parts.push(lrasShift > 0 ? "LRAS is to the right, so full-employment output is higher." : "LRAS is to the left, so full-employment output is lower.");
+          if (adMoved || srasMoved) {
+            var outputGap = adShift + srasShift;
+            var priceGap = adShift - srasShift;
+            if (outputGap > 0.5 && priceGap > 0.5) parts.push("The short-run price level and real national output are higher.");
+            else if (outputGap < -0.5 && priceGap < -0.5) parts.push("The short-run price level and real national output are lower.");
+            else if (outputGap > 0.5 && priceGap < -0.5) parts.push("Real national output is higher and the short-run price level is lower.");
+            else if (outputGap < -0.5 && priceGap > 0.5) parts.push("Real national output is lower and the short-run price level is higher.");
+          }
+          if (Math.abs(crossX - lrasX) <= 0.5) {
+            if (crossY < adEqY - 0.5) parts.push("AD, SRAS and LRAS meet again. The price level is higher and real national output is back at full employment.");
+            else if (crossY > adEqY + 0.5) parts.push("AD, SRAS and LRAS meet again. The price level is lower and real national output is back at full employment.");
+            else parts.push("AD, SRAS and LRAS meet at full-employment output, Yfe.");
+          } else if (crossX < lrasX - 0.5) parts.push("Short-run output is below full-employment output. This is a negative output gap.");
+          else parts.push("Short-run output is above full-employment output. This is a positive output gap.");
+        }
+        var reasons = appliedReasons();
+        var gapBox = document.getElementById("gap-box");
+        var liveGap = null;
+        if (gapBox && !gapBox.hidden && scenarioBase.ad) {
+          liveGap = Math.round((GAP_BILLIONS * (lrasShift - (adShift + srasShift) / 2)) / (-scenarioBase.ad / 2));
+          var combined = combinedDemandSentence(liveGap);
+          if (combined) reasons.push(combined);
+        }
+        var message = reasons.length ? reasons.join(" ") + " " + gapOutcome(crossX, lrasX) : parts.join(" ");
+        if (liveGap !== null) {
+          message += " Unemployment is " + formatPercent(unemploymentRate(liveGap)) + ". Inflation is " + formatPercent(inflationRate(liveGap)) + ".";
+        }
+        var positiveBox = document.getElementById("positive-gap");
+        if (positiveBox && !positiveBox.hidden && scenarioBase.ad > 0) {
+          var boom = positiveRates(adShift, srasShift, lrasShift);
+          message += " Unemployment is " + formatPercent(boom.unemployment) + ". Inflation is " + formatPercent(boom.inflation) + ".";
+        }
+        document.getElementById("ad-label").textContent = message;
+        document.getElementById("ad-chart").setAttribute("aria-label", message);
+      }
+
+      function sameShift(a, b) {
+        return Math.abs(a.ad - b.ad) < 0.5 && Math.abs(a.lras - b.lras) < 0.5 && Math.abs(a.sras - b.sras) < 0.5;
+      }
+
+      function setShiftButtons(disabled) {
+        ["btn-shift-ad", "btn-shift-sras", "btn-shift-lras"].forEach(function (id) {
+          document.getElementById(id).disabled = disabled;
+        });
+      }
+
+      function setInjectionLocked(locked) {
+        injectionLocked = locked;
+        var fields = document.getElementById("spend-fields");
+        if (fields) fields.classList.toggle("is-locked", locked);
+        document.querySelectorAll('input[name="inject"]').forEach(function (input) {
+          input.disabled = injectionFixed || !multiplierKnown;
+        });
+        ["jobs-rates", "jobs-tax-direct", "jobs-tax-indirect", "jobs-ca"].forEach(function (name) {
+          document.querySelectorAll('input[name="' + name + '"]').forEach(function (input) {
+            input.disabled = injectionLocked && injectionFixed;
+          });
+        });
+        updateSpendLimits();
+      }
+
+      function resetInjectionChoice() {
+        injectionFixed = false;
+        injectionChoice = 0;
+        choiceRound = 0;
+        roundPending = false;
+        supplyRound = false;
+        choiceMemory = {
+          "spend-infra": "0",
+          "spend-welfare": "0",
+          "spend-jobs": "0",
+          "jobs-rates": "0",
+          "jobs-tax-direct": "0",
+          "jobs-tax-indirect": "0",
+          "jobs-ca": "0",
+          "jobs-costs": "0"
+        };
+        appliedChoice = {
+          "spend-infra": "0",
+          "spend-welfare": "0",
+          "spend-jobs": "0",
+          "jobs-rates": "0",
+          "jobs-tax-direct": "0",
+          "jobs-tax-indirect": "0",
+          "jobs-ca": "0",
+          "jobs-costs": "0"
+        };
+        document.querySelectorAll('input[name="inject"]').forEach(function (input) {
+          input.checked = false;
+          input.disabled = !multiplierKnown;
+        });
+        setInjectionLocked(false);
+      }
+
+      function resetMultiplierWork() {
+        multiplierKnown = false;
+        gapKnown = false;
+        var box = document.getElementById("multiplier-box");
+        var step = document.getElementById("k-step");
+        var lesson = document.getElementById("gap-lesson");
+        if (box) box.hidden = true;
+        if (step) step.hidden = true;
+        if (lesson) lesson.hidden = false;
+        var withdraw = document.getElementById("mpc-gap");
+        var answer = document.getElementById("k-answer");
+        if (withdraw) withdraw.value = "";
+        if (answer) answer.value = "";
+        var withdrawNote = document.getElementById("mpc-gap-note");
+        var answerNote = document.getElementById("k-note");
+        if (withdrawNote) withdrawNote.textContent = "";
+        if (answerNote) answerNote.textContent = "";
+        var gapInput = document.getElementById("gap-size");
+        if (gapInput) {
+          gapInput.value = "";
+          gapInput.disabled = false;
+        }
+        var gapNote = document.getElementById("gap-size-note");
+        if (gapNote) gapNote.textContent = "";
+        var lessonAsk = document.getElementById("gap-size-ask");
+        if (lessonAsk) lessonAsk.hidden = false;
+      }
+
+      function readDecimal(id) {
+        var raw = document.getElementById(id).value.replace(/,/g, ".").trim();
+        return raw === "" ? NaN : Number(raw);
+      }
+
+      function restoreChoice(name) {
+        var previous = document.querySelector('input[name="' + name + '"][value="' + choiceMemory[name] + '"]');
+        if (previous) previous.checked = true;
+      }
+
+      function unemploymentSections() {
+        return ["spend-infra", "spend-welfare", "spend-jobs", "jobs-rates", "jobs-tax-direct", "jobs-tax-indirect", "jobs-ca", "jobs-costs"];
+      }
+
+      function selectionsDiffer() {
+        return unemploymentSections().some(function (name) {
+          return (choiceMemory[name] || "0") !== (appliedChoice[name] || "0");
+        });
+      }
+
+      function handleSpendChange(event) {
+        var name = event.target.name;
+        if (name === "jobs-costs") {
+          if (!supplyRound) {
+            restoreChoice(name);
+            return;
+          }
+          choiceMemory[name] = event.target.value;
+          var costChanged = selectionsDiffer();
+          if (costChanged && !roundPending) {
+            choiceRound += 1;
+            roundPending = true;
+          } else if (!costChanged && roundPending) {
+            choiceRound = Math.max(0, choiceRound - 1);
+            roundPending = false;
+          }
+          applied[name] = {};
+          updateCards();
+          return;
+        }
+        var spending = name.indexOf("spend-") === 0;
+        if (injectionLocked || (spending && (!injectionFixed || spendSum() > injectionChoice))) {
+          restoreChoice(name);
+          updateSpendLimits();
+          return;
+        }
+        choiceMemory[name] = event.target.value;
+        var changed = selectionsDiffer();
+        if (changed && !roundPending) {
+          choiceRound += 1;
+          roundPending = true;
+        } else if (!changed && roundPending) {
+          choiceRound = Math.max(0, choiceRound - 1);
+          roundPending = false;
+        }
+        if (!spending) applied[name] = {};
+        updateCards();
+      }
+
+      function finishShift() {
+        setShiftButtons(false);
+        if (roundComplete && scenarioOneActive()) {
+          gameFinished = true;
+          amending = false;
+        }
+        updateCards();
+      }
+
+      function animateShift(target) {
+        var start = { ad: shownShifts.ad, lras: shownShifts.lras, sras: shownShifts.sras };
+        if (sameShift(start, target)) {
+          finishShift();
+          return;
+        }
+        if (shiftFrame) cancelAnimationFrame(shiftFrame);
+        shiftOrigin = { ad: start.ad, lras: start.lras, sras: start.sras };
+        setShiftButtons(true);
+        var began = performance.now();
+        function frame(now) {
+          var t = Math.min(1, (now - began) / 700);
+          var eased = 1 - Math.pow(1 - t, 3);
+          drawDiagram(
+            start.ad + (target.ad - start.ad) * eased,
+            start.lras + (target.lras - start.lras) * eased,
+            start.sras + (target.sras - start.sras) * eased,
+            shiftOrigin
+          );
+          if (t < 1) shiftFrame = requestAnimationFrame(frame);
+          else {
+            shiftFrame = 0;
+            shownShifts = { ad: target.ad, lras: target.lras, sras: target.sras };
+            finishShift();
+          }
+        }
+        shiftFrame = requestAnimationFrame(frame);
+      }
+
+      function shiftScenario() {
+        roundComplete = true;
+        roundPending = false;
+        unemploymentSections().forEach(function (name) {
+          appliedChoice[name] = choiceMemory[name] || "0";
+        });
+        ["ad", "sras", "lras"].forEach(function (curve) {
+          POLICIES.forEach(function (policy) {
+            var value = selected(policy.name);
+            if (value === "0") return;
+            if (!policy.effects[value][curve]) return;
+            if (!applied[policy.name]) applied[policy.name] = {};
+            applied[policy.name][curve] = true;
+          });
+        });
+        if (scenarioOneActive()) applied.inject = spendSum() > 0;
+        var target = chosenShift();
+        animateShift({
+          ad: scenarioBase.ad + target.ad,
+          sras: scenarioBase.sras + target.sras,
+          lras: scenarioBase.lras + target.lras
+        });
+      }
+
+      function shiftCurve(curve) {
+        roundPending = false;
+        unemploymentSections().forEach(function (name) {
+          appliedChoice[name] = choiceMemory[name] || "0";
+        });
+        POLICIES.forEach(function (policy) {
+          var value = selected(policy.name);
+          if (value === "0") return;
+          if (!policy.effects[value][curve]) return;
+          if (!applied[policy.name]) applied[policy.name] = {};
+          applied[policy.name][curve] = true;
+        });
+        if (curve === "ad" && scenarioOneActive()) {
+          applied.inject = spendSum() > 0;
+        }
+        var target = chosenShift();
+        var next = { ad: shownShifts.ad, sras: shownShifts.sras, lras: shownShifts.lras };
+        next[curve] = scenarioBase[curve] + target[curve];
+        animateShift(next);
+      }
+
+      function clearChoices() {
+        document.querySelectorAll('input[type="radio"][value="0"]').forEach(function (input) {
+          input.checked = true;
+        });
+        applied = {};
+        chosenNames = {};
+        updateWeights();
+      }
+
+      function showScenario(index) {
+        clearFinalPage();
+        if (shiftFrame) cancelAnimationFrame(shiftFrame);
+        shiftFrame = 0;
+        setShiftButtons(false);
+        scenarioOn = true;
+        scenarioIndex = index;
+        resetPhillips();
+        document.getElementById("diagram-panel").hidden = false;
+        resetMultiplierWork();
+        resetInjectionChoice();
+        clearChoices();
+        var start = scenarios[index].start || { ad: 0, lras: 0, sras: 0 };
+        scenarioBase = { ad: start.ad, lras: start.lras, sras: start.sras };
+        shownShifts = { ad: start.ad, lras: start.lras, sras: start.sras };
+        shiftOrigin = { ad: start.ad, lras: start.lras, sras: start.sras };
+        drawDiagram(start.ad, start.lras, start.sras, shownShifts);
+        if (scenarios[index].opening) {
+          document.getElementById("ad-label").textContent = scenarios[index].opening;
+          document.getElementById("ad-chart").setAttribute("aria-label", scenarios[index].opening);
+        }
+        panelList.forEach(function (item) { setPanel(item.panel, false); });
+        document.getElementById("gap-box").hidden = index !== 0;
+        document.getElementById("multiplier-slot").hidden = true;
+        document.getElementById("positive-gap").hidden = true;
+        var story = document.getElementById("scenario-story");
+        story.open = true;
+        delete story.dataset.folded;
+        var opener = [document.getElementById("panel-unemployment"), document.getElementById("panel-inflation"), document.getElementById("panel-ease")][index];
+        if (opener) showOnly(opener);
+        updateCards();
+      }
+
+      function nextScenario() {
+        if (!scenarioOn || document.getElementById("btn-next").disabled) return;
+        var nextIndex = scenarioIndex + 1;
+        if (nextIndex >= scenarios.length) {
+          scenarioOn = false;
+          document.getElementById("btn-next").hidden = true;
+          document.getElementById("scenario-story").hidden = true;
+          document.getElementById("scenario-steps").hidden = false;
+          var note = document.getElementById("scenario-note");
+          note.textContent = "The series is complete. Demand-side policy trades unemployment against inflation. Supply-side policy can ease that trade-off.";
+          return;
+        }
+        showScenario(nextIndex);
+      }
+
+      var panelList = [
+        document.getElementById("panel-unemployment"),
+        document.getElementById("panel-inflation"),
+        document.getElementById("panel-ease")
+      ].map(function (panel) {
+        return { panel: panel, choices: [] };
+      });
+
+      function setPanel(panel, open) {
+        panel.hidden = !open;
+      }
+
+      function showOnly(panel) {
+        panelList.forEach(function (item) {
+          setPanel(item.panel, item.panel === panel);
+        });
+      }
+
+      panelList.forEach(function (item) {
+        item.panel.querySelectorAll('input[type="radio"]').forEach(function (input) {
+          if (item.choices.indexOf(input.name) === -1) item.choices.push(input.name);
+        });
+        item.panel.addEventListener("change", function (event) {
+          if (!event.target.name) return;
+          if (event.target.name.indexOf("spend-") === 0 || (item.panel.id === "panel-unemployment" && injectionFixed && !document.getElementById("gap-box").hidden)) {
+            handleSpendChange(event);
+            return;
+          }
+          applied[event.target.name] = {};
+          updateWeights();
+          updateCards();
+        });
+      });
+
+      panelList.forEach(function (item) { setPanel(item.panel, false); });
+
+      document.getElementById("gap-box").addEventListener("change", function (event) {
+        if (document.getElementById("gap-box").hidden) return;
+        if (!event.target || event.target.name !== "inject") return;
+        if (!multiplierKnown || injectionFixed || injectionLocked) {
+          var keep = document.querySelector('input[name="inject"][value="' + injectionChoice + '"]');
+          if (keep) keep.checked = true;
+          return;
+        }
+        injectionChoice = injectionBillions();
+        injectionFixed = true;
+        setInjectionLocked(false);
+        var gapNote = document.getElementById("gap-size-note");
+        if (gapNote) gapNote.textContent = "";
+        showOnly(document.getElementById("panel-unemployment"));
+        updateCards();
+      });
+      document.getElementById("btn-check-gap").addEventListener("click", function () {
+        var note = document.getElementById("mpc-gap-note");
+        if (Math.abs(readDecimal("mpc-gap") - 0.5) > 0.001) {
+          note.textContent = "1 − 0.5 = 0.5. Enter 0.5.";
+          return;
+        }
+        note.textContent = "1 − 0.5 = 0.5. The share of extra income that is not spent is 0.5.";
+        document.getElementById("k-step").hidden = false;
+      });
+      document.getElementById("btn-check-k").addEventListener("click", function () {
+        var note = document.getElementById("k-note");
+        if (Math.abs(readDecimal("k-answer") - MULTIPLIER) > 0.001) {
+          note.textContent = "1 ÷ 0.5 = " + MULTIPLIER + ". Enter " + MULTIPLIER + ".";
+          return;
+        }
+        multiplierKnown = true;
+        note.textContent = "The multiplier is " + MULTIPLIER + ". Real national income rises by the spending allocated × " + MULTIPLIER + ".";
+        var gapNote = document.getElementById("gap-size-note");
+        if (gapNote) {
+          gapNote.textContent = "The negative output gap is £100 billion and the multiplier is " + MULTIPLIER + ". Now choose the size of the government injection.";
+        }
+        document.querySelectorAll('input[name="inject"]').forEach(function (input) {
+          input.disabled = injectionFixed;
+        });
+        updateCards();
+      });
+      document.getElementById("mpc-gap").addEventListener("keydown", function (event) {
+        if (event.key === "Enter") document.getElementById("btn-check-gap").click();
+      });
+      document.getElementById("k-answer").addEventListener("keydown", function (event) {
+        if (event.key === "Enter") document.getElementById("btn-check-k").click();
+      });
+      document.getElementById("btn-check-gap-size").addEventListener("click", function () {
+        var note = document.getElementById("gap-size-note");
+        if (Math.abs(readDecimal("gap-size") - 100) > 0.001) {
+          note.textContent = "The distance from Y to Yfe is a negative output gap of £100 billion. Enter 100.";
+          return;
+        }
+        gapKnown = true;
+        document.getElementById("gap-size").disabled = true;
+        document.getElementById("gap-size-ask").hidden = true;
+        note.textContent = "The negative output gap is £100 billion. Now calculate the multiplier.";
+        var multiplierBox = document.getElementById("multiplier-box");
+        if (multiplierBox) multiplierBox.hidden = false;
+        updateCards();
+      });
+      document.getElementById("gap-size").addEventListener("keydown", function (event) {
+        if (event.key === "Enter") document.getElementById("btn-check-gap-size").click();
+      });
+      var choiceScrollX = 0;
+      var choiceScrollY = 0;
+      var choiceLockUntil = 0;
+      function choiceLabel(target) {
+        return target && target.closest ? target.closest(".choice label") : null;
+      }
+      window.addEventListener("scroll", function () {
+        if (performance.now() > choiceLockUntil) return;
+        if (window.scrollX === choiceScrollX && window.scrollY === choiceScrollY) return;
+        window.scrollTo(choiceScrollX, choiceScrollY);
+      }, true);
+      document.addEventListener("mousedown", function (event) {
+        if (!choiceLabel(event.target)) return;
+        event.preventDefault();
+        choiceScrollX = window.scrollX;
+        choiceScrollY = window.scrollY;
+        choiceLockUntil = performance.now() + 500;
+      }, true);
+      document.addEventListener("click", function (event) {
+        var label = choiceLabel(event.target);
+        if (!label) return;
+        var input = label.querySelector("input");
+        if (!input || input.disabled) return;
+        event.preventDefault();
+        var x = window.scrollX;
+        var y = window.scrollY;
+        if (!input.checked) {
+          input.checked = true;
+          input.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        try { input.focus({ preventScroll: true }); } catch (err) { input.focus(); }
+        window.scrollTo(x, y);
+      }, true);
+      document.getElementById("btn-scenario").addEventListener("click", function () { showScenario(0); });
+      document.getElementById("btn-amend").addEventListener("click", amendChoices);
+      document.getElementById("btn-next").addEventListener("click", nextScenario);
+      document.getElementById("btn-shift-ad").addEventListener("click", function () {
+        if (scenarioOneActive()) {
+          setInjectionLocked(true);
+          shiftScenario();
+          return;
+        }
+        roundPending = false;
+        appliedChoice = {
+          "spend-infra": choiceMemory["spend-infra"],
+          "spend-welfare": choiceMemory["spend-welfare"],
+          "spend-jobs": choiceMemory["spend-jobs"],
+          "jobs-rates": choiceMemory["jobs-rates"],
+          "jobs-tax-direct": choiceMemory["jobs-tax-direct"],
+          "jobs-tax-indirect": choiceMemory["jobs-tax-indirect"],
+          "jobs-ca": choiceMemory["jobs-ca"],
+          "jobs-costs": choiceMemory["jobs-costs"]
+        };
+        setInjectionLocked(true);
+        shiftCurve("ad");
+      });
+      document.getElementById("btn-shift-sras").addEventListener("click", function () { shiftCurve("sras"); });
+      document.getElementById("btn-shift-lras").addEventListener("click", function () { shiftCurve("lras"); });
+      document.getElementById("btn-reset").addEventListener("click", function () {
+        clearFinalPage();
+        if (shiftFrame) cancelAnimationFrame(shiftFrame);
+        shiftFrame = 0;
+        scenarioOn = false;
+        document.getElementById("diagram-panel").hidden = true;
+        resetPhillips();
+        resetMultiplierWork();
+        resetInjectionChoice();
+        document.getElementById("btn-next").hidden = true;
+        document.getElementById("scenario-story").hidden = true;
+        document.getElementById("scenario-steps").hidden = true;
+        document.getElementById("gap-box").hidden = true;
+        document.getElementById("positive-gap").hidden = true;
+        document.getElementById("multiplier-slot").hidden = true;
+        setShiftButtons(false);
+        clearChoices();
+        scenarioBase = { ad: 0, lras: 0, sras: 0 };
+        shownShifts = { ad: 0, lras: 0, sras: 0 };
+        shiftOrigin = { ad: 0, lras: 0, sras: 0 };
+        drawDiagram(0, 0, 0, shownShifts);
+        updateCards();
+      });
+      document.getElementById("btn-save").addEventListener("click", function () {
+        var svg = document.getElementById("ad-chart");
+        var clone = svg.cloneNode(true);
+        clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        var background = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        background.setAttribute("width", "760");
+        background.setAttribute("height", "430");
+        background.setAttribute("fill", "#fffaf3");
+        clone.insertBefore(background, clone.firstChild);
+        var xml = new XMLSerializer().serializeToString(clone);
+        var url = URL.createObjectURL(new Blob([xml], { type: "image/svg+xml;charset=utf-8" }));
+        var image = new Image();
+        image.onload = function () {
+          var scale = 2;
+          var canvas = document.createElement("canvas");
+          canvas.width = 760 * scale;
+          canvas.height = 430 * scale;
+          var context = canvas.getContext("2d");
+          context.fillStyle = "#fffaf3";
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          canvas.toBlob(function (png) {
+            var fileUrl = URL.createObjectURL(png);
+            var link = document.createElement("a");
+            link.href = fileUrl;
+            link.download = "inflation-and-unemployment.png";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(fileUrl);
+          }, "image/png");
+        };
+        image.onerror = function () { URL.revokeObjectURL(url); };
+        image.src = url;
+      });
+
+      drawDiagram(0, 0, 0, shownShifts);
+      updateCards();
+      updateSpendLimits();
+    })();
+  </script>
+</body>
+</html>

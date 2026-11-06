@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Components of Aggregate demand and Aggregate supply</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #e4d9c8;
+      --paper: #f7f1e8;
+      --card: #fffaf3;
+      --accent: #9a3412;
+      --accent-soft: #f3e2d4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .wrap { max-width: 1480px; margin: 0 auto; padding: 28px 22px 72px; }
+    h1 {
+      margin: 0 0 8px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.85rem;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+    .lead {
+      box-sizing: border-box;
+      width: calc(100% + 44px);
+      margin: 0 -22px 22px;
+      padding: 22px 28px;
+      background: #f3e2d4;
+      color: var(--ink);
+      font-size: 1.05rem;
+      font-weight: 650;
+      line-height: 1.4;
+    }
+    h2 {
+      margin: 0 0 4px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.2rem;
+      letter-spacing: -0.02em;
+    }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 18px;
+      margin: 0 0 16px;
+    }
+    .factors {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    @media (min-width: 860px) {
+      .factors { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    .stage {
+      display: grid;
+      gap: 16px;
+      align-items: start;
+      margin: 0 0 16px;
+    }
+    @media (min-width: 1100px) {
+      .stage { grid-template-columns: minmax(380px, 460px) minmax(0, 1fr); }
+      .stage .factors { grid-template-columns: 1fr; }
+      .stage .diagram { position: sticky; top: 16px; }
+    }
+    fieldset {
+      margin: 0;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px 12px;
+      background: #fff;
+    }
+    legend {
+      padding: 0 4px;
+      font-weight: 700;
+    }
+    .weight {
+      margin-left: 6px;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+    .choice { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .choice label {
+      flex: 1 1 5.5rem;
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 6px;
+      cursor: pointer;
+      font-weight: 650;
+    }
+    .choice input { position: absolute; opacity: 0; pointer-events: none; }
+    .choice label:has(input:checked) {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+    .choice label:has(input:focus-visible) {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .chart-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .sub { margin: 0; color: var(--muted); font-size: 0.92rem; }
+    svg.chart { display: block; width: 100%; height: auto; background: #fff; border-radius: 8px; }
+    .shares {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    @media (min-width: 720px) {
+      .shares { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+    .share {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .share span { display: block; color: var(--muted); font-size: 0.85rem; }
+    .share strong {
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.25rem;
+    }
+    .note { margin: 12px 0 0; color: var(--muted); font-size: 0.92rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+    .diagram .actions { margin: 12px 0 0; }
+    .actions button {
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      padding: 8px 14px;
+    }
+    .actions button.ghost {
+      background: #fff;
+      color: var(--ink);
+      border-color: var(--line);
+    }
+    .actions button.shift {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+      color: #fff;
+    }
+    .actions button.shift:focus-visible {
+      outline-color: #1d4ed8;
+    }
+    .actions button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .actions button:disabled { opacity: 0.45; cursor: default; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Components of Aggregate demand and Aggregate supply</h1>
+    <p class="sub"><a href="macro-diagrams.html">Back to interactive games</a></p>
+    <p class="lead">Aggregate Demand (AD) is influenced directly by its four components: C + I + G + (X − M).<br>Each component represents a type of spending, and any change in these at every price level shifts the AD curve.<br>Open a component to set its factors, then press Shift AD, Shift SRAS or Shift LRAS under the diagram. Use Scenario for output-gap practice.</p>
+
+    <div class="stage">
+      <div class="controls">
+    <div class="actions">
+      <button type="button" id="btn-consumption" aria-expanded="false" aria-controls="factor-panel">Consumption</button>
+      <button type="button" id="btn-investment" aria-expanded="false" aria-controls="investment-panel">Investment</button>
+      <button type="button" id="btn-government" aria-expanded="false" aria-controls="government-panel">Government spending</button>
+      <button type="button" id="btn-exports" aria-expanded="false" aria-controls="exports-panel">Net exports</button>
+      <button type="button" id="btn-sras" aria-expanded="false" aria-controls="sras-panel">SRAS</button>
+      <button type="button" id="btn-supply" aria-expanded="false" aria-controls="supply-panel">LRAS</button>
+      <button type="button" id="btn-scenario">Scenario</button>
+      <button type="button" class="ghost" id="btn-hide" hidden>Hide</button>
+      <button type="button" class="ghost" id="btn-reset">Reset</button>
+      <button type="button" class="ghost" id="btn-save">Save diagram</button>
+      <button type="button" class="ghost" id="btn-next" hidden>Next</button>
+    </div>
+    <section class="panel" id="factor-panel" aria-labelledby="factor-heading" hidden>
+      <h2 id="factor-heading">Consumption factors</h2>
+      <p class="sub">Consumption factors do not all shift AD by the same amount. A collapse in consumer confidence has a very large effect. A significant income-tax cut has a large effect. Whereas a small interest-rate change has a small to medium effect.</p>
+      <div class="factors">
+        <fieldset>
+          <legend>Consumer confidence <span class="weight" data-factor="confidence" data-step="0.40">+0.40</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Consumer confidence">
+            <label><input type="radio" name="confidence" value="-1"> Low</label>
+            <label><input type="radio" name="confidence" value="0" checked> Neutral</label>
+            <label><input type="radio" name="confidence" value="1"> High</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Income tax <span class="weight" data-factor="taxes" data-step="0.32">+0.32</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Income tax">
+            <label><input type="radio" name="taxes" value="-1"> High</label>
+            <label><input type="radio" name="taxes" value="0" checked> Neutral</label>
+            <label><input type="radio" name="taxes" value="1"> Low</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>House prices <span class="weight" data-factor="wealth" data-step="0.28">+0.28</span></legend>
+          <div class="choice" role="radiogroup" aria-label="House prices">
+            <label><input type="radio" name="wealth" value="-1"> Falling</label>
+            <label><input type="radio" name="wealth" value="0" checked> Neutral</label>
+            <label><input type="radio" name="wealth" value="1"> Rising</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Interest rates <span class="weight" data-factor="rates" data-step="0.18">+0.18</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Interest rates">
+            <label><input type="radio" name="rates" value="-1"> High</label>
+            <label><input type="radio" name="rates" value="0" checked> Neutral</label>
+            <label><input type="radio" name="rates" value="1"> Low</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Savings rates <span class="weight" data-factor="savings" data-step="0.12">+0.12</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Savings rates">
+            <label><input type="radio" name="savings" value="-1"> High</label>
+            <label><input type="radio" name="savings" value="0" checked> Neutral</label>
+            <label><input type="radio" name="savings" value="1"> Low</label>
+          </div>
+        </fieldset>
+      </div>
+    </section>
+    <section class="panel" id="investment-panel" aria-labelledby="investment-heading" hidden>
+      <h2 id="investment-heading">Investment factors</h2>
+      <p class="sub">Investment is about 14–20% of aggregate demand, and its factors do not all shift AD by the same amount. Business confidence and expected profitability have a very large effect. Economic growth and spare capacity have a large effect. Whereas exchange rates have a variable, usually smaller, effect. High spare capacity also discourages investment.</p>
+      <div class="factors">
+        <fieldset>
+          <legend>Business confidence <span class="weight" data-factor="business-confidence" data-step="0.12">+0.12</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Business confidence">
+            <label><input type="radio" name="business-confidence" value="-1"> Low</label>
+            <label><input type="radio" name="business-confidence" value="0" checked> Neutral</label>
+            <label><input type="radio" name="business-confidence" value="1"> High</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Expected profitability <span class="weight" data-factor="expected-profits" data-step="0.12">+0.12</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Expected profitability">
+            <label><input type="radio" name="expected-profits" value="-1"> Low</label>
+            <label><input type="radio" name="expected-profits" value="0" checked> Neutral</label>
+            <label><input type="radio" name="expected-profits" value="1"> High</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Economic growth <span class="weight" data-factor="economic-growth" data-step="0.09">+0.09</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Economic growth">
+            <label><input type="radio" name="economic-growth" value="-1"> Weak</label>
+            <label><input type="radio" name="economic-growth" value="0" checked> Neutral</label>
+            <label><input type="radio" name="economic-growth" value="1"> Strong</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Spare capacity <span class="weight" data-factor="spare-capacity" data-step="0.09">+0.09</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Spare capacity">
+            <label><input type="radio" name="spare-capacity" value="-1"> High</label>
+            <label><input type="radio" name="spare-capacity" value="0" checked> Neutral</label>
+            <label><input type="radio" name="spare-capacity" value="1"> Low</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Interest rates <span class="weight" data-factor="invest-rates" data-step="0.07">+0.07</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Interest rates for investment">
+            <label><input type="radio" name="invest-rates" value="-1"> High</label>
+            <label><input type="radio" name="invest-rates" value="0" checked> Neutral</label>
+            <label><input type="radio" name="invest-rates" value="1"> Low</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Technology <span class="weight" data-factor="invest-technology" data-step="0.07">+0.07</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Technology for investment">
+            <label><input type="radio" name="invest-technology" value="-1"> Stagnant</label>
+            <label><input type="radio" name="invest-technology" value="0" checked> Neutral</label>
+            <label><input type="radio" name="invest-technology" value="1"> New opportunities</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Availability of credit <span class="weight" data-factor="credit" data-step="0.07">+0.07</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Availability of credit">
+            <label><input type="radio" name="credit" value="-1"> Tight</label>
+            <label><input type="radio" name="credit" value="0" checked> Neutral</label>
+            <label><input type="radio" name="credit" value="1"> Easy</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Corporation tax <span class="weight" data-factor="corporation-tax" data-step="0.05">+0.05</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Corporation tax">
+            <label><input type="radio" name="corporation-tax" value="-1"> High</label>
+            <label><input type="radio" name="corporation-tax" value="0" checked> Neutral</label>
+            <label><input type="radio" name="corporation-tax" value="1"> Low</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Government support <span class="weight" data-factor="invest-government" data-step="0.05">+0.05</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Government support for investment">
+            <label><input type="radio" name="invest-government" value="-1"> Low</label>
+            <label><input type="radio" name="invest-government" value="0" checked> Neutral</label>
+            <label><input type="radio" name="invest-government" value="1"> High</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Exchange rates <span class="weight" data-factor="invest-exchange" data-step="0.03">+0.03</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Exchange rates for investment">
+            <label><input type="radio" name="invest-exchange" value="-1"> Unfavourable</label>
+            <label><input type="radio" name="invest-exchange" value="0" checked> Neutral</label>
+            <label><input type="radio" name="invest-exchange" value="1"> Favourable</label>
+          </div>
+        </fieldset>
+      </div>
+    </section>
+    <section class="panel" id="government-panel" aria-labelledby="government-heading" hidden>
+      <h2 id="government-heading">Government spending</h2>
+      <p class="sub">Government spending is about 20–25% of aggregate demand, and its drivers do not all shift AD by the same amount. Emergencies, fiscal stimulus and recession spending have a large effect. Automatic stabilisers from unemployment and political priorities have a medium to large effect.</p>
+      <div class="factors">
+        <fieldset>
+          <legend>Emergencies and shocks <span class="weight" data-factor="gov-emergencies" data-step="0.18">+0.18</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Emergencies and shocks">
+            <label><input type="radio" name="gov-emergencies" value="-1"> Normal times</label>
+            <label><input type="radio" name="gov-emergencies" value="0" checked> Neutral</label>
+            <label><input type="radio" name="gov-emergencies" value="1"> Crisis response</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Fiscal policy objectives <span class="weight" data-factor="gov-fiscal" data-step="0.15">+0.15</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Fiscal policy objectives">
+            <label><input type="radio" name="gov-fiscal" value="-1"> Restraint</label>
+            <label><input type="radio" name="gov-fiscal" value="0" checked> Neutral</label>
+            <label><input type="radio" name="gov-fiscal" value="1"> Stimulus</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Economic growth <span class="weight" data-factor="gov-growth" data-step="0.13">+0.13</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Economic growth and government spending">
+            <label><input type="radio" name="gov-growth" value="-1"> Strong growth</label>
+            <label><input type="radio" name="gov-growth" value="0" checked> Neutral</label>
+            <label><input type="radio" name="gov-growth" value="1"> Recession</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Unemployment levels <span class="weight" data-factor="gov-unemployment" data-step="0.10">+0.10</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Unemployment levels">
+            <label><input type="radio" name="gov-unemployment" value="-1"> Low</label>
+            <label><input type="radio" name="gov-unemployment" value="0" checked> Neutral</label>
+            <label><input type="radio" name="gov-unemployment" value="1"> High</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Political priorities <span class="weight" data-factor="gov-politics" data-step="0.08">+0.08</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Political priorities">
+            <label><input type="radio" name="gov-politics" value="-1"> Lower spending</label>
+            <label><input type="radio" name="gov-politics" value="0" checked> Neutral</label>
+            <label><input type="radio" name="gov-politics" value="1"> Higher spending</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Demographic changes <span class="weight" data-factor="gov-demographics" data-step="0.07">+0.07</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Demographic changes">
+            <label><input type="radio" name="gov-demographics" value="-1"> Falling pressure</label>
+            <label><input type="radio" name="gov-demographics" value="0" checked> Neutral</label>
+            <label><input type="radio" name="gov-demographics" value="1"> Rising needs</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Tax revenue <span class="weight" data-factor="gov-tax-revenue" data-step="0.05">+0.05</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Tax revenue">
+            <label><input type="radio" name="gov-tax-revenue" value="-1"> Falling</label>
+            <label><input type="radio" name="gov-tax-revenue" value="0" checked> Neutral</label>
+            <label><input type="radio" name="gov-tax-revenue" value="1"> Rising</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Borrowing and debt <span class="weight" data-factor="gov-borrowing" data-step="0.05">+0.05</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Government borrowing and debt">
+            <label><input type="radio" name="gov-borrowing" value="-1"> High debt pressure</label>
+            <label><input type="radio" name="gov-borrowing" value="0" checked> Neutral</label>
+            <label><input type="radio" name="gov-borrowing" value="1"> Low borrowing costs</label>
+          </div>
+        </fieldset>
+      </div>
+    </section>
+    <section class="panel" id="exports-panel" aria-labelledby="exports-heading" hidden>
+      <h2 id="exports-heading">Net exports</h2>
+      <p class="sub">Net exports are about −1% to −2% of aggregate demand, because the UK usually buys more from abroad than it sells. Exchange rates are often the most immediate factor. A depreciation raises net exports and shifts AD right. Strong growth in trading partners raises demand for UK exports. Strong domestic growth can raise imports and weaken net exports.</p>
+      <div class="factors">
+        <fieldset>
+          <legend>Exchange rates <span class="weight" data-factor="nx-exchange" data-step="0.06">+0.06</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Exchange rates for net exports">
+            <label><input type="radio" name="nx-exchange" value="-1"> Appreciation</label>
+            <label><input type="radio" name="nx-exchange" value="0" checked> Neutral</label>
+            <label><input type="radio" name="nx-exchange" value="1"> Depreciation</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Growth in trading partners <span class="weight" data-factor="trading-partners" data-step="0.04">+0.04</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Growth in trading partners">
+            <label><input type="radio" name="trading-partners" value="-1"> Weak</label>
+            <label><input type="radio" name="trading-partners" value="0" checked> Neutral</label>
+            <label><input type="radio" name="trading-partners" value="1"> Strong</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Domestic economic growth <span class="weight" data-factor="domestic-growth" data-step="0.03">+0.03</span></legend>
+          <div class="choice" role="radiogroup" aria-label="Domestic economic growth">
+            <label><input type="radio" name="domestic-growth" value="-1"> Strong</label>
+            <label><input type="radio" name="domestic-growth" value="0" checked> Neutral</label>
+            <label><input type="radio" name="domestic-growth" value="1"> Weak</label>
+          </div>
+        </fieldset>
+      </div>
+    </section>
+    <section class="panel" id="sras-panel" aria-labelledby="sras-heading" hidden>
+      <h2 id="sras-heading">SRAS</h2>
+      <p class="sub">Cost changes shift SRAS. Productivity improvements allow firms to produce more at the same cost, so they have a large effect and shift SRAS right.</p>
+      <div class="factors">
+        <fieldset>
+          <legend>Productivity <span class="weight" data-sras="sras-productivity" data-step="0.35"></span></legend>
+          <div class="choice" role="radiogroup" aria-label="Productivity for short-run aggregate supply">
+            <label><input type="radio" name="sras-productivity" value="-1"> Falling</label>
+            <label><input type="radio" name="sras-productivity" value="0" checked> Neutral</label>
+            <label><input type="radio" name="sras-productivity" value="1"> Improving</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Raw material prices <span class="weight" data-sras="materials" data-step="0.25"></span></legend>
+          <div class="choice" role="radiogroup" aria-label="Raw material prices">
+            <label><input type="radio" name="materials" value="-1"> High</label>
+            <label><input type="radio" name="materials" value="0" checked> Neutral</label>
+            <label><input type="radio" name="materials" value="1"> Low</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Energy prices <span class="weight" data-sras="energy" data-step="0.25"></span></legend>
+          <div class="choice" role="radiogroup" aria-label="Energy prices">
+            <label><input type="radio" name="energy" value="-1"> High</label>
+            <label><input type="radio" name="energy" value="0" checked> Neutral</label>
+            <label><input type="radio" name="energy" value="1"> Low</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Wage costs <span class="weight" data-sras="wage-costs" data-step="0.25"></span></legend>
+          <div class="choice" role="radiogroup" aria-label="Wage costs">
+            <label><input type="radio" name="wage-costs" value="-1"> High</label>
+            <label><input type="radio" name="wage-costs" value="0" checked> Neutral</label>
+            <label><input type="radio" name="wage-costs" value="1"> Low</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Business taxes <span class="weight" data-sras="business-taxes" data-step="0.25"></span></legend>
+          <div class="choice" role="radiogroup" aria-label="Business taxes">
+            <label><input type="radio" name="business-taxes" value="-1"> High</label>
+            <label><input type="radio" name="business-taxes" value="0" checked> Neutral</label>
+            <label><input type="radio" name="business-taxes" value="1"> Low</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Subsidies <span class="weight" data-sras="subsidies" data-step="0.25"></span></legend>
+          <div class="choice" role="radiogroup" aria-label="Subsidies">
+            <label><input type="radio" name="subsidies" value="-1"> Low</label>
+            <label><input type="radio" name="subsidies" value="0" checked> Neutral</label>
+            <label><input type="radio" name="subsidies" value="1"> High</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Exchange rates <span class="weight" data-sras="exchange-rates" data-step="0.25"></span></legend>
+          <div class="choice" role="radiogroup" aria-label="Exchange rates">
+            <label><input type="radio" name="exchange-rates" value="-1"> Depreciation</label>
+            <label><input type="radio" name="exchange-rates" value="0" checked> Neutral</label>
+            <label><input type="radio" name="exchange-rates" value="1"> Appreciation</label>
+          </div>
+        </fieldset>
+      </div>
+    </section>
+    <section class="panel" id="supply-panel" aria-labelledby="supply-heading" hidden>
+      <h2 id="supply-heading">LRAS</h2>
+      <p class="sub">Long-run aggregate supply (LRAS) is influenced by anything that changes the economy’s productive capacity — the quantity or quality of its factors of production. These factors do not all shift LRAS by the same amount. Productivity and technology have a very high effect. Capital and infrastructure have a high effect. Available labour has a medium to high effect. Natural resources have a low to medium effect.</p>
+      <div class="factors">
+        <fieldset>
+          <legend>Productivity <span class="weight" data-supply="productivity" data-step="0.30"></span></legend>
+          <div class="choice" role="radiogroup" aria-label="Productivity">
+            <label><input type="radio" name="productivity" value="-1"> Decreasing</label>
+            <label><input type="radio" name="productivity" value="0" checked> Neutral</label>
+            <label><input type="radio" name="productivity" value="1"> Increasing</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Technology <span class="weight" data-supply="technology" data-step="0.30"></span></legend>
+          <div class="choice" role="radiogroup" aria-label="Technology">
+            <label><input type="radio" name="technology" value="-1"> Stagnant</label>
+            <label><input type="radio" name="technology" value="0" checked> Neutral</label>
+            <label><input type="radio" name="technology" value="1"> More efficient</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Capital <span class="weight" data-supply="capital" data-step="0.22"></span></legend>
+          <div class="choice" role="radiogroup" aria-label="Capital">
+            <label><input type="radio" name="capital" value="-1"> Falling</label>
+            <label><input type="radio" name="capital" value="0" checked> Neutral</label>
+            <label><input type="radio" name="capital" value="1"> Increasing</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Infrastructure <span class="weight" data-supply="infrastructure" data-step="0.22"></span></legend>
+          <div class="choice" role="radiogroup" aria-label="Infrastructure">
+            <label><input type="radio" name="infrastructure" value="-1"> Worsening</label>
+            <label><input type="radio" name="infrastructure" value="0" checked> Neutral</label>
+            <label><input type="radio" name="infrastructure" value="1"> Improving</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Available labour <span class="weight" data-supply="available-labour" data-step="0.16"></span></legend>
+          <div class="choice" role="radiogroup" aria-label="Available labour">
+            <label><input type="radio" name="available-labour" value="-1"> Falling</label>
+            <label><input type="radio" name="available-labour" value="0" checked> Neutral</label>
+            <label><input type="radio" name="available-labour" value="1"> Rising</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Natural resources <span class="weight" data-supply="natural-resources" data-step="0.10"></span></legend>
+          <div class="choice" role="radiogroup" aria-label="Natural resources">
+            <label><input type="radio" name="natural-resources" value="-1"> Scarcer</label>
+            <label><input type="radio" name="natural-resources" value="0" checked> Neutral</label>
+            <label><input type="radio" name="natural-resources" value="1"> More available</label>
+          </div>
+        </fieldset>
+      </div>
+    </section>
+      </div>
+
+    <section class="panel diagram">
+      <div class="chart-head">
+        <div>
+          <h2>Aggregate demand and supply</h2>
+          <p class="sub" id="ad-label" aria-live="polite">AD, SRAS and LRAS meet at full-employment output, Yfe.</p>
+        </div>
+      </div>
+      <svg class="chart" id="ad-chart" viewBox="0 0 760 430" role="img" aria-labelledby="ad-chart-title">
+        <title id="ad-chart-title">Price level against real national output, with AD, SRAS and LRAS</title>
+        <line x1="72" y1="28" x2="72" y2="368" stroke="#1c1915" stroke-width="2.2"/>
+        <line x1="72" y1="368" x2="730" y2="368" stroke="#1c1915" stroke-width="2.2"/>
+        <polyline points="66,42 72,28 78,42" fill="none" stroke="#1c1915" stroke-width="2.2" stroke-linejoin="miter"/>
+        <polyline points="716,362 730,368 716,374" fill="none" stroke="#1c1915" stroke-width="2.2" stroke-linejoin="miter"/>
+        <text x="24" y="198" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle" transform="rotate(-90 24 198)">Price level</text>
+        <text x="60" y="390" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="end">0</text>
+        <text id="yfe-label" x="390" y="390" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle">Y<tspan baseline-shift="sub" font-size="11">fe</tspan></text>
+        <text x="708" y="404" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="end">Real national output</text>
+        <line id="lras-base" x1="390" y1="46" x2="390" y2="368" stroke="#b9aea0" stroke-width="2.2" stroke-dasharray="7 5" visibility="hidden"/>
+        <text id="lras-base-label" x="390" y="32" fill="#8a8074" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle" visibility="hidden">LRAS</text>
+        <line id="lras-current" x1="390" y1="46" x2="390" y2="368" stroke="#1c1915" stroke-width="2.2"/>
+        <text id="lras-label" x="390" y="32" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle">LRAS</text>
+        <line id="sras-base" x1="176" y1="328" x2="576" y2="48" stroke="#b9aea0" stroke-width="2.2" stroke-dasharray="7 5" visibility="hidden"/>
+        <text id="sras-base-label" x="584" y="44" fill="#8a8074" font-size="16" font-family="Segoe UI, sans-serif" visibility="hidden">SRAS</text>
+        <line id="sras-current" x1="176" y1="328" x2="576" y2="48" stroke="#1c1915" stroke-width="2.2"/>
+        <text id="sras-label" x="584" y="44" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif">SRAS</text>
+        <line id="ad-base" x1="204" y1="48" x2="604" y2="328" stroke="#b9aea0" stroke-width="2.2" stroke-dasharray="7 5" visibility="hidden"/>
+        <text id="ad-base-label" x="616" y="336" fill="#8a8074" font-size="16" font-family="Segoe UI, sans-serif" visibility="hidden">AD</text>
+        <line id="ad-current" x1="204" y1="48" x2="604" y2="328" stroke="#1c1915" stroke-width="2.6"/>
+        <text id="ad-current-label" x="616" y="336" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif">AD</text>
+        <line id="p-line" stroke="#1c1915" stroke-width="1.8" stroke-dasharray="2 4" visibility="hidden"/>
+        <text id="p-label" x="64" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="end" visibility="hidden">P</text>
+        <line id="y-line" stroke="#1c1915" stroke-width="1.8" stroke-dasharray="2 4" visibility="hidden"/>
+        <text id="y-label" y="390" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle" visibility="hidden">Y</text>
+        <circle id="ad-dot" r="5.5" fill="#9a3412" visibility="hidden"/>
+        <line id="ad-arrow" stroke="#9a3412" stroke-width="2.6" visibility="hidden"/>
+        <polygon id="ad-arrow-head" fill="#9a3412" visibility="hidden"/>
+        <line id="sras-arrow" stroke="#2563eb" stroke-width="2.6" visibility="hidden"/>
+        <polygon id="sras-arrow-head" fill="#2563eb" visibility="hidden"/>
+        <line id="as-arrow" stroke="#1c1915" stroke-width="2.6" visibility="hidden"/>
+        <polygon id="as-arrow-head" fill="#1c1915" visibility="hidden"/>
+      </svg>
+      <div class="actions" role="group" aria-label="Shift the AD, SRAS and LRAS curves">
+        <button type="button" class="shift" id="btn-shift-ad">Shift AD</button>
+        <button type="button" class="shift" id="btn-shift-sras">Shift SRAS</button>
+        <button type="button" class="shift" id="btn-shift-lras">Shift LRAS</button>
+      </div>
+      <p class="note" id="consumption-note" hidden>Consumption is the largest component of AD — around 60% of UK AD.<br>When consumption rises, households spend more, so AD shifts right.<br>When consumption falls, AD shifts left.</p>
+      <p class="note" id="investment-note" hidden>Investment is spending by firms on capital goods (machines, buildings, technology).<br>It is volatile and strongly influenced by expectations.<br>Higher investment → AD shifts right<br>Lower investment → AD shifts left</p>
+      <p class="note" id="government-note" hidden>Government spending is a direct injection into the economy.<br>Large effects come from emergencies, fiscal stimulus and recession spending.<br>Higher unemployment raises welfare spending through automatic stabilisers.<br>Higher G → AD shifts right<br>Lower G → AD shifts left</p>
+      <p class="note" id="exports-note" hidden>Net exports = exports minus imports.<br>A depreciation of the pound typically raises exports and reduces imports, so AD shifts right.<br>Strong growth abroad raises demand for UK exports.<br>Strong domestic growth can raise imports and weaken net exports.</p>
+      <p class="note" id="sras-productivity-note" hidden>Better training, technology, management and organisation allow firms to produce more at the same cost.<br>Productivity improvements shift SRAS right.<br>Falling productivity shifts SRAS left.<br>Impact: large.</p>
+      <p class="note" id="materials-note" hidden>If inputs become more expensive, firms can supply less at each price level.<br>Oil price rises → transport &amp; production costs rise → SRAS left<br>Commodity prices fall → cheaper inputs → SRAS right</p>
+      <p class="note" id="energy-note" hidden>Energy is a major cost for manufacturing, transport, and services.<br>Higher electricity/gas prices → SRAS left<br>Cheaper energy (e.g., renewables, subsidies) → SRAS right</p>
+      <p class="note" id="wages-note" hidden>Wages are the biggest cost for most firms.<br>Higher wages → higher costs → SRAS shifts left<br>Lower wages → lower costs → SRAS shifts right</p>
+      <p class="note" id="taxes-note" hidden>Anything that increases the cost of compliance or production shifts SRAS left.<br>Higher corporation tax → SRAS left<br>More regulation (e.g., environmental rules) → SRAS left<br>Tax cuts or deregulation → SRAS right</p>
+      <p class="note" id="shocks-note" hidden>A depreciation makes imported inputs more expensive, so firms’ costs rise and SRAS shifts left.<br>An appreciation makes imported inputs cheaper, so SRAS shifts right.</p>
+      <p class="note" id="subsidies-note" hidden>Subsidies shift SRAS to the right because they reduce firms’ production costs in the short run.</p>
+      <p class="note" id="lras-note" hidden>Long-run aggregate supply (LRAS) is influenced by anything that changes the economy’s productive capacity — the quantity or quality of its factors of production.<br>Productivity and technology have a very high effect. Capital and infrastructure have a high effect.<br>Not demand side factors.</p>
+    </section>
+    </div>
+
+    <section class="shares" aria-label="Shares of UK aggregate demand">
+      <div class="share"><span>Consumption (C)</span><strong>60–65%</strong></div>
+      <div class="share"><span>Investment (I)</span><strong>14–20%</strong></div>
+      <div class="share"><span>Government spending (G)</span><strong>20–25%</strong></div>
+      <div class="share"><span>Net exports (X−M)</span><strong>−1% to −2%</strong></div>
+    </section>
+  </div>
+  <script>
+    (function () {
+      var stepFormat = new Intl.NumberFormat("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      var adEqX = 390;
+      var adEqY = 178;
+      var adSlope = 0.70;
+      var pixelsPerPoint = 48;
+      var axisY = 368;
+
+      var chart = document.getElementById("ad-chart");
+      var adLabel = document.getElementById("ad-label");
+      var btnNext = document.getElementById("btn-next");
+      var shiftButtons = [
+        document.getElementById("btn-shift-ad"),
+        document.getElementById("btn-shift-sras"),
+        document.getElementById("btn-shift-lras")
+      ];
+      var el = {
+        adCurrent: document.getElementById("ad-current"),
+        adCurrentLabel: document.getElementById("ad-current-label"),
+        adBase: document.getElementById("ad-base"),
+        adBaseLabel: document.getElementById("ad-base-label"),
+        srasCurrent: document.getElementById("sras-current"),
+        srasLabel: document.getElementById("sras-label"),
+        srasBase: document.getElementById("sras-base"),
+        srasBaseLabel: document.getElementById("sras-base-label"),
+        lrasCurrent: document.getElementById("lras-current"),
+        lrasLabel: document.getElementById("lras-label"),
+        lrasBase: document.getElementById("lras-base"),
+        lrasBaseLabel: document.getElementById("lras-base-label"),
+        yfeLabel: document.getElementById("yfe-label"),
+        adDot: document.getElementById("ad-dot"),
+        yLine: document.getElementById("y-line"),
+        yLabel: document.getElementById("y-label"),
+        pLine: document.getElementById("p-line"),
+        pLabel: document.getElementById("p-label"),
+        adArrow: document.getElementById("ad-arrow"),
+        adArrowHead: document.getElementById("ad-arrow-head"),
+        srasArrow: document.getElementById("sras-arrow"),
+        srasArrowHead: document.getElementById("sras-arrow-head"),
+        asArrow: document.getElementById("as-arrow"),
+        asArrowHead: document.getElementById("as-arrow-head")
+      };
+
+      var factorPanel = document.getElementById("factor-panel");
+      var investmentPanel = document.getElementById("investment-panel");
+      var governmentPanel = document.getElementById("government-panel");
+      var exportsPanel = document.getElementById("exports-panel");
+      var srasPanel = document.getElementById("sras-panel");
+      var supplyPanel = document.getElementById("supply-panel");
+      var showFactors = document.getElementById("btn-consumption");
+      var showInvestment = document.getElementById("btn-investment");
+      var showGovernment = document.getElementById("btn-government");
+      var showExports = document.getElementById("btn-exports");
+      var showSras = document.getElementById("btn-sras");
+      var showSupply = document.getElementById("btn-supply");
+      var hideFactors = document.getElementById("btn-hide");
+      var panels = [
+        [showFactors, factorPanel],
+        [showInvestment, investmentPanel],
+        [showGovernment, governmentPanel],
+        [showExports, exportsPanel],
+        [showSras, srasPanel],
+        [showSupply, supplyPanel]
+      ];
+      var panelNotes = {
+        consumption: document.getElementById("consumption-note"),
+        investment: document.getElementById("investment-note"),
+        government: document.getElementById("government-note"),
+        exports: document.getElementById("exports-note"),
+        lras: document.getElementById("lras-note")
+      };
+      var srasNotes = {
+        "sras-productivity": document.getElementById("sras-productivity-note"),
+        materials: document.getElementById("materials-note"),
+        energy: document.getElementById("energy-note"),
+        "wage-costs": document.getElementById("wages-note"),
+        "business-taxes": document.getElementById("taxes-note"),
+        subsidies: document.getElementById("subsidies-note"),
+        "exchange-rates": document.getElementById("shocks-note")
+      };
+      var srasWeightNodes = document.querySelectorAll("[data-sras]");
+      var supplyWeightNodes = document.querySelectorAll("[data-supply]");
+      var demandWeightNodes = document.querySelectorAll("[data-factor]");
+
+      function adY(x, shift) {
+        return adEqY + adSlope * (x - shift - adEqX);
+      }
+
+      function srasY(x, shift) {
+        return adEqY - adSlope * (x - shift - adEqX);
+      }
+
+      function clipSegment(yFromX, xFromY) {
+        var bounds = { l: 110, r: 700, t: 40, b: 340 };
+        var hits = [];
+        function add(x, y) {
+          if (x < bounds.l - 0.5 || x > bounds.r + 0.5 || y < bounds.t - 0.5 || y > bounds.b + 0.5) return;
+          var i;
+          for (i = 0; i < hits.length; i += 1) {
+            if (Math.abs(hits[i][0] - x) < 0.5 && Math.abs(hits[i][1] - y) < 0.5) return;
+          }
+          hits.push([x, y]);
+        }
+        [bounds.l, bounds.r].forEach(function (x) { add(x, yFromX(x)); });
+        [bounds.t, bounds.b].forEach(function (y) { add(xFromY(y), y); });
+        hits.sort(function (a, b) { return a[0] - b[0]; });
+        if (hits.length < 2) return null;
+        return [hits[0], hits[hits.length - 1]];
+      }
+
+      function visibleAd(shift) {
+        return clipSegment(
+          function (x) { return adY(x, shift); },
+          function (y) { return (y - adEqY) / adSlope + shift + adEqX; }
+        );
+      }
+
+      function visibleSras(shift) {
+        return clipSegment(
+          function (x) { return srasY(x, shift); },
+          function (y) { return shift + adEqX + (adEqY - y) / adSlope; }
+        );
+      }
+
+      function placeAdLabel(textEl, point, title) {
+        var labelX = point[0] + 12;
+        var labelY = point[1] + 8;
+        var anchor = "start";
+        if (labelX > 700) {
+          labelX = point[0] - 10;
+          anchor = "end";
+        }
+        if (labelY > 400) labelY = 400;
+        if (labelY < 24) labelY = 24;
+        textEl.setAttribute("x", labelX.toFixed(1));
+        textEl.setAttribute("y", labelY.toFixed(1));
+        textEl.setAttribute("text-anchor", anchor);
+        textEl.textContent = title;
+        textEl.setAttribute("fill", "#1c1915");
+        textEl.setAttribute("visibility", "visible");
+      }
+
+      function setLine(line, segment) {
+        if (!segment) return;
+        line.setAttribute("x1", segment[0][0].toFixed(1));
+        line.setAttribute("y1", segment[0][1].toFixed(1));
+        line.setAttribute("x2", segment[1][0].toFixed(1));
+        line.setAttribute("y2", segment[1][1].toFixed(1));
+      }
+
+      function showShiftArrow(arrow, head, fromX, toX, y) {
+        var visible = Math.abs(toX - fromX) >= 8;
+        arrow.setAttribute("x1", fromX.toFixed(1));
+        arrow.setAttribute("y1", y.toFixed(1));
+        arrow.setAttribute("x2", toX.toFixed(1));
+        arrow.setAttribute("y2", y.toFixed(1));
+        arrow.setAttribute("visibility", visible ? "visible" : "hidden");
+        var dir = toX < fromX ? -1 : 1;
+        head.setAttribute("points", toX.toFixed(1) + "," + y.toFixed(1) + " " + (toX - dir * 12).toFixed(1) + "," + (y - 6).toFixed(1) + " " + (toX - dir * 12).toFixed(1) + "," + (y + 6).toFixed(1));
+        head.setAttribute("visibility", visible ? "visible" : "hidden");
+      }
+
+      function hideArrow(arrow, head) {
+        arrow.setAttribute("visibility", "hidden");
+        head.setAttribute("visibility", "hidden");
+      }
+
+      function drawDiagram(adShift, lrasShift, srasShift, origin) {
+        origin = origin || { ad: 0, lras: 0, sras: 0 };
+        var adMoved = Math.abs(adShift) >= 0.5;
+        var lrasMoved = Math.abs(lrasShift) >= 0.5;
+        var srasMoved = Math.abs(srasShift) >= 0.5;
+        var adSegment = visibleAd(adShift);
+        setLine(el.adCurrent, adSegment);
+        if (adSegment) placeAdLabel(el.adCurrentLabel, adSegment[1], adMoved ? "AD\u2081" : "AD");
+        el.adBase.setAttribute("visibility", adMoved ? "visible" : "hidden");
+        el.adBaseLabel.setAttribute("visibility", adMoved ? "visible" : "hidden");
+        var srasSegment = visibleSras(srasShift);
+        setLine(el.srasCurrent, srasSegment);
+        if (srasSegment) placeAdLabel(el.srasLabel, srasSegment[1], srasMoved ? "SRAS\u2081" : "SRAS");
+        el.srasBase.setAttribute("visibility", srasMoved ? "visible" : "hidden");
+        el.srasBaseLabel.setAttribute("visibility", srasMoved ? "visible" : "hidden");
+        var lrasX = Math.max(96, Math.min(700, adEqX + lrasShift));
+        el.lrasCurrent.setAttribute("x1", lrasX.toFixed(1));
+        el.lrasCurrent.setAttribute("x2", lrasX.toFixed(1));
+        el.lrasCurrent.setAttribute("y2", String(axisY));
+        el.lrasLabel.textContent = lrasMoved ? "LRAS\u2081" : "LRAS";
+        el.lrasLabel.setAttribute("x", lrasX.toFixed(1));
+        el.lrasBase.setAttribute("visibility", lrasMoved ? "visible" : "hidden");
+        el.lrasBaseLabel.setAttribute("visibility", lrasMoved ? "visible" : "hidden");
+        el.yfeLabel.setAttribute("x", lrasX.toFixed(1));
+        var crossX = adEqX + (adShift + srasShift) / 2;
+        var crossY = adEqY - adSlope * (adShift - srasShift) / 2;
+        if (adMoved || srasMoved || lrasMoved) {
+          el.adDot.setAttribute("cx", crossX.toFixed(1));
+          el.adDot.setAttribute("cy", crossY.toFixed(1));
+          el.adDot.setAttribute("visibility", "visible");
+          var pEnd = Math.max(72, crossX - 8);
+          el.pLine.setAttribute("x1", "72");
+          el.pLine.setAttribute("x2", pEnd.toFixed(1));
+          el.pLine.setAttribute("y1", crossY.toFixed(1));
+          el.pLine.setAttribute("y2", crossY.toFixed(1));
+          el.pLine.setAttribute("visibility", "visible");
+          el.pLabel.setAttribute("y", (crossY + 5).toFixed(1));
+          el.pLabel.setAttribute("visibility", "visible");
+        } else {
+          el.adDot.setAttribute("visibility", "hidden");
+          el.pLine.setAttribute("visibility", "hidden");
+          el.pLabel.setAttribute("visibility", "hidden");
+        }
+        if ((adMoved || srasMoved || lrasMoved) && Math.abs(crossX - lrasX) > 0.5) {
+          el.yLine.setAttribute("x1", crossX.toFixed(1));
+          el.yLine.setAttribute("x2", crossX.toFixed(1));
+          el.yLine.setAttribute("y1", Math.min(axisY, crossY + 8).toFixed(1));
+          el.yLine.setAttribute("y2", String(axisY));
+          el.yLine.setAttribute("visibility", "visible");
+          if (Math.abs(crossX - lrasX) >= 36) {
+            el.yLabel.setAttribute("text-anchor", "middle");
+            el.yLabel.setAttribute("x", crossX.toFixed(1));
+          } else if (crossX < lrasX) {
+            el.yLabel.setAttribute("text-anchor", "end");
+            el.yLabel.setAttribute("x", (lrasX - 22).toFixed(1));
+          } else {
+            el.yLabel.setAttribute("text-anchor", "start");
+            el.yLabel.setAttribute("x", (lrasX + 22).toFixed(1));
+          }
+          el.yLabel.setAttribute("visibility", "visible");
+        } else {
+          el.yLine.setAttribute("visibility", "hidden");
+          el.yLabel.setAttribute("visibility", "hidden");
+        }
+        var arrowY = adEqY - 36;
+        var fromX = adEqX + (arrowY - adEqY) / adSlope;
+        var srasArrowY = 220;
+        var srasFromX = adEqX + (adEqY - srasArrowY) / adSlope;
+        showShiftArrow(el.adArrow, el.adArrowHead, fromX + origin.ad, fromX + adShift, arrowY);
+        showShiftArrow(el.srasArrow, el.srasArrowHead, srasFromX + origin.sras, srasFromX + srasShift, srasArrowY);
+        showShiftArrow(el.asArrow, el.asArrowHead, adEqX + origin.lras, adEqX + lrasShift, axisY - 18);
+        var parts = [];
+        if (!adMoved && !srasMoved && !lrasMoved) {
+          parts.push("AD, SRAS and LRAS meet at full-employment output, Yfe.");
+        } else {
+          if (adMoved) parts.push(adShift > 0 ? "AD is to the right of its starting equilibrium." : "AD is to the left of its starting equilibrium.");
+          if (srasMoved) parts.push(srasShift > 0 ? "SRAS is to the right of its starting equilibrium." : "SRAS is to the left of its starting equilibrium.");
+          if (lrasMoved) parts.push(lrasShift > 0 ? "LRAS is to the right, so full-employment output is higher." : "LRAS is to the left, so full-employment output is lower.");
+          if (adMoved || srasMoved) {
+            var outputGap = adShift + srasShift;
+            var priceGap = adShift - srasShift;
+            if (outputGap > 0.5 && priceGap > 0.5) parts.push("The short-run price level and real national output are higher.");
+            else if (outputGap < -0.5 && priceGap < -0.5) parts.push("The short-run price level and real national output are lower.");
+            else if (outputGap > 0.5 && priceGap < -0.5) parts.push("Real national output is higher and the short-run price level is lower.");
+            else if (outputGap < -0.5 && priceGap > 0.5) parts.push("Real national output is lower and the short-run price level is higher.");
+          }
+          if (Math.abs(crossX - lrasX) <= 0.5) {
+            if (crossY < adEqY - 0.5) parts.push("AD, SRAS and LRAS meet again. The price level is higher and real national output is back at full employment.");
+            else if (crossY > adEqY + 0.5) parts.push("AD, SRAS and LRAS meet again. The price level is lower and real national output is back at full employment.");
+            else parts.push("AD, SRAS and LRAS meet at full-employment output, Yfe.");
+          } else if (crossX < lrasX - 0.5) parts.push("Short-run output is below full-employment output. This is a negative output gap.");
+          else parts.push("Short-run output is above full-employment output. This is a positive output gap.");
+        }
+        var message = parts.join(" ");
+        adLabel.textContent = message;
+        chart.setAttribute("aria-label", message);
+      }
+
+      function selectedSign(name) {
+        var selected = document.querySelector('input[name="' + name + '"]:checked');
+        return selected ? Number(selected.value) : 0;
+      }
+
+      function srasShiftForGap(adShift, lrasShift, fromSras) {
+        var count = srasWeightNodes.length;
+        if (!count) return 0;
+        var needed = (2 * lrasShift) - adShift - (fromSras || 0);
+        var closeGap = Math.abs(needed) >= 0.5;
+        var perFactor = closeGap ? Math.abs(needed) / count : 0;
+        var total = 0;
+        srasWeightNodes.forEach(function (output) {
+          var sign = selectedSign(output.getAttribute("data-sras"));
+          var step = closeGap
+            ? perFactor
+            : Number(output.getAttribute("data-step")) * pixelsPerPoint;
+          total += sign * step;
+        });
+        return total;
+      }
+
+      function sumFactors(nodes, attr, showWeights) {
+        var total = 0;
+        nodes.forEach(function (output) {
+          var sign = selectedSign(output.getAttribute(attr));
+          var points = Number(output.getAttribute("data-step"));
+          total += sign * points / 100;
+          if (showWeights) {
+            output.textContent = sign > 0 ? "+" + stepFormat.format(points) : sign < 0 ? "−" + stepFormat.format(points) : "";
+          }
+        });
+        return total;
+      }
+
+      var shownShifts = { ad: 0, lras: 0, sras: 0 };
+      var shiftFrame = 0;
+      var shiftOrigin = { ad: 0, lras: 0, sras: 0 };
+      var scenarioBase = { ad: 0, lras: 0, sras: 0 };
+      var scenarioIndex = 0;
+      var scenarioOn = false;
+      var scenarios = [
+        {
+          ad: 96,
+          lras: 0,
+          sras: 0,
+          note: "Positive output gap. Aggregate demand has shifted right, so real output is above full-employment output. Choose settings that return the economy to full employment."
+        },
+        {
+          ad: -96,
+          lras: 0,
+          sras: 0,
+          note: "Negative output gap. Aggregate demand has shifted left, so real output is below full-employment output. Choose settings that return the economy to full employment."
+        },
+        {
+          ad: 0,
+          lras: 0,
+          sras: -96,
+          note: "Negative output gap. Short-run aggregate supply has shifted left, so real output is below full-employment output and the price level is higher. Choose settings that return the economy to full employment."
+        }
+      ];
+
+      function sameShift(a, b) {
+        return Math.abs(a.ad - b.ad) < 0.5 && Math.abs(a.lras - b.lras) < 0.5 && Math.abs(a.sras - b.sras) < 0.5;
+      }
+
+      function setShiftButtons(disabled) {
+        shiftButtons.forEach(function (button) { button.disabled = disabled; });
+      }
+
+      function animateShift(target, done, origin) {
+        var start = { ad: shownShifts.ad, lras: shownShifts.lras, sras: shownShifts.sras };
+        if (sameShift(start, target)) {
+          if (done) done();
+          else finishShift();
+          return;
+        }
+        if (shiftFrame) cancelAnimationFrame(shiftFrame);
+        shiftOrigin = origin || { ad: start.ad, lras: start.lras, sras: start.sras };
+        setShiftButtons(true);
+        var began = performance.now();
+        function frame(now) {
+          var t = Math.min(1, (now - began) / 700);
+          var eased = 1 - Math.pow(1 - t, 3);
+          drawDiagram(
+            start.ad + (target.ad - start.ad) * eased,
+            start.lras + (target.lras - start.lras) * eased,
+            start.sras + (target.sras - start.sras) * eased,
+            shiftOrigin
+          );
+          if (t < 1) {
+            shiftFrame = requestAnimationFrame(frame);
+          } else {
+            shiftFrame = 0;
+            shownShifts = { ad: target.ad, lras: target.lras, sras: target.sras };
+            if (done) done();
+            else finishShift();
+          }
+        }
+        shiftFrame = requestAnimationFrame(frame);
+      }
+
+      function shiftAd() {
+        var demand = sumFactors(demandWeightNodes, "data-factor", true);
+        animateShift({
+          ad: scenarioBase.ad + demand * 100 * pixelsPerPoint,
+          lras: shownShifts.lras,
+          sras: shownShifts.sras
+        });
+      }
+
+      function shiftSras() {
+        var fromSras = scenarioBase.sras;
+        animateShift({
+          ad: shownShifts.ad,
+          lras: shownShifts.lras,
+          sras: fromSras + srasShiftForGap(shownShifts.ad, shownShifts.lras, fromSras)
+        });
+      }
+
+      function shiftLras() {
+        var lrasSupply = sumFactors(supplyWeightNodes, "data-supply", false);
+        animateShift({
+          ad: shownShifts.ad,
+          lras: scenarioBase.lras + lrasSupply * 100 * pixelsPerPoint,
+          sras: shownShifts.sras
+        });
+      }
+
+      function placeGapArrow(shifts) {
+        var crossX = adEqX + (shifts.ad + shifts.sras) / 2;
+        var crossY = adEqY - adSlope * (shifts.ad - shifts.sras) / 2;
+        var useSras = Math.abs(shifts.sras) > Math.abs(shifts.ad);
+        var fromX = useSras
+          ? adEqX + (adEqY - crossY) / adSlope
+          : adEqX + (crossY - adEqY) / adSlope;
+        hideArrow(el.adArrow, el.adArrowHead);
+        hideArrow(el.srasArrow, el.srasArrowHead);
+        hideArrow(el.asArrow, el.asArrowHead);
+        showShiftArrow(
+          useSras ? el.srasArrow : el.adArrow,
+          useSras ? el.srasArrowHead : el.adArrowHead,
+          fromX,
+          crossX,
+          crossY
+        );
+      }
+
+      function clearDiagramChoices() {
+        panels.forEach(function (pair) {
+          pair[1].querySelectorAll('input[type="radio"][value="0"]').forEach(function (input) {
+            input.checked = true;
+          });
+        });
+        chosenNames = {};
+        update();
+      }
+
+      function showScenario(index) {
+        if (shiftFrame) cancelAnimationFrame(shiftFrame);
+        shiftFrame = 0;
+        btnNext.hidden = true;
+        btnNext.disabled = true;
+        setShiftButtons(false);
+        var item = scenarios[index];
+        scenarioOn = true;
+        scenarioIndex = index;
+        scenarioBase = { ad: item.ad, lras: item.lras, sras: item.sras };
+        clearDiagramChoices();
+        panels.forEach(function (pair) { setPanel(pair[0], pair[1], false); });
+        shownShifts = { ad: item.ad, lras: item.lras, sras: item.sras };
+        shiftOrigin = { ad: item.ad, lras: item.lras, sras: item.sras };
+        drawDiagram(item.ad, item.lras, item.sras, shownShifts);
+        placeGapArrow(shownShifts);
+        var text = "Scenario " + (index + 1) + " of " + scenarios.length + ". " + item.note;
+        adLabel.textContent = text;
+        chart.setAttribute("aria-label", text);
+      }
+
+      function finishShift() {
+        setShiftButtons(false);
+        if (!scenarioOn) return;
+        btnNext.hidden = false;
+        btnNext.disabled = false;
+        var output = (shownShifts.ad + shownShifts.sras) / 2;
+        if (Math.abs(output - shownShifts.lras) <= 8) {
+          adLabel.textContent = "Full employment has been restored. Press Next to continue.";
+        }
+      }
+
+      function nextScenario() {
+        if (!scenarioOn || btnNext.disabled) return;
+        if (scenarioIndex >= scenarios.length - 1) {
+          btnNext.hidden = true;
+          scenarioOn = false;
+          scenarioBase = { ad: 0, lras: 0, sras: 0 };
+          adLabel.textContent = "The series is complete. AD, SRAS and LRAS meet at full-employment output, Yfe.";
+          return;
+        }
+        showScenario(scenarioIndex + 1);
+      }
+
+      function update() {
+        sumFactors(demandWeightNodes, "data-factor", true);
+      }
+
+      var srasFactorNote = "";
+      function syncSrasNotes() {
+        Object.keys(srasNotes).forEach(function (name) {
+          srasNotes[name].hidden = srasPanel.hidden || srasFactorNote !== name;
+        });
+      }
+      function setPanel(button, panel, open) {
+        if (panel === srasPanel && !open) srasFactorNote = "";
+        panel.hidden = !open;
+        button.setAttribute("aria-expanded", open ? "true" : "false");
+        hideFactors.hidden = panels.every(function (pair) { return pair[1].hidden; });
+        panelNotes.consumption.hidden = factorPanel.hidden;
+        panelNotes.investment.hidden = investmentPanel.hidden;
+        panelNotes.government.hidden = governmentPanel.hidden;
+        panelNotes.exports.hidden = exportsPanel.hidden;
+        syncSrasNotes();
+        panelNotes.lras.hidden = supplyPanel.hidden;
+      }
+      function showOnly(button, panel) {
+        panels.forEach(function (pair) {
+          setPanel(pair[0], pair[1], pair[1] === panel);
+        });
+      }
+      var chosenNames = {};
+      var namesByPanel = {};
+      [
+        [factorPanel, ["confidence", "taxes", "wealth", "rates", "savings"]],
+        [investmentPanel, ["business-confidence", "expected-profits", "economic-growth", "spare-capacity", "invest-rates", "invest-technology", "credit", "corporation-tax", "invest-government", "invest-exchange"]],
+        [governmentPanel, ["gov-emergencies", "gov-fiscal", "gov-growth", "gov-unemployment", "gov-politics", "gov-demographics", "gov-tax-revenue", "gov-borrowing"]],
+        [exportsPanel, ["nx-exchange", "trading-partners", "domestic-growth"]],
+        [srasPanel, ["sras-productivity", "materials", "energy", "wage-costs", "business-taxes", "subsidies", "exchange-rates"]],
+        [supplyPanel, ["productivity", "technology", "capital", "infrastructure", "available-labour", "natural-resources"]]
+      ].forEach(function (item) {
+        namesByPanel[item[0].id] = item[1];
+        item[0].addEventListener("change", update);
+        item[0].addEventListener("click", function (event) {
+          var label = event.target.closest("label");
+          if (!label || !item[0].contains(label)) return;
+          var radio = label.querySelector("input");
+          if (!radio) return;
+          hideWhenComplete(item[0], radio.name);
+        });
+      });
+      function hideWhenComplete(panel, name) {
+        var names = namesByPanel[panel.id];
+        if (!names || names.indexOf(name) === -1) return;
+        var already = names.every(function (item) { return chosenNames[item]; });
+        chosenNames[name] = true;
+        if (already) return;
+        if (!names.every(function (item) { return chosenNames[item]; })) return;
+        panels.forEach(function (pair) {
+          if (pair[1] === panel) setPanel(pair[0], pair[1], false);
+        });
+      }
+      panels.forEach(function (pair) {
+        pair[0].addEventListener("click", function () { showOnly(pair[0], pair[1]); });
+        setPanel(pair[0], pair[1], false);
+      });
+      srasPanel.addEventListener("click", function (event) {
+        var label = event.target.closest("label");
+        if (!label) return;
+        var radio = label.querySelector("input");
+        if (!radio) return;
+        srasFactorNote = Object.prototype.hasOwnProperty.call(srasNotes, radio.name) ? radio.name : "";
+        syncSrasNotes();
+      });
+      hideFactors.addEventListener("click", function () {
+        panels.forEach(function (pair) { setPanel(pair[0], pair[1], false); });
+      });
+      document.getElementById("btn-scenario").addEventListener("click", function () {
+        showScenario(0);
+      });
+      btnNext.addEventListener("click", nextScenario);
+      shiftButtons[0].addEventListener("click", shiftAd);
+      shiftButtons[1].addEventListener("click", shiftSras);
+      shiftButtons[2].addEventListener("click", shiftLras);
+      document.getElementById("btn-reset").addEventListener("click", function () {
+        if (shiftFrame) cancelAnimationFrame(shiftFrame);
+        shiftFrame = 0;
+        btnNext.hidden = true;
+        scenarioOn = false;
+        scenarioBase = { ad: 0, lras: 0, sras: 0 };
+        setShiftButtons(false);
+        document.querySelectorAll('input[type="radio"][value="0"]').forEach(function (input) {
+          input.checked = true;
+        });
+        shownShifts = { ad: 0, lras: 0, sras: 0 };
+        shiftOrigin = { ad: 0, lras: 0, sras: 0 };
+        chosenNames = {};
+        drawDiagram(0, 0, 0, shownShifts);
+        update();
+      });
+      document.getElementById("btn-save").addEventListener("click", function () {
+        var clone = chart.cloneNode(true);
+        clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        var background = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        background.setAttribute("width", "760");
+        background.setAttribute("height", "430");
+        background.setAttribute("fill", "#fffaf3");
+        clone.insertBefore(background, clone.firstChild);
+        var xml = new XMLSerializer().serializeToString(clone);
+        var url = URL.createObjectURL(new Blob([xml], { type: "image/svg+xml;charset=utf-8" }));
+        var image = new Image();
+        image.onload = function () {
+          var scale = 2;
+          var canvas = document.createElement("canvas");
+          canvas.width = 760 * scale;
+          canvas.height = 430 * scale;
+          var context = canvas.getContext("2d");
+          context.fillStyle = "#fffaf3";
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          canvas.toBlob(function (png) {
+            var fileUrl = URL.createObjectURL(png);
+            var link = document.createElement("a");
+            link.href = fileUrl;
+            link.download = "aggregate-demand-and-supply.png";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(fileUrl);
+          }, "image/png");
+        };
+        image.onerror = function () { URL.revokeObjectURL(url); };
+        image.src = url;
+      });
+      drawDiagram(0, 0, 0, shownShifts);
+      update();
+    })();
+  </script>
+</body>
+</html>

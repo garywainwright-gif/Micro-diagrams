@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Keynesian aggregate demand shifts</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #e4d9c8;
+      --paper: #f7f1e8;
+      --card: #fffaf3;
+      --accent: #9a3412;
+      --accent-soft: #f3e2d4;
+      --formula: var(--accent-soft);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .book { max-width: 920px; margin: 0 auto; padding: 20px 20px 72px; }
+    .topic {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 22px 24px;
+      margin: 16px 0;
+    }
+    h1 { margin: 0 0 8px; font-size: 1.75rem; letter-spacing: -0.03em; }
+    .intro-lead {
+      font-family: "Financier Display", Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.2rem;
+      letter-spacing: -0.02em;
+      margin: 4px 0 10px;
+    }
+    .meta { color: var(--muted); font-size: 0.92rem; margin: 0 0 12px; }
+    .meta a { color: var(--accent); font-weight: 700; }
+    .head {
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;
+    }
+    .scorebox {
+      min-width: 11rem; text-align: right; background: var(--formula);
+      border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px;
+    }
+    .scores { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .score-main { margin: 0; font-size: 1.7rem; font-weight: 800; letter-spacing: -0.03em; }
+    .score-sub { margin: 0; color: var(--muted); font-size: 0.82rem; }
+    .clockbox .score-main {
+      font-family: "Financier Display", Georgia, "Palatino Linotype", Palatino, serif;
+      font-variant-numeric: tabular-nums;
+    }
+    .clockbox.urgent .score-main { color: var(--accent); }
+    .clockbox.done .score-main { color: #166534; }
+    .clockbox.out .score-main { color: #9f1239; }
+    .shift-row button, .tools button {
+      font: inherit; font-weight: 700; cursor: pointer; border-radius: 8px;
+    }
+    .scenario {
+      background: var(--formula); border-radius: 8px; padding: 12px 14px; margin: 12px 0;
+      min-height: 4.6em;
+      color: var(--ink);
+      font-size: 1.45rem;
+      font-weight: 800;
+    }
+    .q-count { margin: 0 0 4px; color: var(--ink); font-size: 1.45rem; font-weight: 800; }
+    .cat-title { margin: 0 0 8px; font-weight: 800; color: var(--accent); }
+    .scenario p { margin: 0 0 8px; }
+    .scenario p:last-child { margin-bottom: 0; }
+    .ask { font-weight: 800; }
+    .chart-wrap {
+      background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 8px 8px 4px;
+    }
+    .chart-title { margin: 4px 8px 0; font-weight: 800; }
+    svg.chart { display: block; width: 100%; height: auto; }
+    .chart-note { margin: 4px 8px 8px; color: var(--muted); font-size: 0.88rem; }
+    [hidden] { display: none !important; }
+    .shift-row { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; margin-top: 12px; }
+    .shift-row button {
+      flex: 0 1 210px;
+      width: 210px;
+      max-width: 100%;
+      padding: 10px 12px;
+      line-height: 1.25;
+      border: 2px solid var(--accent); background: #fff; color: var(--accent); font-size: 1rem;
+    }
+    .shift-row #btn-next {
+      flex: 0 0 auto;
+      width: auto;
+      background: var(--accent);
+      color: #fffaf3;
+      border: 0;
+      white-space: nowrap;
+    }
+    .shift-row #btn-next:hover:not(:disabled) { background: #7c2d12; }
+    .shift-row #btn-next:disabled { opacity: 0.45; }
+    .shift-row button:hover:not(:disabled) { background: var(--accent-soft); }
+    .shift-row button:disabled { cursor: default; }
+    .shift-row button.ok { background: #dcfce7; border-color: #166534; color: #166534; }
+    .shift-row button.bad { background: #ffe4e6; border-color: #9f1239; color: #9f1239; }
+    .shift-row button.dim { opacity: 0.55; }
+    .shift-row button.on { background: var(--accent); color: #fffaf3; border-color: var(--accent); }
+    .feedback { margin: 12px 0 0; min-height: 1.4em; font-size: 0.95rem; }
+    .feedback.ok { color: #166534; }
+    .feedback.bad { color: #9f1239; }
+    .feedback p { margin: 0 0 8px; }
+    .feedback p:last-child { margin-bottom: 0; }
+    .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .tools button {
+      background: var(--accent); color: #fffaf3; border: 0; padding: 8px 12px;
+    }
+    .diagram-save { margin: 8px 8px 4px; }
+    .diagram-save button {
+      background: var(--accent); color: #fffaf3; border: 0; padding: 8px 12px;
+      font: inherit; font-weight: 700; cursor: pointer; border-radius: 8px;
+    }
+    .diagram-save button:hover:not(:disabled) { background: #7c2d12; }
+    .diagram-save button:disabled { opacity: 0.45; cursor: default; }
+    .tools button.ghost { background: #fff; color: var(--accent); border: 1px solid var(--line); }
+    .tools button.ghost:hover:not(:disabled) { background: var(--accent-soft); }
+    button:focus-visible, a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .tools button:disabled { opacity: 0.45; cursor: default; }
+    .log { margin: 8px 0 0; padding-left: 1.2em; color: var(--muted); font-size: 0.88rem; }
+    .log li { margin: 3px 0; }
+    .log .hit { color: #166534; font-weight: 700; }
+    .log .miss { color: #9f1239; font-weight: 700; }
+    @media (max-width: 640px) {
+      .shift-row { flex-direction: column; }
+      .shift-row button, .shift-row #btn-next { width: 100%; flex: 1 1 auto; }
+      .scores { justify-content: flex-start; }
+      .scorebox { text-align: left; }
+    }
+  </style>
+  <link rel="stylesheet" href="../diagram-economist.css" />
+</head>
+<body>
+  <div class="book">
+    <article class="topic">
+      <div class="head">
+        <div>
+          <h1>Keynesian aggregate demand shifts</h1>
+          <p class="meta"><a href="../macro-diagrams.html">Back to interactive games</a></p>
+        </div>
+        <div class="scores">
+          <div class="scorebox clockbox">
+            <p class="score-main" id="clock" role="timer" aria-label="Time left to beat the clock" data-seconds="120">2:00</p>
+            <p class="score-sub" id="clock-sub">Beat the clock</p>
+          </div>
+          <div class="scorebox" aria-live="polite">
+            <p class="score-main"><span id="score-points">0</span> / <span id="score-attempts">0</span></p>
+            <p class="score-sub" id="score-sub">correct out of attempts</p>
+          </div>
+        </div>
+      </div>
+      <p class="intro-lead">Get ready — your Keynesian reflexes are about to be tested.</p>
+      <p>The diagram is the Keynesian aggregate supply curve. It is flat while there is spare capacity, then it rises, and it is vertical at full-employment output Yfe.</p>
+      <p>Predict the direction of movement of the aggregate demand curve. The diagram shows what that shift does to real output and the price level.</p>
+      <p>Your mission: rack up as many points as possible before time runs out.</p>
+      <p>You’ve got two minutes.</p>
+      <p>The clock is ticking.</p>
+      <p>Beat it — or watch your score freeze at zero.</p>
+      <div class="scenario" id="scenario">
+        <p>Ten questions are being prepared.</p>
+      </div>
+      <div class="chart-wrap" id="play-chart" hidden>
+        <p class="chart-title" id="chart-title">Keynesian aggregate supply</p>
+        <svg class="chart" id="chart" viewBox="0 0 680 450" role="img" aria-labelledby="chart-title chart-note">
+          <line x1="92" y1="48" x2="92" y2="338" stroke="#1c1915" stroke-width="2" />
+          <polygon points="92,34 87,48 97,48" fill="#1c1915" />
+          <line x1="92" y1="338" x2="630" y2="338" stroke="#1c1915" stroke-width="2" />
+          <polygon points="644,338 630,333 630,343" fill="#1c1915" />
+          <text x="104" y="42" fill="#5c5348" font-size="15" font-family="Financier Text, Georgia, Palatino Linotype, Palatino, serif">Price level</text>
+          <text id="x-label" x="300" y="424" text-anchor="middle" fill="#5c5348" font-size="15" font-family="Financier Text, Georgia, Palatino Linotype, Palatino, serif">Real national output</text>
+          <line id="p-line" x1="92" y1="252" x2="250" y2="252" stroke="#5c5348" stroke-width="1.5" stroke-dasharray="5 4" opacity="0" />
+          <text id="p-label" x="84" y="257" text-anchor="end" fill="#5c5348" font-size="16" font-weight="700" font-family="Financier Display, Georgia, Palatino Linotype, Palatino, serif" opacity="0">P</text>
+          <line id="p1-line" x1="92" y1="200" x2="300" y2="200" stroke="#166534" stroke-width="1.5" stroke-dasharray="5 4" opacity="0" />
+          <text id="p1-label" x="84" y="205" text-anchor="end" fill="#166534" font-size="16" font-weight="700" font-family="Financier Display, Georgia, Palatino Linotype, Palatino, serif" opacity="0">P1</text>
+          <line id="eq-line" x1="250" y1="252" x2="250" y2="338" stroke="#5c5348" stroke-width="1.5" stroke-dasharray="5 4" opacity="0" />
+          <text id="y-label" x="250" y="358" text-anchor="middle" fill="#5c5348" font-size="16" font-weight="700" font-family="Financier Display, Georgia, Palatino Linotype, Palatino, serif" opacity="0">Y</text>
+          <line id="eq1-line" x1="322" y1="252" x2="322" y2="338" stroke="#166534" stroke-width="1.5" stroke-dasharray="5 4" opacity="0" />
+          <text id="y1-label" x="322" y="358" text-anchor="middle" fill="#166534" font-size="16" font-weight="700" font-family="Financier Display, Georgia, Palatino Linotype, Palatino, serif" opacity="0">Y1</text>
+          <line id="yfe-line" x1="528" y1="50" x2="528" y2="338" stroke="#1c1915" stroke-width="1.5" stroke-dasharray="5 4" />
+          <path id="as-curve" d="M 156 252 H 400 C 470 252, 528 200, 528 132 V 50" fill="none" stroke="#1c1915" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+          <text id="as-label" x="528" y="42" text-anchor="middle" fill="#1c1915" font-size="18" font-weight="700" font-family="Financier Display, Georgia, Palatino Linotype, Palatino, serif">AS</text>
+          <text id="yfe-label" x="528" y="358" text-anchor="middle" fill="#1c1915" font-size="16" font-weight="700" font-family="Financier Display, Georgia, Palatino Linotype, Palatino, serif">Yfe</text>
+          <line id="ad-line" x1="140" y1="120" x2="340" y2="320" stroke="#9a3412" stroke-width="3" stroke-linecap="round" opacity="0" />
+          <text id="ad-label" x="348" y="312" fill="#9a3412" font-size="18" font-weight="700" font-family="Financier Display, Georgia, Palatino Linotype, Palatino, serif" opacity="0">AD</text>
+          <line id="ad1-line" x1="180" y1="120" x2="380" y2="320" stroke="#166534" stroke-width="3" stroke-linecap="round" opacity="0" />
+          <text id="ad1-label" x="388" y="312" fill="#166534" font-size="18" font-weight="700" font-family="Financier Display, Georgia, Palatino Linotype, Palatino, serif" opacity="0">AD1</text>
+          <line id="arrow-line" stroke="#1c1915" stroke-width="2.5" opacity="0" />
+          <polygon id="arrow-head" fill="#1c1915" opacity="0" />
+          <circle id="eq-dot" cx="250" cy="252" r="5" fill="#9a3412" opacity="0" />
+          <circle id="eq1-dot" cx="322" cy="252" r="5" fill="#166534" opacity="0" />
+        </svg>
+        <p class="chart-note" id="chart-note">The Keynesian AS curve is flat, then rises, then is vertical at Yfe. Decide whether aggregate demand shifts left or right.</p>
+        <div class="diagram-save">
+          <button type="button" id="btn-save" disabled>Save the diagram</button>
+        </div>
+      </div>
+      <div class="shift-row" id="shift-row" hidden>
+        <button type="button" id="btn-left" disabled>Decrease in aggregate demand — shift left</button>
+        <button type="button" id="btn-right" disabled>Increase in aggregate demand — shift right</button>
+        <button type="button" id="btn-next" disabled>Next question</button>
+      </div>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+      <div class="tools">
+        <button type="button" class="ghost" id="btn-reset">Reset score</button>
+      </div>
+      <ol class="log" id="log" hidden></ol>
+    </article>
+  </div>
+  <script src="../keynesian-ad-shift-game.js?v=20261023taxcut"></script>
+  <script>KeynesianAdGame.mount(document.querySelector("article.topic"));</script>
+</body>
+</html>

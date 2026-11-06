@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Economic growth and wealth equality</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #e4d9c8;
+      --paper: #f7f1e8;
+      --card: #fffaf3;
+      --accent: #9a3412;
+      --accent-soft: #f3e2d4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .wrap { max-width: 1480px; margin: 0 auto; padding: 28px 22px 72px; }
+    h1 {
+      margin: 0 0 8px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.85rem;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+    .lead {
+      box-sizing: border-box;
+      width: calc(100% + 44px);
+      margin: 0 -22px 22px;
+      padding: 22px 28px;
+      background: #f3e2d4;
+      color: var(--ink);
+      font-size: 1.05rem;
+      font-weight: 650;
+      line-height: 1.4;
+    }
+    .lead #btn-scenario {
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      padding: 6px 12px;
+      margin-left: 8px;
+      vertical-align: baseline;
+    }
+    .lead #btn-scenario:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    h2 {
+      margin: 0 0 4px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.2rem;
+      letter-spacing: -0.02em;
+    }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 18px;
+      margin: 0 0 16px;
+    }
+    .stage {
+      display: grid;
+      gap: 16px;
+      align-items: start;
+      margin: 0 0 16px;
+    }
+    @media (min-width: 1100px) {
+      .stage { grid-template-columns: minmax(320px, 440px) minmax(0, 1fr); }
+      .stage .diagram-column { position: sticky; top: 12px; }
+    }
+    .weight { margin-left: 6px; color: var(--accent); font-weight: 650; }
+    .hint {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-weight: 450;
+      font-size: 0.86rem;
+      line-height: 1.35;
+    }
+    .policy-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 8px;
+      padding: 8px 10px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+    .policy-name { flex: 1 1 auto; min-width: 0; font-weight: 700; line-height: 1.3; }
+    .policy-row button {
+      flex: 0 0 auto;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 12px;
+    }
+    .policy-row > button.compact {
+      max-width: 46%;
+      font-size: 0.78rem;
+      font-weight: 650;
+      line-height: 1.2;
+      padding: 4px 7px;
+      white-space: normal;
+    }
+    .policy-actions button {
+      font-size: 0.78rem;
+      font-weight: 650;
+      line-height: 1.2;
+      padding: 4px 7px;
+    }
+    .policy-row button[aria-pressed="true"] {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      box-shadow: inset 4px 0 0 var(--accent);
+    }
+    .policy-row button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .policy-actions {
+      display: flex;
+      flex: 0 0 auto;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: flex-end;
+      max-width: 46%;
+    }
+    .chart-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .sub { margin: 0; color: var(--muted); font-size: 0.92rem; }
+    svg.chart { display: block; width: auto; max-width: 100%; height: auto; max-height: calc(100vh - 280px); margin: 0 auto; background: #fff; border-radius: 8px; }
+    svg.lorenz-chart { display: block; width: 100%; height: auto; max-height: 300px; margin: 4px 0 8px; background: #fff; }
+    .shares {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 0 0 12px;
+    }
+    @media (min-width: 720px) {
+      .shares.live-readout { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+    .share {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .share span { display: block; color: var(--muted); font-size: 0.85rem; }
+    .share strong {
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.25rem;
+    }
+    .share.helped { border-color: #166534; }
+    .share.helped strong { color: #166534; }
+    .share.hurt { border-color: #9a3412; }
+    .share.hurt strong { color: #9a3412; }
+    .scenario-block { margin: 0 0 12px; padding: 12px; border-radius: 8px; }
+    .scenario-block h2 { margin-bottom: 6px; }
+    .scenario-block p { margin: 0; }
+    #scenario-story-text h3 {
+      margin: 14px 0 6px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+    #scenario-story-text h3:first-child { margin-top: 0; }
+    #scenario-story-text p { margin: 0 0 10px; }
+    #scenario-story-text p:last-child { margin-bottom: 0; }
+    #scenario-story-text ul { margin: 0 0 10px; padding-left: 1.25rem; }
+    #scenario-story-text li { margin: 0 0 4px; }
+    #scenario-story,
+    #scenario-steps {
+      box-sizing: border-box;
+      width: calc(100% + 44px);
+      margin-left: -22px;
+      margin-right: -22px;
+      padding: 16px 28px;
+    }
+    #scenario-story { background: var(--accent-soft); font-weight: 650; }
+    #scenario-steps {
+      background: #fff;
+      border: 1px solid var(--line);
+      font-weight: 650;
+      margin-bottom: 22px;
+    }
+    .group-label {
+      margin: 16px 0 8px;
+      color: var(--ink);
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.35;
+    }
+    .group-label:first-of-type { margin-top: 2px; }
+    .group-note { margin: -2px 0 10px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+    .actions button {
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      padding: 8px 14px;
+    }
+    .actions button.ghost {
+      background: #fff;
+      color: var(--ink);
+      border-color: var(--line);
+    }
+    .actions button.shift {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+      color: #fff;
+    }
+    .actions button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .actions button.shift:focus-visible { outline-color: #1d4ed8; }
+    .actions button:disabled { opacity: 0.45; cursor: default; }
+    [hidden] { display: none !important; }
+    #scenario-story summary {
+      cursor: pointer;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    #scenario-story[open] summary { margin-bottom: 8px; }
+    .diagram.is-pending { box-shadow: 0 0 0 3px #1d4ed8; }
+    .shift-bar {
+      margin: 12px 0 0;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid #1d4ed8;
+      border-radius: 10px;
+    }
+    .explain {
+      margin: 0 0 12px;
+      padding: 12px;
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 0.98rem;
+    }
+    .aims { margin: 10px 0 0; padding-left: 1.2rem; }
+    .aims li { margin: 0 0 4px; }
+    .aims li.met { color: #166534; }
+    #btn-amend {
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      padding: 8px 14px;
+    }
+    #btn-amend:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .gap-box {
+      margin: 0 0 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+    }
+    .gap-box h2 { margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Economic growth and wealth equality</h1>
+    <p class="sub"><a href="macro-diagrams.html">Back to interactive games</a> · <a href="Stagflation.html">Stagflation</a></p>
+    <p class="lead">Faster economic growth and a more equal distribution of wealth can conflict.<br>A policy that shifts LRAS right can raise productive capacity, but the gains can go to owners of capital.<br>A policy that redistributes income can lower the Gini coefficient, but higher costs or weaker incentives can slow growth.<br>Education and training can support both objectives. Press for the scenario. <button type="button" id="btn-scenario">Scenario</button></p>
+
+    <details class="scenario-block" id="scenario-story" hidden>
+      <summary id="scenario-story-heading">Scenario</summary>
+      <div id="scenario-story-text">
+        <h3>Economic scenario</h3>
+        <p>The economy is at full employment. Aggregate demand and short-run aggregate supply cross on long-run aggregate supply. Real GDP growth is 1.0%. Real output and full-employment output are both £2,800 billion, so there is no output gap. Unemployment is 4.5%. Skills are uneven, and poorer regions have not shared in income and wealth.</p>
+        <p>Wealth is unequally distributed. The wealth Gini coefficient is 0.42. The Lorenz curve bows away from the line of equality. Owners of capital and land hold a large share of assets. Low-paid workers and poorer regions have seen weak gains.</p>
+        <p>The government has a large budget deficit and only has £15 billion to spend.</p>
+        <h3>Your task</h3>
+        <p>Bring the economy to all four of these results:</p>
+        <ul>
+          <li>Economic growth at or above 2.5%.</li>
+          <li>A wealth Gini coefficient at or below 0.35.</li>
+          <li>Unemployment kept at or below 5.5%.</li>
+          <li>Productive capacity at least £60 billion higher, so the growth is not only a short-run rise in demand.</li>
+        </ul>
+        <p>Read the diagram and the Lorenz curve first. The economy starts on LRAS, and the wealth Gini coefficient is 0.42. The government can spend only £15 billion. Then choose policies. Supply-side policy can shift LRAS right. Demand-side policy shifts AD right and raises growth only in the short run, which opens a positive output gap. Progressive tax, welfare benefits and a higher minimum wage pull the Lorenz curve inward, but they can shift SRAS or LRAS left. Education and training is one of the few policies that supports both objectives. Regional development can also narrow inequality and raise capacity.</p>
+      </div>
+    </details>
+
+    <section class="scenario-block" id="scenario-steps" hidden aria-label="Progress">
+      <p id="scenario-note"></p>
+      <ul class="aims" id="aims" hidden>
+        <li id="aim-g">Economic growth at or above 2.5%.</li>
+        <li id="aim-gini">A wealth Gini coefficient at or below 0.35.</li>
+        <li id="aim-u">Unemployment at or below 5.5%.</li>
+        <li id="aim-cap">Productive capacity at least £60 billion higher.</li>
+      </ul>
+      <button type="button" id="btn-amend" hidden>Amend my policies</button>
+    </section>
+
+    <div class="stage">
+      <div class="controls">
+        <section class="panel" id="policy-panel" hidden aria-labelledby="policy-heading">
+          <h2 id="policy-heading">Policy choices</h2>
+          <p class="sub">Press a policy button to use it. Press the same button again to turn it off. The diagram does not move until you press Shift AD, Shift SRAS or Shift LRAS. Reset policies returns the economy to full employment, with the wealth Gini coefficient at 0.42.</p>
+
+          <p class="group-label">Policies to increase economic growth. These aim to increase real GDP and shift LRAS to the right.</p>
+          <div class="policy-row">
+            <span class="policy-name">Education and training <span class="weight" data-policy="edu"></span><span class="hint">Choose £10 billion or £15 billion. Aggregate demand and short-run aggregate supply each shift by that amount, so real GDP rises by the same amount.</span></span>
+            <span class="policy-actions">
+              <button type="button" data-choice="edu10" data-group="edu" aria-pressed="false">Fund £10 billion</button>
+              <button type="button" data-choice="edu15" data-group="edu" aria-pressed="false">Fund £15 billion</button>
+            </span>
+          </div>
+          <div class="policy-row">
+            <span class="policy-name">Infrastructure investment <span class="weight" data-policy="infra"></span><span class="hint">Choose £10 billion or £15 billion. Aggregate demand and short-run aggregate supply each shift by that amount, so real GDP rises by the same amount.</span></span>
+            <span class="policy-actions">
+              <button type="button" data-choice="infra10" data-group="infra" aria-pressed="false">Invest £10 billion</button>
+              <button type="button" data-choice="infra15" data-group="infra" aria-pressed="false">Invest £15 billion</button>
+            </span>
+          </div>
+          <div class="policy-row">
+            <span class="policy-name">Business investment incentives <span class="weight" data-policy="invest"></span><span class="hint">Investment allowances, corporation tax reductions and research and development grants.</span></span>
+            <button type="button" class="compact" data-choice="invest" aria-pressed="false">Incentivise investment by £5 billion</button>
+          </div>
+          <div class="policy-row">
+            <span class="policy-name">Promoting competition <span class="weight" data-policy="comp"></span><span class="hint">Deregulation, reducing barriers to entry and preventing monopolistic behaviour.</span></span>
+            <button type="button" data-choice="comp" aria-pressed="false">Promote competition</button>
+          </div>
+          <div class="policy-row">
+            <span class="policy-name">Labour market reforms <span class="weight" data-policy="labour"></span><span class="hint">Easier hiring and firing, weaker trade-union power and better occupational mobility. Lowers wage costs and structural unemployment. Can widen inequality.</span></span>
+            <button type="button" data-choice="labour" aria-pressed="false">Reform the labour market</button>
+          </div>
+          <div class="policy-row">
+            <span class="policy-name">Government investment in R&amp;D <span class="weight" data-policy="rd"></span><span class="hint">Choose £5 billion or £10 billion. Aggregate demand and short-run aggregate supply each shift by that amount, so real GDP rises by the same amount.</span></span>
+            <span class="policy-actions">
+              <button type="button" data-choice="rd5" data-group="rd" aria-pressed="false">Fund £5 billion</button>
+              <button type="button" data-choice="rd10" data-group="rd" aria-pressed="false">Fund £10 billion</button>
+            </span>
+          </div>
+          <div class="policy-row">
+            <span class="policy-name">Demand-side policies <span class="weight" data-policy="demand"></span><span class="hint">Lower interest rates, AD shifts right in the short run.</span></span>
+            <span class="policy-actions">
+              <button type="button" data-choice="demand25" data-group="demand" aria-pressed="false">Reduce by 0.25%</button>
+              <button type="button" data-choice="demand50" data-group="demand" aria-pressed="false">Reduce by 0.5%</button>
+            </span>
+          </div>
+
+          <p class="group-label">Policies to increase wealth equality. These aim to reduce inequalities in income and wealth.</p>
+          <p class="sub group-note">Education and training is listed above. It is one of the few policies that helps both objectives.</p>
+          <div class="policy-row">
+            <span class="policy-name">Progressive taxation <span class="weight" data-policy="tax"></span><span class="hint">Higher earners pay a larger proportion of income in tax, through higher bands, capital gains tax or a wealth tax.</span></span>
+            <button type="button" data-choice="tax" aria-pressed="false">Make tax more progressive</button>
+          </div>
+          <div class="policy-row">
+            <span class="policy-name">Welfare benefits and transfers <span class="weight" data-policy="welfare"></span><span class="hint">Universal Credit, state pensions, disability benefits and child benefit.</span></span>
+            <button type="button" data-choice="welfare" aria-pressed="false">Raise welfare benefits</button>
+          </div>
+          <div class="policy-row">
+            <span class="policy-name">National minimum wage <span class="weight" data-policy="nmw"></span><span class="hint">Raises the earnings of low-paid workers and reduces in-work poverty.</span></span>
+            <button type="button" data-choice="nmw" aria-pressed="false">Raise the minimum wage</button>
+          </div>
+          <div class="policy-row">
+            <span class="policy-name">Regional development <span class="weight" data-policy="region"></span><span class="hint">Enterprise zones, infrastructure in deprived areas and grants for firms locating in poorer regions. Also supports growth.</span></span>
+            <button type="button" data-choice="region" aria-pressed="false">Develop poorer regions</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="diagram-column">
+        <section class="panel diagram" id="diagram-panel" hidden>
+          <div class="shares live-readout" id="live-readout">
+            <p class="share" id="box-g"><span>Economic growth</span> <strong id="live-growth">1.0%</strong></p>
+            <p class="share" id="box-gini"><span>Wealth Gini</span> <strong id="live-gini">0.42</strong></p>
+            <p class="share" id="box-u"><span>Unemployment</span> <strong id="live-unemployment">4.5%</strong></p>
+            <p class="share" id="box-cap"><span>Change in productive capacity</span> <strong id="live-capacity">£0 billion</strong></p>
+          </div>
+
+          <section class="gap-box" id="lorenz-box" aria-labelledby="lorenz-heading">
+            <h2 id="lorenz-heading">Lorenz curve</h2>
+            <p class="sub" id="lorenz-note"></p>
+            <svg id="lorenz-chart" class="lorenz-chart" viewBox="0 0 560 340" role="img" aria-labelledby="lorenz-chart-title">
+              <title id="lorenz-chart-title">Lorenz curve of wealth</title>
+              <g id="lorenz-draw"></g>
+            </svg>
+            <p class="sub">The straight line is perfect equality. A deeper bow means wealth is shared less equally. A lower Gini coefficient means a more equal distribution. When the curve has moved, grey shows where it was at the start.</p>
+          </section>
+
+          <div class="chart-head">
+            <h2>Aggregate demand and supply</h2>
+          </div>
+          <p class="explain" id="ad-label" aria-live="polite"></p>
+
+          <svg class="chart" id="ad-chart" viewBox="0 0 760 430" role="img" aria-labelledby="ad-chart-title">
+            <title id="ad-chart-title">Price level against real national output</title>
+            <line x1="72" y1="28" x2="72" y2="368" stroke="#1c1915" stroke-width="2.2"/>
+            <line x1="72" y1="368" x2="730" y2="368" stroke="#1c1915" stroke-width="2.2"/>
+            <polyline points="66,42 72,28 78,42" fill="none" stroke="#1c1915" stroke-width="2.2" stroke-linejoin="miter"/>
+            <polyline points="716,362 730,368 716,374" fill="none" stroke="#1c1915" stroke-width="2.2" stroke-linejoin="miter"/>
+            <text x="24" y="198" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle" transform="rotate(-90 24 198)">Price level</text>
+            <text x="60" y="390" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="end">0</text>
+            <text id="yfe-label" x="390" y="390" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle">Y<tspan dy="4" font-size="11">fe</tspan></text>
+            <text x="708" y="404" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="end">Real national output</text>
+            <line id="lras-base" x1="390" y1="46" x2="390" y2="368" stroke="#b9aea0" stroke-width="2.2" stroke-dasharray="7 5" visibility="hidden"/>
+            <text id="lras-base-label" x="390" y="32" fill="#8a8074" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle" visibility="hidden">LRAS</text>
+            <line id="lras-current" x1="390" y1="46" x2="390" y2="368" stroke="#1c1915" stroke-width="2.2"/>
+            <text id="lras-label" x="390" y="32" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle">LRAS</text>
+            <line id="sras-base" stroke="#b9aea0" stroke-width="2.2" stroke-dasharray="7 5" visibility="hidden"/>
+            <text id="sras-base-label" fill="#8a8074" font-size="16" font-family="Segoe UI, sans-serif" visibility="hidden">SRAS</text>
+            <line id="sras-current" stroke="#1c1915" stroke-width="2.2"/>
+            <text id="sras-label" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif">SRAS</text>
+            <line id="ad-base" stroke="#b9aea0" stroke-width="2.2" stroke-dasharray="7 5" visibility="hidden"/>
+            <text id="ad-base-label" fill="#8a8074" font-size="16" font-family="Segoe UI, sans-serif" visibility="hidden">AD</text>
+            <line id="ad-current" stroke="#1c1915" stroke-width="2.6"/>
+            <text id="ad-current-label" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif">AD</text>
+            <line id="p-line" stroke="#1c1915" stroke-width="1.8" stroke-dasharray="2 4"/>
+            <text id="p-label" x="64" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="end">P</text>
+            <line id="y-line" stroke="#1c1915" stroke-width="1.8" stroke-dasharray="2 4"/>
+            <text id="y-label" y="390" fill="#1c1915" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle">Y</text>
+            <circle id="ad-dot" r="5.5" fill="#9a3412"/>
+            <rect id="gap-shade" fill="#9a3412" opacity="0.16"/>
+            <text id="gap-shade-title" fill="#9a3412" font-size="14" font-family="Segoe UI, sans-serif" font-weight="700" text-anchor="middle"></text>
+            <text id="gap-shade-amount" fill="#9a3412" font-size="14" font-family="Segoe UI, sans-serif" text-anchor="middle"></text>
+            <line id="ad-arrow" stroke="#9a3412" stroke-width="2.6" visibility="hidden"/>
+            <polygon id="ad-arrow-head" fill="#9a3412" visibility="hidden"/>
+            <line id="sras-arrow" stroke="#2563eb" stroke-width="2.6" visibility="hidden"/>
+            <polygon id="sras-arrow-head" fill="#2563eb" visibility="hidden"/>
+            <line id="as-arrow" stroke="#1c1915" stroke-width="2.6" visibility="hidden"/>
+            <polygon id="as-arrow-head" fill="#1c1915" visibility="hidden"/>
+          </svg>
+
+          <div class="actions shift-bar" id="shift-bar" hidden>
+            <button type="button" class="shift" id="btn-shift-ad" hidden>Shift AD</button>
+            <button type="button" class="shift" id="btn-shift-sras" hidden>Shift SRAS</button>
+            <button type="button" class="shift" id="btn-shift-lras" hidden>Shift LRAS</button>
+          </div>
+          <div class="actions">
+            <button type="button" class="ghost" id="btn-reset">Reset policies</button>
+            <button type="button" class="ghost" id="btn-save">Save diagram</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var adEqX = 390;
+      var adEqY = 178;
+      var adSlope = 0.70;
+      var axisY = 368;
+      var YFE = 2800;
+      var START = { ad: 0, sras: 0, lras: 0 };
+      var GINI_START = 0.42;
+      var shown = { ad: START.ad, sras: START.sras, lras: START.lras };
+      var shiftOrigin = { ad: START.ad, sras: START.sras, lras: START.lras };
+      var shiftFrame = 0;
+      var scenarioOn = false;
+      var startCrossY = adEqY - adSlope * (START.ad - START.sras) / 2;
+
+      var POLICIES = [
+        {
+          name: "edu10",
+          effect: { ad: 10, sras: 10, lras: 6 },
+          gini: -0.004,
+          text: "The government spends £10 billion on education and training. That spending shifts AD right by £10 billion. Higher productivity cuts unit costs by the same amount, so SRAS shifts right by £10 billion. Real GDP rises by £10 billion. The economy can produce a little more, so LRAS shifts right by £6 billion. Better skills raise the earnings of people who were on low incomes, so the Gini coefficient falls slightly. It takes time."
+        },
+        {
+          name: "edu15",
+          effect: { ad: 15, sras: 15, lras: 9 },
+          gini: -0.006,
+          text: "The government spends £15 billion on education and training. That spending shifts AD right by £15 billion. Higher productivity cuts unit costs by the same amount, so SRAS shifts right by £15 billion. Real GDP rises by £15 billion, one and a half times the rise from spending £10 billion. The economy can produce more, so LRAS shifts right by £9 billion. Better skills raise the earnings of people who were on low incomes, so the Gini coefficient falls by one and a half times as much as with £10 billion. It takes time."
+        },
+        {
+          name: "infra10",
+          effect: { ad: 10, sras: 10, lras: 6 },
+          gini: 0.002,
+          text: "The government spends £10 billion on roads, railways, broadband and energy networks. That spending shifts AD right by £10 billion. Better networks cut business costs by the same amount, so SRAS shifts right by £10 billion. Real GDP rises by £10 billion. Productive capacity rises, so LRAS shifts right by £6 billion. The rise in land values and the contracts often accrue to owners of land and capital, so wealth inequality widens slightly."
+        },
+        {
+          name: "infra15",
+          effect: { ad: 15, sras: 15, lras: 9 },
+          gini: 0.003,
+          text: "The government spends £15 billion on roads, railways, broadband and energy networks. That spending shifts AD right by £15 billion. Better networks cut business costs by the same amount, so SRAS shifts right by £15 billion. Real GDP rises by £15 billion, one and a half times the rise from spending £10 billion. Productive capacity rises, so LRAS shifts right by £9 billion. The rise in land values and the contracts often accrue to owners of land and capital, so wealth inequality widens by one and a half times as much as with £10 billion."
+        },
+        {
+          name: "invest",
+          effect: { ad: 50, sras: 55, lras: 70 },
+          gini: 0.02,
+          text: "The government incentivises investment by £5 billion, through investment allowances, lower corporation tax and research grants. That encourages a larger rise in private investment, so AD shifts right by about £50 billion. Newer capital cuts costs, so SRAS shifts right by about £55 billion. Real GDP rises by about £52 billion. A larger capital stock raises productive capacity, so LRAS shifts right by £70 billion. The allowances and tax cuts raise the wealth of owners of capital, so the Gini coefficient rises."
+        },
+        {
+          name: "comp",
+          effect: { ad: 40, sras: 55, lras: 50 },
+          gini: -0.012,
+          text: "Deregulation, fewer barriers to entry and action against monopolies increase competition. Firms cut costs and innovate, so SRAS shifts right, and productive capacity rises over time, so LRAS shifts right. Greater efficiency and innovation increase growth. Some monopoly profit is competed away, which helps households a little, but the fall in the Gini coefficient is small. On its own this does not hit the targets."
+        },
+        {
+          name: "labour",
+          effect: { ad: 45, sras: 60, lras: 65 },
+          gini: 0.015,
+          text: "Labour market reforms make hiring and firing easier, reduce trade-union power and improve occupational mobility. Wage costs fall and workers move into vacant jobs more readily, so SRAS shifts right. Structural unemployment falls and the economy can produce more, so LRAS shifts right. Higher employment raises incomes a little, so AD shifts right, but by less than short-run aggregate supply. Growth rises and the price level falls. Weaker bargaining power and less job security widen wage and wealth inequality, so the Gini coefficient rises."
+        },
+        {
+          name: "rd5",
+          effect: { ad: 5, sras: 5, lras: 4 },
+          gini: 0.001,
+          text: "The government spends £5 billion on research and development. That spending shifts AD right by £5 billion. New technology cuts firms' costs by the same amount, so SRAS shifts right by £5 billion. Real GDP rises by £5 billion. The economy can produce a little more, so LRAS shifts right by £4 billion. The patents, profits and higher pay for scarce skills often accrue to owners of capital and to highly skilled workers, so the Gini coefficient rises slightly. It takes time."
+        },
+        {
+          name: "rd10",
+          effect: { ad: 10, sras: 10, lras: 8 },
+          gini: 0.002,
+          text: "The government spends £10 billion on research and development. That spending shifts AD right by £10 billion. New technology cuts firms' costs by the same amount, so SRAS shifts right by £10 billion. Real GDP rises by £10 billion, twice the rise from spending £5 billion. The economy can produce more, so LRAS shifts right by £8 billion. The patents, profits and higher pay for scarce skills often accrue to owners of capital and to highly skilled workers, so the Gini coefficient rises by twice as much as with £5 billion. It takes time."
+        },
+        {
+          name: "demand25",
+          effect: { ad: 25, sras: 0, lras: 0 },
+          gini: 0.006,
+          text: "A 0.25% cut in interest rates stimulates consumption, investment and net exports, so AD shifts right by £25 billion. SRAS and LRAS do not move, so this is a short-run rise in demand. Real GDP rises by £12.5 billion and the price level rises. Higher asset prices can increase wealth inequality a little."
+        },
+        {
+          name: "demand50",
+          effect: { ad: 50, sras: 0, lras: 0 },
+          gini: 0.012,
+          text: "A 0.5% cut in interest rates stimulates consumption, investment and net exports, so AD shifts right by £50 billion, twice the shift from a 0.25% cut. SRAS and LRAS do not move. Real GDP rises by £25 billion and the price level rises by more than after a 0.25% cut. Higher asset prices can increase wealth inequality."
+        },
+        {
+          name: "tax",
+          effect: { ad: -60, sras: -70, lras: -55 },
+          gini: -0.09,
+          text: "Progressive taxation means higher earners pay a larger proportion of income in tax, through higher income-tax bands, capital gains tax or a wealth tax. Disposable income and wealth become more equal, so the Gini coefficient falls and the Lorenz curve moves inward. Higher taxes can weaken incentives to work, save and invest, so LRAS shifts left. Costs can rise, so SRAS shifts left. Spending by higher earners falls, so AD shifts left. Growth slows."
+        },
+        {
+          name: "welfare",
+          effect: { ad: 60, sras: -40, lras: -15 },
+          gini: -0.055,
+          text: "Welfare benefits and transfers, such as Universal Credit, state pensions, disability benefits and child benefit, redistribute income towards lower-income households. The Gini coefficient falls. Those households spend a large share of extra income, so AD shifts right. The tax that funds the benefits, and a weaker incentive to take work, raise costs and reduce capacity, so SRAS and LRAS shift left. Equality improves by more than growth does."
+        },
+        {
+          name: "nmw",
+          effect: { ad: 25, sras: -45, lras: -8 },
+          gini: -0.032,
+          text: "A higher national minimum wage raises the earnings of low-paid workers and reduces in-work poverty, so income inequality narrows and the Gini coefficient falls. Firms' wage costs rise, so SRAS shifts left. The price level rises, real output falls and unemployment rises. A little of the extra pay is spent, so AD shifts right, but by less than the leftward shift of SRAS. Growth weakens."
+        },
+        {
+          name: "region",
+          effect: { ad: 55, sras: 55, lras: 50 },
+          gini: -0.042,
+          text: "Regional development uses enterprise zones, infrastructure in deprived areas and grants for firms that locate in poorer regions. Incomes and jobs in those regions rise, so regional inequality falls and the Gini coefficient falls. The grants and projects are spending, so AD shifts right. Capacity in the poorer regions rises, so LRAS shifts right, and better local infrastructure cuts costs, so SRAS shifts right. This supports growth as well as equality. On its own the scale is too small to hit every target."
+        }
+      ];
+
+      function selected(name) {
+        var button = document.querySelector('#policy-panel button[data-choice="' + name + '"]');
+        return button && button.getAttribute("aria-pressed") === "true" ? "1" : "0";
+      }
+
+      function policyByName(name) {
+        var found = null;
+        POLICIES.forEach(function (policy) {
+          if (policy.name === name) found = policy;
+        });
+        return found;
+      }
+
+      function formatPercent(n) {
+        var rounded = Math.round(n * 10) / 10;
+        if (Math.abs(rounded - Math.round(rounded)) < 0.05) return Math.round(rounded) + "%";
+        return rounded.toFixed(1) + "%";
+      }
+
+      function formatGrowth(n) {
+        var rounded = Math.round(n * 10) / 10;
+        if (Object.is(rounded, -0)) rounded = 0;
+        var sign = rounded < 0 ? "−" : "";
+        return sign + Math.abs(rounded).toFixed(1) + "%";
+      }
+
+      function formatGini(n) {
+        return (Math.round(n * 100) / 100).toFixed(2);
+      }
+
+      function formatBillions(n) {
+        return "£" + Math.abs(Math.round(n)) + " billion";
+      }
+
+      function formatCapacity(n) {
+        var rounded = Math.round(n);
+        if (Math.abs(rounded) < 1) return "£0 billion";
+        if (rounded > 0) return "+£" + rounded + " billion";
+        return "−£" + Math.abs(rounded) + " billion";
+      }
+
+      function policyGiniActive(policy) {
+        if (selected(policy.name) !== "1") return false;
+        var target = targetShift();
+        if (policy.effect.ad && Math.abs(shown.ad - target.ad) < 0.5) return true;
+        if (policy.effect.sras && Math.abs(shown.sras - target.sras) < 0.5) return true;
+        if (policy.effect.lras && Math.abs(shown.lras - target.lras) < 0.5) return true;
+        return false;
+      }
+
+      function giniNow() {
+        var gini = GINI_START;
+        POLICIES.forEach(function (policy) {
+          if (policyGiniActive(policy)) gini += policy.gini;
+        });
+        if (gini < 0.05) gini = 0.05;
+        if (gini > 0.8) gini = 0.8;
+        return gini;
+      }
+
+      function economy(adShift, srasShift, lrasShift) {
+        var crossOffset = (adShift + srasShift) / 2;
+        var crossX = adEqX + crossOffset;
+        var lrasX = adEqX + lrasShift;
+        var gap = lrasX - crossX;
+        var unemployment = Math.max(2, 4.5 + 0.02 * gap);
+        var growth = 1 + crossOffset * 0.02;
+        var crossY = adEqY - adSlope * (adShift - srasShift) / 2;
+        return {
+          crossX: crossX,
+          lrasX: lrasX,
+          crossY: crossY,
+          gap: gap,
+          unemployment: unemployment,
+          growth: growth,
+          gini: giniNow(),
+          capacity: lrasShift,
+          output: YFE + crossOffset,
+          yfe: YFE + lrasShift
+        };
+      }
+
+      function chosenTotal() {
+        var total = { ad: 0, sras: 0, lras: 0 };
+        POLICIES.forEach(function (policy) {
+          if (selected(policy.name) !== "1") return;
+          total.ad += policy.effect.ad;
+          total.sras += policy.effect.sras;
+          total.lras += policy.effect.lras;
+        });
+        return total;
+      }
+
+      function targetShift() {
+        var chosen = chosenTotal();
+        return {
+          ad: START.ad + chosen.ad,
+          sras: START.sras + chosen.sras,
+          lras: START.lras + chosen.lras
+        };
+      }
+
+      function pendingLabels() {
+        var target = targetShift();
+        var labels = [];
+        if (Math.abs(target.ad - shown.ad) >= 0.5) labels.push("Shift AD");
+        if (Math.abs(target.sras - shown.sras) >= 0.5) labels.push("Shift SRAS");
+        if (Math.abs(target.lras - shown.lras) >= 0.5) labels.push("Shift LRAS");
+        return labels;
+      }
+
+      function policyFullyOn(policy) {
+        if (selected(policy.name) !== "1") return false;
+        var target = targetShift();
+        if (policy.effect.ad && Math.abs(shown.ad - target.ad) >= 0.5) return false;
+        if (policy.effect.sras && Math.abs(shown.sras - target.sras) >= 0.5) return false;
+        if (policy.effect.lras && Math.abs(shown.lras - target.lras) >= 0.5) return false;
+        return true;
+      }
+
+      function targetsMet(state) {
+        return state.growth >= 2.45
+          && state.gini <= 0.3505
+          && state.unemployment <= 5.51
+          && state.capacity >= 59.5;
+      }
+
+      function effectLabel(policy) {
+        var effect = policy.effect;
+        var parts = [];
+        if (effect.ad > 0) parts.push("AD right");
+        if (effect.ad < 0) parts.push("AD left");
+        if (effect.sras > 0) parts.push("SRAS right");
+        if (effect.sras < 0) parts.push("SRAS left");
+        if (effect.lras > 0) parts.push("LRAS right");
+        if (effect.lras < 0) parts.push("LRAS left");
+        if (policy.gini < -0.005) parts.push("more equal");
+        if (policy.gini > 0.005) parts.push("less equal");
+        return parts.join(", ");
+      }
+
+      function updateWeights() {
+        document.querySelectorAll("[data-policy]").forEach(function (el) {
+          var name = el.getAttribute("data-policy");
+          var policy = policyByName(name);
+          if (!policy) {
+            var picked = null;
+            document.querySelectorAll('#policy-panel button[data-group="' + name + '"]').forEach(function (button) {
+              if (button.getAttribute("aria-pressed") === "true") picked = policyByName(button.getAttribute("data-choice"));
+            });
+            el.textContent = picked ? effectLabel(picked) : "";
+            return;
+          }
+          el.textContent = selected(policy.name) === "1" ? effectLabel(policy) : "";
+        });
+      }
+
+      function lesson(state) {
+        if (targetsMet(state)) return "The targets are met. Productive capacity is higher, so the rise in real GDP can last, and the Gini coefficient is lower. Policies that raise human capital or develop poorer regions can support both objectives. Demand-side policy on its own raises short-run growth only. Policies that only reward owners of capital widen wealth inequality.";
+        var growthUp = state.growth >= 2.45;
+        var equal = state.gini <= 0.3505;
+        var capacityUp = state.capacity >= 59.5;
+        var jobs = state.unemployment <= 5.51;
+        if (growthUp && capacityUp && !equal) return "Growth is higher and LRAS has shifted right, so productive capacity is higher. The Gini coefficient is still above 0.35. Education and training moves the Lorenz curve inward, and it can be paired with regional development or welfare benefits. Investment incentives, infrastructure, labour market reforms, research spending and untargeted tax cuts can widen wealth inequality.";
+        if (equal && !growthUp) return "The Gini coefficient is lower, so wealth is more equal. Growth is still below 2.5%. Progressive tax, a higher minimum wage and welfare benefits can shift SRAS or LRAS left. Pair them with a policy that raises productivity or regional capacity.";
+        if (growthUp && !capacityUp) return "Real GDP growth is higher because demand has risen. Productive capacity is not yet £60 billion higher, so this is short-run growth. Demand-side policy shifts AD right and does not shift LRAS.";
+        if (capacityUp && !jobs) return "Productive capacity is higher, but unemployment is above 5.5%. A higher minimum wage, or a tax change that weakens incentives, shifts SRAS left and can push unemployment up from the low rate that comes with a positive output gap.";
+        if (state.gini > 0.43 && state.growth > 1.3) return "Growth has picked up and wealth inequality has widened. The Lorenz curve has bowed further out. Look at which policies raise the wealth of owners of capital.";
+        return "Choose a policy, then press the shift button under the diagram. A supply-side policy can shift LRAS right. A demand-side policy shifts AD right and raises growth only in the short run. An equality policy moves the Lorenz curve.";
+      }
+
+      function positionSentence(state) {
+        var gapText;
+        if (state.gap > 0.5) gapText = "There is a negative output gap of " + formatBillions(state.gap) + ".";
+        else if (state.gap < -0.5) gapText = "There is a positive output gap of " + formatBillions(state.gap) + ".";
+        else gapText = "Real output is at full-employment output.";
+        var priceWords = "";
+        if (state.crossY < startCrossY - 8) priceWords = " The price level is higher than at the start.";
+        else if (state.crossY > startCrossY + 8) priceWords = " The price level is lower than at the start.";
+        return gapText + " Real output is " + formatBillions(state.output) + " and full-employment output is " + formatBillions(state.yfe) + ". Unemployment is " + formatPercent(state.unemployment) + ". Economic growth is " + formatGrowth(state.growth) + ". The wealth Gini coefficient is " + formatGini(state.gini) + ". The change in productive capacity is " + formatCapacity(state.capacity) + "." + priceWords;
+      }
+
+      function explain(state) {
+        var parts = [];
+        var any = false;
+        POLICIES.forEach(function (policy) {
+          if (!policyFullyOn(policy)) return;
+          any = true;
+          parts.push(policy.text);
+        });
+        var stillStart = sameShift(shown, START);
+        if (!any && stillStart) {
+          parts.push("Aggregate demand and short-run aggregate supply cross on long-run aggregate supply. Real output is at full-employment output, £2,800 billion, so there is no output gap. Economic growth is 1.0% and unemployment is 4.5%. The wealth Gini coefficient is 0.42. The Lorenz curve bows away from the line of equality, so wealth is unequally distributed. Slow growth and unequal wealth are the problem to solve.");
+        } else {
+          parts.push(positionSentence(state));
+        }
+        var labels = pendingLabels();
+        if (labels.length) parts.push("Press " + labels.join(" and ") + " to show this choice on the diagram.");
+        return parts.join(" ");
+      }
+
+      function setAim(id, met, text) {
+        var item = document.getElementById(id);
+        item.textContent = text;
+        item.className = met ? "met" : "";
+      }
+
+      function updateAims(state) {
+        var list = document.getElementById("aims");
+        list.hidden = !scenarioOn;
+        var growthMet = state.growth >= 2.45;
+        var giniMet = state.gini <= 0.3505;
+        var jobsMet = state.unemployment <= 5.51;
+        var capMet = state.capacity >= 59.5;
+        setAim("aim-g", growthMet, growthMet
+          ? "Economic growth is " + formatGrowth(state.growth) + ". Aim met."
+          : "Economic growth is " + formatGrowth(state.growth) + ". Aim: 2.5% or above.");
+        setAim("aim-gini", giniMet, giniMet
+          ? "The wealth Gini coefficient is " + formatGini(state.gini) + ". Aim met."
+          : "The wealth Gini coefficient is " + formatGini(state.gini) + ". Aim: 0.35 or below.");
+        setAim("aim-u", jobsMet, jobsMet
+          ? "Unemployment is " + formatPercent(state.unemployment) + ". Aim met."
+          : "Unemployment is " + formatPercent(state.unemployment) + ". Aim: 5.5% or below.");
+        setAim("aim-cap", capMet, capMet
+          ? "Change in productive capacity is " + formatCapacity(state.capacity) + ". Aim met."
+          : "Change in productive capacity is " + formatCapacity(state.capacity) + ". Aim: at least +£60 billion.");
+      }
+
+      function tone(now, start, lowerIsBetter, epsilon) {
+        if (Math.abs(now - start) < epsilon) return "";
+        return (lowerIsBetter ? now < start : now > start) ? "helped" : "hurt";
+      }
+
+      function updateReadout(state) {
+        document.getElementById("live-growth").textContent = formatGrowth(state.growth);
+        document.getElementById("live-gini").textContent = formatGini(state.gini);
+        document.getElementById("live-unemployment").textContent = formatPercent(state.unemployment);
+        document.getElementById("live-capacity").textContent = formatCapacity(state.capacity);
+        document.getElementById("box-g").className = "share " + tone(state.growth, 1, false, 0.05);
+        document.getElementById("box-gini").className = "share " + tone(state.gini, GINI_START, true, 0.005);
+        document.getElementById("box-u").className = "share " + tone(state.unemployment, 4.5, true, 0.05);
+        document.getElementById("box-cap").className = "share " + tone(state.capacity, 0, false, 1);
+      }
+
+      function lorenzK(gini) {
+        return (1 + gini) / (1 - gini);
+      }
+
+      function drawLorenz(state) {
+        var left = 78, right = 500, top = 36, bottom = 268;
+        function xOf(p) { return left + (p / 100) * (right - left); }
+        function yOf(share) { return bottom - (share / 100) * (bottom - top); }
+        function curvePoints(gini) {
+          var k = lorenzK(gini);
+          var pts = [];
+          var i;
+          for (i = 0; i <= 50; i += 1) {
+            var p = i / 50;
+            pts.push(xOf(p * 100).toFixed(1) + "," + yOf(100 * Math.pow(p, k)).toFixed(1));
+          }
+          return pts;
+        }
+        function lensPoints(gini) {
+          var k = lorenzK(gini);
+          var pts = [xOf(0).toFixed(1) + "," + yOf(0).toFixed(1), xOf(100).toFixed(1) + "," + yOf(100).toFixed(1)];
+          var i;
+          for (i = 50; i >= 0; i -= 1) {
+            var p = i / 50;
+            pts.push(xOf(p * 100).toFixed(1) + "," + yOf(100 * Math.pow(p, k)).toFixed(1));
+          }
+          return pts.join(" ");
+        }
+        var parts = [];
+        function add(markup) { parts.push(markup); }
+        add('<line x1="' + left + '" y1="' + (top - 14) + '" x2="' + left + '" y2="' + bottom + '" stroke="#1c1915" stroke-width="1.8"/>');
+        add('<line x1="' + left + '" y1="' + bottom + '" x2="' + (right + 16) + '" y2="' + bottom + '" stroke="#1c1915" stroke-width="1.8"/>');
+        add('<polyline points="' + (left - 6) + ',' + (top - 2) + ' ' + left + ',' + (top - 14) + ' ' + (left + 6) + ',' + (top - 2) + '" fill="none" stroke="#1c1915" stroke-width="1.8" stroke-linejoin="miter"/>');
+        add('<polyline points="' + (right + 4) + ',' + (bottom - 6) + ' ' + (right + 16) + ',' + bottom + ' ' + (right + 4) + ',' + (bottom + 6) + '" fill="none" stroke="#1c1915" stroke-width="1.8" stroke-linejoin="miter"/>');
+        add('<text x="18" y="148" fill="#1c1915" font-size="14" font-family="Segoe UI, sans-serif" text-anchor="middle" transform="rotate(-90 18 148)">Cumulative % of wealth</text>');
+        add('<text x="289" y="318" fill="#1c1915" font-size="14" font-family="Segoe UI, sans-serif" text-anchor="middle">Cumulative % of households</text>');
+        var tick;
+        for (tick = 0; tick <= 100; tick += 20) {
+          add('<line x1="' + (left - 6) + '" y1="' + yOf(tick) + '" x2="' + left + '" y2="' + yOf(tick) + '" stroke="#1c1915" stroke-width="1.3"/>');
+          add('<text x="' + (left - 10) + '" y="' + (yOf(tick) + 4) + '" fill="#1c1915" font-size="13" font-family="Segoe UI, sans-serif" text-anchor="end">' + tick + '</text>');
+          add('<line x1="' + xOf(tick) + '" y1="' + bottom + '" x2="' + xOf(tick) + '" y2="' + (bottom + 6) + '" stroke="#1c1915" stroke-width="1.3"/>');
+          add('<text x="' + xOf(tick) + '" y="' + (bottom + 20) + '" fill="#1c1915" font-size="13" font-family="Segoe UI, sans-serif" text-anchor="middle">' + tick + '</text>');
+        }
+        var fill = state.gini < GINI_START - 0.005 ? "#166534" : (state.gini > GINI_START + 0.005 ? "#9a3412" : "#9a3412");
+        add('<polygon points="' + lensPoints(state.gini) + '" fill="' + fill + '" opacity="0.13"/>');
+        add('<line x1="' + xOf(0) + '" y1="' + yOf(0) + '" x2="' + xOf(100) + '" y2="' + yOf(100) + '" stroke="#8a8074" stroke-width="1.6" stroke-dasharray="6 4"/>');
+        add('<text x="' + (xOf(78) + 8) + '" y="' + (yOf(78) - 6) + '" fill="#8a8074" font-size="13" font-family="Segoe UI, sans-serif">Equality</text>');
+        if (Math.abs(state.gini - GINI_START) >= 0.005) {
+          add('<polyline points="' + curvePoints(GINI_START).join(" ") + '" fill="none" stroke="#b9aea0" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>');
+        }
+        add('<polyline points="' + curvePoints(state.gini).join(" ") + '" fill="none" stroke="#1c1915" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>');
+        var half = 100 * Math.pow(0.5, lorenzK(state.gini));
+        document.getElementById("lorenz-draw").innerHTML = parts.join("");
+        var halfText = Math.round(half) + "%";
+        var note = document.getElementById("lorenz-note");
+        if (Math.abs(state.gini - GINI_START) < 0.005) {
+          note.textContent = "The Gini coefficient is " + formatGini(state.gini) + ". The poorest 50% of households hold about " + halfText + " of wealth.";
+        } else if (state.gini < GINI_START) {
+          note.textContent = "The Lorenz curve has moved inward. The Gini coefficient is " + formatGini(state.gini) + ". The poorest 50% of households hold about " + halfText + " of wealth.";
+        } else {
+          note.textContent = "The Lorenz curve has bowed further out. The Gini coefficient is " + formatGini(state.gini) + ". The poorest 50% of households hold about " + halfText + " of wealth.";
+        }
+      }
+
+      function clipSegment(yFromX, xFromY) {
+        var bounds = { l: 110, r: 700, t: 40, b: 340 };
+        var hits = [];
+        function add(x, y) {
+          if (x < bounds.l - 0.5 || x > bounds.r + 0.5 || y < bounds.t - 0.5 || y > bounds.b + 0.5) return;
+          var i;
+          for (i = 0; i < hits.length; i += 1) {
+            if (Math.abs(hits[i][0] - x) < 0.5 && Math.abs(hits[i][1] - y) < 0.5) return;
+          }
+          hits.push([x, y]);
+        }
+        [bounds.l, bounds.r].forEach(function (x) { add(x, yFromX(x)); });
+        [bounds.t, bounds.b].forEach(function (y) { add(xFromY(y), y); });
+        hits.sort(function (a, b) { return a[0] - b[0]; });
+        if (hits.length < 2) return null;
+        return [hits[0], hits[hits.length - 1]];
+      }
+
+      function adY(x, shift) { return adEqY + adSlope * (x - shift - adEqX); }
+      function srasY(x, shift) { return adEqY - adSlope * (x - shift - adEqX); }
+
+      function visibleAd(shift) {
+        return clipSegment(
+          function (x) { return adY(x, shift); },
+          function (y) { return (y - adEqY) / adSlope + shift + adEqX; }
+        );
+      }
+
+      function visibleSras(shift) {
+        return clipSegment(
+          function (x) { return srasY(x, shift); },
+          function (y) { return shift + adEqX + (adEqY - y) / adSlope; }
+        );
+      }
+
+      function placeSrasLabel(textEl, segment, title, faded, lrasX) {
+        var end = segment[1];
+        var start = segment[0];
+        var x = end[0] - 8;
+        var y = end[1] + 2;
+        var anchor = "end";
+        if (lrasX != null && Math.abs(end[0] - lrasX) < 42) {
+          var px = end[0] + (start[0] - end[0]) * 0.28;
+          var py = end[1] + (start[1] - end[1]) * 0.28;
+          anchor = px < lrasX ? "end" : "start";
+          x = px + (px < lrasX ? -8 : 8);
+          y = py - 6;
+        }
+        if (y < 48) y = 48;
+        if (y > 330) y = 330;
+        textEl.setAttribute("x", x.toFixed(1));
+        textEl.setAttribute("y", y.toFixed(1));
+        textEl.setAttribute("text-anchor", anchor);
+        textEl.textContent = title;
+        textEl.setAttribute("fill", faded ? "#8a8074" : "#1c1915");
+        textEl.setAttribute("visibility", "visible");
+      }
+
+      function placeLabel(textEl, point, title, faded) {
+        var labelX = point[0] + 12;
+        var labelY = point[1] + 8;
+        var anchor = "start";
+        if (labelX > 700) {
+          labelX = point[0] - 10;
+          anchor = "end";
+        }
+        if (labelY > 400) labelY = 400;
+        if (labelY < 24) labelY = 24;
+        textEl.setAttribute("x", labelX.toFixed(1));
+        textEl.setAttribute("y", labelY.toFixed(1));
+        textEl.setAttribute("text-anchor", anchor);
+        textEl.textContent = title;
+        textEl.setAttribute("fill", faded ? "#8a8074" : "#1c1915");
+        textEl.setAttribute("visibility", "visible");
+      }
+
+      function setLine(id, segment) {
+        var line = document.getElementById(id);
+        if (!segment) {
+          line.setAttribute("visibility", "hidden");
+          return;
+        }
+        line.setAttribute("visibility", "visible");
+        line.setAttribute("x1", segment[0][0].toFixed(1));
+        line.setAttribute("y1", segment[0][1].toFixed(1));
+        line.setAttribute("x2", segment[1][0].toFixed(1));
+        line.setAttribute("y2", segment[1][1].toFixed(1));
+      }
+
+      function showShiftArrow(arrow, head, fromX, toX, y, maxLength) {
+        var delta = toX - fromX;
+        var visible = Math.abs(delta) >= 8;
+        var start = fromX;
+        var end = toX;
+        if (visible && maxLength && Math.abs(delta) > maxLength) {
+          var direction = delta < 0 ? -1 : 1;
+          end = toX;
+          start = toX - direction * maxLength;
+        }
+        arrow.setAttribute("x1", start.toFixed(1));
+        arrow.setAttribute("y1", y.toFixed(1));
+        arrow.setAttribute("x2", end.toFixed(1));
+        arrow.setAttribute("y2", y.toFixed(1));
+        arrow.setAttribute("visibility", visible ? "visible" : "hidden");
+        var dir = end < start ? -1 : 1;
+        head.setAttribute("points", end.toFixed(1) + "," + y.toFixed(1) + " " + (end - dir * 12).toFixed(1) + "," + (y - 6).toFixed(1) + " " + (end - dir * 12).toFixed(1) + "," + (y + 6).toFixed(1));
+        head.setAttribute("visibility", visible ? "visible" : "hidden");
+      }
+
+      function markOutputGap(state) {
+        var shade = document.getElementById("gap-shade");
+        var title = document.getElementById("gap-shade-title");
+        var amount = document.getElementById("gap-shade-amount");
+        var leftEdge = Math.max(96, Math.min(state.crossX, state.lrasX));
+        var rightEdge = Math.min(700, Math.max(state.crossX, state.lrasX));
+        var width = rightEdge - leftEdge;
+        if (width < 8 || Math.abs(state.gap) < 0.5) {
+          shade.setAttribute("visibility", "hidden");
+          title.setAttribute("visibility", "hidden");
+          amount.setAttribute("visibility", "hidden");
+          return;
+        }
+        var top = Math.min(Math.max(40, state.crossY), axisY);
+        shade.setAttribute("x", leftEdge.toFixed(1));
+        shade.setAttribute("y", top.toFixed(1));
+        shade.setAttribute("width", width.toFixed(1));
+        shade.setAttribute("height", Math.max(8, axisY - top).toFixed(1));
+        shade.setAttribute("visibility", "visible");
+        var positive = state.crossX > state.lrasX + 0.5;
+        title.textContent = positive ? "Positive output gap" : "Negative output gap";
+        title.setAttribute("font-size", width < 150 ? "12" : "14");
+        amount.textContent = formatBillions(state.gap);
+        var mid = Math.max(150, Math.min(560, leftEdge + width / 2));
+        var labelY = Math.min(axisY - 28, Math.max(top + 22, top + (axisY - top) * 0.42));
+        title.setAttribute("x", mid.toFixed(1));
+        title.setAttribute("y", labelY.toFixed(1));
+        amount.setAttribute("x", mid.toFixed(1));
+        amount.setAttribute("y", (labelY + 16).toFixed(1));
+        title.setAttribute("visibility", "visible");
+        amount.setAttribute("visibility", "visible");
+      }
+
+      function drawDiagram(adShift, lrasShift, srasShift, origin) {
+        var state = economy(adShift, srasShift, lrasShift);
+        var srasMoved = Math.abs(srasShift - START.sras) >= 0.5;
+        if (srasMoved) {
+          var srasBase = visibleSras(START.sras);
+          setLine("sras-base", srasBase);
+          if (srasBase) placeSrasLabel(document.getElementById("sras-base-label"), srasBase, "SRAS", true, adEqX);
+          else document.getElementById("sras-base-label").setAttribute("visibility", "hidden");
+        } else {
+          document.getElementById("sras-base").setAttribute("visibility", "hidden");
+          document.getElementById("sras-base-label").setAttribute("visibility", "hidden");
+        }
+        var srasNow = visibleSras(srasShift);
+        setLine("sras-current", srasNow);
+        if (srasNow) placeSrasLabel(document.getElementById("sras-label"), srasNow, srasMoved ? "SRAS1" : "SRAS", false, adEqX + lrasShift);
+
+        var adMoved = Math.abs(adShift - START.ad) >= 0.5;
+        var adNow = visibleAd(adShift);
+        setLine("ad-current", adNow);
+        if (adNow) placeLabel(document.getElementById("ad-current-label"), adNow[1], adMoved ? "AD1" : "AD", false);
+        if (adMoved) {
+          var adWas = visibleAd(START.ad);
+          setLine("ad-base", adWas);
+          if (adWas) {
+            placeLabel(document.getElementById("ad-base-label"), adWas[1], "AD", true);
+            var adBaseLabel = document.getElementById("ad-base-label");
+            adBaseLabel.setAttribute("y", (Number(adBaseLabel.getAttribute("y")) - 22).toFixed(1));
+          }
+        } else {
+          document.getElementById("ad-base").setAttribute("visibility", "hidden");
+          document.getElementById("ad-base-label").setAttribute("visibility", "hidden");
+        }
+
+        var lrasX = Math.max(110, Math.min(690, state.lrasX));
+        var lras = document.getElementById("lras-current");
+        lras.setAttribute("x1", lrasX.toFixed(1));
+        lras.setAttribute("x2", lrasX.toFixed(1));
+        var lrasMoved = Math.abs(lrasShift - START.lras) >= 0.5;
+        var lrasLabel = document.getElementById("lras-label");
+        lrasLabel.textContent = lrasMoved ? "LRAS1" : "LRAS";
+        var lrasToTheRight = lrasMoved && lrasX > adEqX;
+        lrasLabel.setAttribute("text-anchor", lrasToTheRight ? "start" : "end");
+        lrasLabel.setAttribute("x", (lrasToTheRight ? lrasX + 8 : lrasX - 8).toFixed(1));
+        lrasLabel.setAttribute("y", "30");
+        document.getElementById("yfe-label").setAttribute("x", lrasX.toFixed(1));
+        var lrasBase = document.getElementById("lras-base");
+        var lrasBaseLabel = document.getElementById("lras-base-label");
+        lrasBase.setAttribute("visibility", lrasMoved ? "visible" : "hidden");
+        lrasBaseLabel.setAttribute("visibility", lrasMoved ? "visible" : "hidden");
+        if (lrasMoved) {
+          lrasBase.setAttribute("x1", String(adEqX));
+          lrasBase.setAttribute("x2", String(adEqX));
+          lrasBaseLabel.setAttribute("text-anchor", lrasToTheRight ? "end" : "start");
+          lrasBaseLabel.setAttribute("x", (lrasToTheRight ? adEqX - 8 : adEqX + 8).toFixed(1));
+          lrasBaseLabel.setAttribute("y", "96");
+        }
+
+        var dot = document.getElementById("ad-dot");
+        var dotX = Math.max(80, Math.min(710, state.crossX));
+        var dotY = Math.max(36, Math.min(360, state.crossY));
+        dot.setAttribute("cx", dotX.toFixed(1));
+        dot.setAttribute("cy", dotY.toFixed(1));
+        var pLine = document.getElementById("p-line");
+        pLine.setAttribute("x1", "72");
+        pLine.setAttribute("x2", Math.max(80, dotX - 8).toFixed(1));
+        pLine.setAttribute("y1", dotY.toFixed(1));
+        pLine.setAttribute("y2", dotY.toFixed(1));
+        document.getElementById("p-label").setAttribute("y", (dotY + 5).toFixed(1));
+        var yLine = document.getElementById("y-line");
+        var yLabel = document.getElementById("y-label");
+        if (Math.abs(state.crossX - lrasX) > 12) {
+          yLine.setAttribute("visibility", "visible");
+          yLabel.setAttribute("visibility", "visible");
+          yLine.setAttribute("x1", dotX.toFixed(1));
+          yLine.setAttribute("x2", dotX.toFixed(1));
+          yLine.setAttribute("y1", Math.min(axisY, dotY + 8).toFixed(1));
+          yLine.setAttribute("y2", String(axisY));
+          yLabel.setAttribute("x", dotX.toFixed(1));
+        } else {
+          yLine.setAttribute("visibility", "hidden");
+          yLabel.setAttribute("visibility", "hidden");
+        }
+        markOutputGap(state);
+
+        var arrowY = Math.max(70, Math.min(300, dotY - 28));
+        var fromX = adEqX + (arrowY - adEqY) / adSlope;
+        var srasArrowY = Math.max(70, Math.min(300, 150));
+        function srasXAt(y, shift) { return adEqX + (adEqY - y) / adSlope + shift; }
+        var guard = 0;
+        while (guard < 14) {
+          var targetX = srasXAt(srasArrowY, srasShift);
+          if (targetX < 156 && srasArrowY > 68) srasArrowY -= 8;
+          else if (targetX > 640 && srasArrowY < 300) srasArrowY += 8;
+          else break;
+          guard += 1;
+        }
+        var srasFromX = adEqX + (adEqY - srasArrowY) / adSlope;
+        showShiftArrow(document.getElementById("ad-arrow"), document.getElementById("ad-arrow-head"), fromX + origin.ad, fromX + adShift, arrowY);
+        showShiftArrow(document.getElementById("sras-arrow"), document.getElementById("sras-arrow-head"), srasFromX + origin.sras, srasFromX + srasShift, srasArrowY, 72);
+        showShiftArrow(document.getElementById("as-arrow"), document.getElementById("as-arrow-head"), adEqX + origin.lras, adEqX + lrasShift, axisY - 18);
+      }
+
+      function updateShiftBar() {
+        var labels = pendingLabels();
+        var map = { "Shift AD": "btn-shift-ad", "Shift SRAS": "btn-shift-sras", "Shift LRAS": "btn-shift-lras" };
+        Object.keys(map).forEach(function (label) {
+          document.getElementById(map[label]).hidden = !scenarioOn || labels.indexOf(label) === -1;
+        });
+        var bar = document.getElementById("shift-bar");
+        bar.hidden = !scenarioOn || labels.length === 0;
+        document.getElementById("diagram-panel").classList.toggle("is-pending", scenarioOn && labels.length > 0);
+      }
+
+      function updateUI() {
+        if (!scenarioOn) return;
+        var state = economy(shown.ad, shown.sras, shown.lras);
+        updateReadout(state);
+        updateAims(state);
+        drawLorenz(state);
+        updateWeights();
+        updateShiftBar();
+        var pending = pendingLabels();
+        var note = lesson(state);
+        if (pending.length && !targetsMet(state)) note += " Press " + pending.join(" and ") + ".";
+        document.getElementById("scenario-note").textContent = note;
+        var movedFromStart = !sameShift(shown, START);
+        var shiftsFinished = pending.length === 0 && movedFromStart;
+        document.getElementById("policy-panel").hidden = shiftsFinished;
+        document.getElementById("btn-amend").hidden = targetsMet(state) || !movedFromStart;
+        var message = explain(state);
+        document.getElementById("ad-label").textContent = message;
+        document.getElementById("ad-chart").setAttribute("aria-label", message);
+      }
+
+      function sameShift(a, b) {
+        return Math.abs(a.ad - b.ad) < 0.5 && Math.abs(a.lras - b.lras) < 0.5 && Math.abs(a.sras - b.sras) < 0.5;
+      }
+
+      function setShiftButtons(disabled) {
+        ["btn-shift-ad", "btn-shift-sras", "btn-shift-lras"].forEach(function (id) {
+          document.getElementById(id).disabled = disabled;
+        });
+      }
+
+      function animateShift(target) {
+        var start = { ad: shown.ad, lras: shown.lras, sras: shown.sras };
+        if (sameShift(start, target)) {
+          updateUI();
+          return;
+        }
+        if (shiftFrame) cancelAnimationFrame(shiftFrame);
+        shiftOrigin = { ad: start.ad, lras: start.lras, sras: start.sras };
+        setShiftButtons(true);
+        var began = performance.now();
+        function frame(now) {
+          var t = Math.min(1, (now - began) / 700);
+          var eased = 1 - Math.pow(1 - t, 3);
+          drawDiagram(
+            start.ad + (target.ad - start.ad) * eased,
+            start.lras + (target.lras - start.lras) * eased,
+            start.sras + (target.sras - start.sras) * eased,
+            shiftOrigin
+          );
+          if (t < 1) {
+            shiftFrame = requestAnimationFrame(frame);
+          } else {
+            shiftFrame = 0;
+            shown = { ad: target.ad, lras: target.lras, sras: target.sras };
+            drawDiagram(shown.ad, shown.lras, shown.sras, shiftOrigin);
+            setShiftButtons(false);
+            updateUI();
+          }
+        }
+        shiftFrame = requestAnimationFrame(frame);
+      }
+
+      function shiftCurve(curve) {
+        var target = targetShift();
+        var next = { ad: shown.ad, sras: shown.sras, lras: shown.lras };
+        next[curve] = target[curve];
+        if (sameShift(next, target)) document.getElementById("policy-panel").hidden = true;
+        animateShift(next);
+      }
+
+      function clearPolicies() {
+        document.querySelectorAll("#policy-panel button[data-choice]").forEach(function (button) {
+          button.setAttribute("aria-pressed", "false");
+        });
+        updateWeights();
+      }
+
+      function showScenario() {
+        if (shiftFrame) cancelAnimationFrame(shiftFrame);
+        shiftFrame = 0;
+        setShiftButtons(false);
+        scenarioOn = true;
+        shown = { ad: START.ad, sras: START.sras, lras: START.lras };
+        shiftOrigin = { ad: START.ad, sras: START.sras, lras: START.lras };
+        clearPolicies();
+        var story = document.getElementById("scenario-story");
+        story.hidden = false;
+        story.open = true;
+        document.getElementById("scenario-steps").hidden = false;
+        document.getElementById("diagram-panel").hidden = false;
+        document.getElementById("policy-panel").hidden = false;
+        drawDiagram(START.ad, START.lras, START.sras, shiftOrigin);
+        updateUI();
+        story.scrollIntoView({ block: "nearest" });
+      }
+
+      function resetPolicies() {
+        if (!scenarioOn) return;
+        if (shiftFrame) cancelAnimationFrame(shiftFrame);
+        shiftFrame = 0;
+        setShiftButtons(false);
+        clearPolicies();
+        shown = { ad: START.ad, sras: START.sras, lras: START.lras };
+        shiftOrigin = { ad: START.ad, sras: START.sras, lras: START.lras };
+        drawDiagram(START.ad, START.lras, START.sras, shiftOrigin);
+        updateUI();
+      }
+
+      document.getElementById("btn-scenario").addEventListener("click", showScenario);
+      document.getElementById("policy-panel").addEventListener("click", function (event) {
+        var button = event.target.closest("button[data-choice]");
+        if (!button) return;
+        var buttonTop = button.getBoundingClientRect().top;
+        var turningOn = button.getAttribute("aria-pressed") !== "true";
+        var group = button.getAttribute("data-group");
+        if (group) {
+          document.querySelectorAll('#policy-panel button[data-group="' + group + '"]').forEach(function (other) {
+            other.setAttribute("aria-pressed", "false");
+          });
+        }
+        button.setAttribute("aria-pressed", turningOn ? "true" : "false");
+        updateWeights();
+        updateUI();
+        function holdPage() {
+          var drift = button.getBoundingClientRect().top - buttonTop;
+          if (Math.abs(drift) > 0.5) window.scrollBy(0, drift);
+        }
+        holdPage();
+        requestAnimationFrame(holdPage);
+      });
+      document.getElementById("btn-shift-ad").addEventListener("click", function () { shiftCurve("ad"); });
+      document.getElementById("btn-shift-sras").addEventListener("click", function () { shiftCurve("sras"); });
+      document.getElementById("btn-shift-lras").addEventListener("click", function () { shiftCurve("lras"); });
+      document.getElementById("btn-amend").addEventListener("click", function () {
+        if (!scenarioOn) return;
+        if (shiftFrame) cancelAnimationFrame(shiftFrame);
+        shiftFrame = 0;
+        setShiftButtons(false);
+        var scrollX = window.scrollX;
+        var scrollY = window.scrollY;
+        shown = { ad: START.ad, sras: START.sras, lras: START.lras };
+        shiftOrigin = { ad: START.ad, sras: START.sras, lras: START.lras };
+        drawDiagram(START.ad, START.lras, START.sras, shiftOrigin);
+        updateUI();
+        window.scrollTo(scrollX, scrollY);
+      });
+      document.getElementById("btn-reset").addEventListener("click", resetPolicies);
+      document.getElementById("btn-save").addEventListener("click", function () {
+        var svg = document.getElementById("ad-chart");
+        var clone = svg.cloneNode(true);
+        clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        var background = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        background.setAttribute("width", "760");
+        background.setAttribute("height", "430");
+        background.setAttribute("fill", "#fffaf3");
+        clone.insertBefore(background, clone.firstChild);
+        var xml = new XMLSerializer().serializeToString(clone);
+        var url = URL.createObjectURL(new Blob([xml], { type: "image/svg+xml;charset=utf-8" }));
+        var image = new Image();
+        image.onload = function () {
+          var scale = 2;
+          var canvas = document.createElement("canvas");
+          canvas.width = 760 * scale;
+          canvas.height = 430 * scale;
+          var context = canvas.getContext("2d");
+          context.fillStyle = "#fffaf3";
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          canvas.toBlob(function (png) {
+            var fileUrl = URL.createObjectURL(png);
+            var link = document.createElement("a");
+            link.href = fileUrl;
+            link.download = "growth-and-wealth-equality.png";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(fileUrl);
+          }, "image/png");
+        };
+        image.onerror = function () { URL.revokeObjectURL(url); };
+        image.src = url;
+      });
+    })();
+  </script>
+</body>
+</html>
