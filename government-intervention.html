@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Government Intervention</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #e4d9c8;
+      --paper: #f7f1e8;
+      --card: #fffaf3;
+      --accent: #9a3412;
+      --accent-soft: #f3e2d4;
+      --ok: #166534;
+      --ok-bg: #e7f6ec;
+      --ok-line: #b7e4c7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    a { color: inherit; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 0 22px 64px; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 22px 0 8px;
+    }
+    .mark {
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+      line-height: 1.15;
+    }
+    .mark span { color: var(--accent); }
+    header nav a {
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.92rem;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 1px;
+    }
+    h2 {
+      margin: 36px 0 8px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+    h3 {
+      margin: 20px 0 12px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+    h4 {
+      margin: 0 0 10px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .lede {
+      margin: 0 0 16px;
+      max-width: 70ch;
+      color: var(--muted);
+    }
+    .col-title {
+      margin: 0 0 8px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.05rem;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 16px;
+      align-items: start;
+      margin: 0 0 28px;
+    }
+    .stage-empty {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      min-height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .figure-stack {
+      display: grid;
+      gap: 12px;
+    }
+    .figure-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 8px 8px 10px;
+      min-width: 0;
+    }
+    .figure-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fff;
+    }
+    .figure-label {
+      margin: 8px 0 0;
+      text-align: center;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .figure-explain {
+      margin: 0;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--ok-bg);
+      border: 1px solid var(--ok-line);
+      color: var(--ok);
+      font-size: 0.98rem;
+      line-height: 1.45;
+    }
+    .tray-wrap { position: sticky; top: 16px; }
+    .tray {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+    }
+    .chip {
+      display: block;
+      width: 100%;
+      text-align: left;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+    }
+    .chip:hover { background: var(--accent-soft); }
+    .chip.on {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .chip:focus-visible, .save-diagram:focus-visible, .question:focus-visible, a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .save-row {
+      margin: 10px 0 0;
+    }
+    .save-diagram {
+      font: inherit;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .save-diagram:hover { background: var(--accent-soft); }
+    .save-diagram:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: var(--card);
+    }
+    .practice {
+      max-width: 880px;
+    }
+    .question {
+      display: block;
+      width: 100%;
+      text-align: left;
+      font: inherit;
+      font-weight: 700;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+    }
+    .question:hover { background: var(--accent-soft); }
+    .question + .question { margin-top: 10px; }
+    @media (max-width: 860px) {
+      .board { grid-template-columns: 1fr; }
+      .tray-wrap { position: static; }
+      .tray {
+        max-height: none;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .chip { width: auto; }
+    }
+      .start-practice-row { margin: 8px 0 28px; }
+    .start-practice {
+      font: inherit;
+      font-weight: 700;
+      color: #fffaf3;
+      background: var(--ink);
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      cursor: pointer;
+    }
+    .start-practice:hover { background: #312a22; }
+    .start-practice:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .practice[hidden], .revision-block[hidden], .start-practice-row[hidden] { display: none !important; }
+  </style>
+  <link rel="stylesheet" href="diagram-economist.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="mark" href="Diagram Economist.html">The Diagram <span>Economist</span></a>
+      <nav><a href="Diagram Economist/exam-practice.html">Back</a></nav>
+    </header>
+    <main>
+      <div class="revision-block" id="revisionBlock">
+      <h2>Government Intervention</h2>
+      <p class="lede">Revise the diagrams first. Click a use to open its diagram and explanation.</p>
+      <section class="revision" aria-label="Government intervention revision">
+        <div class="board">
+          <div>
+            <h3 class="col-title">Diagram</h3>
+            <div id="revStage">
+              <div class="stage-empty">Click a use to show its diagram and explanation.</div>
+            </div>
+            <p class="save-row">
+              <button type="button" class="save-diagram" id="saveDiagram" disabled>Save the diagram</button>
+            </p>
+          </div>
+          <div class="tray-wrap">
+            <h3 class="col-title">Click the correct use</h3>
+            <div class="tray" id="revTray" role="list"></div>
+          </div>
+        </div>
+      </section>
+      </div>
+      <p class="start-practice-row" id="startPracticeRow">
+        <button type="button" class="start-practice" id="startPractice">Start practice questions</button>
+      </p>
+      <div class="practice" id="practiceBlock" hidden>
+        <h2>Practice questions</h2>
+        <button type="button" class="question" data-answer="solar-tariff-revenue-answer.png">Can you draw a diagram that identifies the amount of tariff revenue the government would collect following the imposition of a tariff to protect domestic producers of solar panels.</button>
+        <h3>Indirect tax (specific + ad valorem)</h3>
+        <h4>Level 2</h4>
+        <button type="button" class="question" data-answer="specific-tax-low-high-price-answer.png">A government imposes a specific tax per unit. Draw a diagram that shows the amount of tax due at a low priced products and at high priced products.</button>
+        <button type="button" class="question" data-answer="ad-valorem-tax-supply-answer.png">Illustrate, using a diagram, how the imposition of an ad valorem indirect tax affects the supply of a product and market equilibrium.</button>
+        <h3>Subsidy</h3>
+        <h4>Level 2</h4>
+        <button type="button" class="question" data-answer="subsidy-s-to-s1-gains-answer.png">Using the subsidy diagram, explain how the introduction of a subsidy shifts supply from S to S1 and identify the gains to consumers and producers.</button>
+        <button type="button" class="question" data-starter="subsidy-elasticity-effectiveness-starter.png" data-answer="subsidy-elasticity-effectiveness-answer.png">Using diagrams, explain how the effectiveness of a subsidy depends on the price elasticity of demand.</button>
+        <h3>Minimum price (price floor)</h3>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-starter="minimum-price-surplus-starter.png" data-answer="minimum-price-surplus-answer.png">Using the diagram, identify the size of the surplus created by the minimum price.</button>
+        <h3>Maximum price (price ceiling)</h3>
+        <h4>Level 2</h4>
+        <button type="button" class="question" data-answer="maximum-price-quantity-answer.png">Draw a market diagram that explains why a maximum price increases quantity demanded but reduces quantity supplied.</button>
+        <h3>Buffer stock schemes</h3>
+        <button type="button" class="question" data-answer="buffer-stock-excess-supply-answer.png">Using a diagram, show why a government may need to purchase excess supply when operating a buffer stock scheme.</button>
+        <h3>Pollution permits (tradable permits)</h3>
+        <button type="button" class="question" data-answer="pollution-permits-negative-externality-answer.png">Using a diagram, illustrate how a market for pollution permits can help correct a negative production externality.</button>
+      </div>
+    </main>
+  </div>
+  <script>
+    (function () {
+      var FIGURES = [
+        {
+          id: "min-price",
+          label: "Minimum price (price floor)",
+          src: "Diagram Economist/minimum-price-floor.png",
+          explain: "The government sets a minimum price at P2, above the equilibrium price Pe. At this higher price, quantity demanded falls from Qe to Q1 while quantity supplied rises from Qe to Q2. This creates excess supply equal to Q2 − Q1."
+        },
+        {
+          id: "max-price",
+          label: "Maximum price (price ceiling)",
+          src: "Diagram Economist/maximum-price-ceiling.png",
+          explain: "A maximum price set below the equilibrium price reduces the market price from Pe to Pm. At the lower price, quantity demanded rises from Qe to Q2 while quantity supplied falls from Qe to Q1. This creates excess demand or a shortage equal to Q2 − Q1."
+        },
+        {
+          id: "buffer",
+          label: "Buffer stock schemes",
+          src: "Diagram Economist/buffer-stock-schemes.png",
+          explain: "A buffer stock scheme sets a price band to stabilise a commodity market. When the free-market price would fall below the floor, the agency buys surplus stock and stores it. When the price would rise above the ceiling, it sells from the stockpile. Buying supports price and selling releases supply, so the market price stays inside the band."
+        },
+        {
+          id: "specific",
+          label: "Indirect tax (specific tax)",
+          src: "Diagram Economist/indirect-tax-specific.png",
+          explain: "A specific tax is a fixed amount per unit. It raises firms’ costs equally at every price, so the supply curve shifts vertically upwards from S to S1 by the full amount of the tax. The vertical gap between S and S1 is the tax per unit. Consumers usually pay a higher price and buy less; producers receive less after tax."
+        },
+        {
+          id: "ad-valorem",
+          label: "Ad valorem tax",
+          src: "Diagram Economist/ad-valorem-tax.png",
+          explain: "An ad valorem tax is levied as a percentage of the selling price. As prices increase, the amount of tax paid rises, causing the supply curve to shift from S to S1 by a larger amount at higher prices. Consequently, the post-tax supply curve is not parallel to the original supply curve."
+        },
+        {
+          id: "subsidy",
+          label: "Subsidy",
+          src: "Diagram Economist/subsidy.png",
+          explain: "A subsidy lowers firms’ costs of production, so supply shifts right from S to S1. Equilibrium price falls and quantity rises. Consumers gain from the lower price and higher quantity; producers gain from receiving the market price plus the subsidy per unit. The vertical gap between S and S1 is the subsidy per unit."
+        },
+        {
+          id: "tariff",
+          label: "Tariff (import duty)",
+          src: "Diagram Economist/tariff-diagram.png",
+          explain: "A tariff raises the price of imports from the world price to a higher domestic price. Domestic producers supply more and domestic consumers buy less, so imports shrink. The government collects tariff revenue on the remaining imports: the tax per unit multiplied by the quantity still imported."
+        },
+        {
+          id: "quota",
+          label: "Quota (import restriction)",
+          src: "Diagram Economist/quota-import-restriction.png",
+          explain: "A quota caps the volume of imports allowed into the country. With fewer imports available, the domestic price rises above the world price. Domestic firms expand output and consumers reduce quantity demanded. Unlike a tariff, a quota does not automatically raise government tax revenue unless licences are sold."
+        }
+      ];
+
+      var stage = document.getElementById("revStage");
+      var tray = document.getElementById("revTray");
+      var saveBtn = document.getElementById("saveDiagram");
+      var current = null;
+      var currentFig = null;
+
+      function esc(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function fileName(src) {
+        return (src.split("/").pop() || "diagram.png").split("?")[0];
+      }
+
+      function renderTray() {
+        tray.innerHTML = FIGURES.map(function (fig) {
+          var cls = "chip" + (current === fig.id ? " on" : "");
+          return '<button type="button" class="' + cls + '" data-id="' + esc(fig.id) + '" role="listitem">' +
+            esc(fig.label) +
+            "</button>";
+        }).join("");
+      }
+
+      function show(fig) {
+        current = fig.id;
+        currentFig = fig;
+        saveBtn.disabled = false;
+        stage.innerHTML =
+          '<div class="figure-stack">' +
+            '<div class="figure-card">' +
+              '<img src="' + esc(fig.src) + '" alt="' + esc(fig.label) + '">' +
+              '<p class="figure-label">' + esc(fig.label) + "</p>" +
+            "</div>" +
+            '<p class="figure-explain">' + esc(fig.explain) + "</p>" +
+          "</div>";
+        renderTray();
+      }
+
+      function saveDiagram() {
+        if (!currentFig) return;
+        var src = currentFig.src;
+        var name = fileName(src);
+        fetch(src)
+          .then(function (res) { return res.blob(); })
+          .then(function (blob) {
+            var url = URL.createObjectURL(blob);
+            var link = document.createElement("a");
+            link.href = url;
+            link.download = name;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+          })
+          .catch(function () {
+            var link = document.createElement("a");
+            link.href = src;
+            link.download = name;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+          });
+      }
+
+      tray.addEventListener("click", function (event) {
+        var btn = event.target.closest("[data-id]");
+        if (!btn) return;
+        var id = btn.getAttribute("data-id");
+        for (var i = 0; i < FIGURES.length; i++) {
+          if (FIGURES[i].id === id) {
+            show(FIGURES[i]);
+            return;
+          }
+        }
+      });
+
+      saveBtn.addEventListener("click", saveDiagram);
+      renderTray();
+    })();
+  </script>
+  <script src="revision-practice.js?v=20261107"></script>
+  <script src="exam-question.js?v=20261107return"></script>
+</body>
+</html>

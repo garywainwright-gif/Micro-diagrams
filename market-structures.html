@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Market Structures</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #e4d9c8;
+      --paper: #f7f1e8;
+      --card: #fffaf3;
+      --accent: #9a3412;
+      --accent-soft: #f3e2d4;
+      --ok: #166534;
+      --ok-bg: #e7f6ec;
+      --ok-line: #b7e4c7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    a { color: inherit; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 0 22px 64px; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 22px 0 8px;
+    }
+    .mark {
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+      line-height: 1.15;
+    }
+    .mark span { color: var(--accent); }
+    header nav a {
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.92rem;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 1px;
+    }
+    h2 {
+      margin: 36px 0 8px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+    h3 {
+      margin: 20px 0 12px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+    h4 {
+      margin: 0 0 10px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .lede {
+      margin: 0 0 16px;
+      max-width: 70ch;
+      color: var(--muted);
+    }
+    .col-title {
+      margin: 0 0 8px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.05rem;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 16px;
+      align-items: start;
+      margin: 0 0 28px;
+    }
+    .stage-empty {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      min-height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .figure-stack {
+      display: grid;
+      gap: 12px;
+    }
+    .figure-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 8px 8px 10px;
+      min-width: 0;
+    }
+    .figure-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fff;
+    }
+    .figure-label {
+      margin: 8px 0 0;
+      text-align: center;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .figure-explain {
+      margin: 0;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--ok-bg);
+      border: 1px solid var(--ok-line);
+      color: var(--ok);
+      font-size: 0.98rem;
+      line-height: 1.45;
+    }
+    .tray-wrap { position: sticky; top: 16px; }
+    .tray {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+    }
+    .chip {
+      display: block;
+      width: 100%;
+      text-align: left;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+    }
+    .chip:hover { background: var(--accent-soft); }
+    .chip.on {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .chip:focus-visible, .save-diagram:focus-visible, .question:focus-visible, a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .save-row {
+      margin: 10px 0 0;
+    }
+    .save-diagram {
+      font: inherit;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .save-diagram:hover { background: var(--accent-soft); }
+    .save-diagram:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: var(--card);
+    }
+    .practice {
+      max-width: 880px;
+    }
+    .question {
+      display: block;
+      width: 100%;
+      text-align: left;
+      font: inherit;
+      font-weight: 700;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+    }
+    .question + .question { margin-top: 10px; }
+    .question:hover { background: var(--accent-soft); }
+    @media (max-width: 860px) {
+      .board { grid-template-columns: 1fr; }
+      .tray-wrap { position: static; }
+      .tray {
+        max-height: none;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .chip { width: auto; }
+    }
+      .start-practice-row { margin: 8px 0 28px; }
+    .start-practice {
+      font: inherit;
+      font-weight: 700;
+      color: #fffaf3;
+      background: var(--ink);
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      cursor: pointer;
+    }
+    .start-practice:hover { background: #312a22; }
+    .start-practice:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .practice[hidden], .revision-block[hidden], .start-practice-row[hidden] { display: none !important; }
+  </style>
+  <link rel="stylesheet" href="diagram-economist.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="mark" href="Diagram Economist.html">The Diagram <span>Economist</span></a>
+      <nav><a href="Diagram Economist/exam-practice.html">Back</a></nav>
+    </header>
+    <main>
+      <div class="revision-block" id="revisionBlock">
+      <h2>Market Structures</h2>
+      <p class="lede">Revise the firms diagrams first. Click a use to open its diagram and explanation.</p>
+      <section class="revision" aria-label="Firms diagrams revision">
+        <div class="board">
+          <div>
+            <h3 class="col-title">Diagram</h3>
+            <div id="revStage">
+              <div class="stage-empty">Click a use to show its diagram and explanation.</div>
+            </div>
+            <p class="save-row">
+              <button type="button" class="save-diagram" id="saveDiagram" disabled>Save the diagram</button>
+            </p>
+          </div>
+          <div class="tray-wrap">
+            <h3 class="col-title">Click the correct use</h3>
+            <div class="tray" id="revTray" role="list"></div>
+          </div>
+        </div>
+      </section>
+      </div>
+      <p class="start-practice-row" id="startPracticeRow">
+        <button type="button" class="start-practice" id="startPractice">Start practice questions</button>
+      </p>
+      <div class="practice" id="practiceBlock" hidden>
+        <h2>Practice questions</h2>
+        <h3>Perfect competition (short run + long run)</h3>
+        <button type="button" class="question" data-answer="perfect-competition-long-run-normal-profit-answer.png">Using a diagram, illustrate why firms in perfect competition earn only normal profit in the long run.</button>
+        <button type="button" class="question" data-answer="perfect-competition-entry-normal-profit-answer.png">Using a diagram, show how entry of new firms leads to normal profit in perfect competition.</button>
+        <button type="button" class="question" data-answer="perfect-competition-efficiency-answer.png">Draw a diagram showing productive and allocative efficiency, for a firm in perfect competition.</button>
+        <h3>Monopoly (profit max, revenue curves)</h3>
+        <h3>Price discrimination (1st, 2nd, 3rd degree)</h3>
+        <button type="button" class="question" data-starter="peak-off-peak-price-discrimination-starter.png" data-answer="peak-off-peak-price-discrimination-answer.png">Diagram 1 shows the situation for peak time passengers after their train operator introduced price discrimination to maximise profits. Show the effect of this on the consumer surplus for off peak passengers.</button>
+        <h3>Monopolistic competition</h3>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-answer="monopolistic-productive-efficiency-answer.png">For a firm in a monopolistically competitive market, draw a diagram to show the point that represents productive efficiency.</button>
+        <h3>Oligopoly (kinked demand curve)</h3>
+        <h3>Contestable markets</h3>
+        <h3>Natural monopoly (LRAC shape + regulation)</h3>
+      </div>
+    </main>
+  </div>
+  <script>
+    (function () {
+      var FIGURES = [
+        {
+          id: "monopoly",
+          label: "Monopoly",
+          src: "Diagram Economist/monopoly-diagram.png",
+          explain: "A monopoly faces the market demand curve, so AR slopes down and MR lies below AR. The firm maximises profit where MR = MC and then reads price from the demand (AR) curve. Compared with perfect competition, output is lower and price is higher, creating the potential for supernormal profit and allocative inefficiency."
+        },
+        {
+          id: "monop-sr",
+          label: "Monopolistic competition (short run)",
+          src: "Diagram Economist/monopolistic-competition-short-run.png",
+          explain: "In the short run a monopolistically competitive firm has a downward-sloping demand curve because products are differentiated. It maximises profit where MR = MC. If price is above AC at that output, the firm makes supernormal profit; if price is below AC, it makes a loss."
+        },
+        {
+          id: "monop-lr",
+          label: "Monopolistic competition (long run, tangency)",
+          src: "Diagram Economist/monopolistic-competition-long-run.png",
+          explain: "In the long run free entry erodes supernormal profit. The firm’s demand curve shifts left until it is tangent to AC at the profit-maximising output where MR = MC. Price equals AC, so only normal profit remains. The firm is neither productively nor allocatively efficient."
+        },
+        {
+          id: "perfect",
+          label: "Perfect competition (firm)",
+          src: "Diagram Economist/perfect-competition-firm.png",
+          explain: "A perfectly competitive firm is a price taker, so AR = MR is a horizontal line at the market price. It produces where MR = MC. In the long run free entry drives price to minimum AC, so the firm earns normal profit and can achieve productive and allocative efficiency."
+        },
+        {
+          id: "perfect-demand-rise",
+          label: "Perfect competition (demand rises, supernormal profit)",
+          src: "Diagram Economist/perfect-competition-demand-rises-supernormal-profit.png",
+          explain: "If market demand rises, industry price rises from P to P1. The firm faces a higher horizontal D1 = AR = MR line and expands output to where MC = MR at Q1. Because P1 is above AC at that output, the firm earns supernormal profit (the shaded area) in the short run."
+        },
+        {
+          id: "oligopoly",
+          label: "Oligopoly cost curves",
+          src: "Diagram Economist/oligopoly-cost-curves.png",
+          explain: "Oligopoly diagrams often show a kinked demand curve: demand is more elastic above the kink and less elastic below it, because rivals match price cuts but not price rises. That creates a discontinuity in MR. Cost curves can shift within that gap without changing the profit-maximising price and output, helping to explain price rigidity."
+        },
+        {
+          id: "shutdown",
+          label: "Shutdown condition",
+          src: "Diagram Economist/shutdown-condition.png",
+          explain: "In the short run a firm should continue if price covers average variable cost, even if it makes a loss, because fixed costs must be paid anyway. If price falls below AVC, the firm shuts down and produces nothing. The shutdown point is where price equals minimum AVC."
+        },
+        {
+          id: "profit-max",
+          label: "Profit maximisation (MR = MC)",
+          src: "Diagram Economist/profit-maximisation-mr-mc.png",
+          explain: "Firms maximise profit at the output where marginal revenue equals marginal cost. If MR is above MC, an extra unit adds more to revenue than to cost, so profit rises. If MR is below MC, the firm should cut output. Price is then read from the demand or AR curve at that output."
+        }
+      ];
+
+      var stage = document.getElementById("revStage");
+      var tray = document.getElementById("revTray");
+      var saveBtn = document.getElementById("saveDiagram");
+      var current = null;
+      var currentFig = null;
+
+      function esc(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function fileName(src) {
+        return (src.split("/").pop() || "diagram.png").split("?")[0];
+      }
+
+      function renderTray() {
+        tray.innerHTML = FIGURES.map(function (fig) {
+          var cls = "chip" + (current === fig.id ? " on" : "");
+          return '<button type="button" class="' + cls + '" data-id="' + esc(fig.id) + '" role="listitem">' +
+            esc(fig.label) +
+            "</button>";
+        }).join("");
+      }
+
+      function show(fig) {
+        current = fig.id;
+        currentFig = fig;
+        saveBtn.disabled = false;
+        stage.innerHTML =
+          '<div class="figure-stack">' +
+            '<div class="figure-card">' +
+              '<img src="' + esc(fig.src) + '" alt="' + esc(fig.label) + '">' +
+              '<p class="figure-label">' + esc(fig.label) + "</p>" +
+            "</div>" +
+            '<p class="figure-explain">' + esc(fig.explain) + "</p>" +
+          "</div>";
+        renderTray();
+      }
+
+      function saveDiagram() {
+        if (!currentFig) return;
+        var src = currentFig.src;
+        var name = fileName(src);
+        fetch(src)
+          .then(function (res) { return res.blob(); })
+          .then(function (blob) {
+            var url = URL.createObjectURL(blob);
+            var link = document.createElement("a");
+            link.href = url;
+            link.download = name;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+          })
+          .catch(function () {
+            var link = document.createElement("a");
+            link.href = src;
+            link.download = name;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+          });
+      }
+
+      tray.addEventListener("click", function (event) {
+        var btn = event.target.closest("[data-id]");
+        if (!btn) return;
+        var id = btn.getAttribute("data-id");
+        for (var i = 0; i < FIGURES.length; i++) {
+          if (FIGURES[i].id === id) {
+            show(FIGURES[i]);
+            return;
+          }
+        }
+      });
+
+      saveBtn.addEventListener("click", saveDiagram);
+      renderTray();
+    })();
+  </script>
+  <script src="revision-practice.js?v=20261107"></script>
+  <script src="exam-question.js?v=20261107return"></script>
+</body>
+</html>

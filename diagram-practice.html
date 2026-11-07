@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Diagram practice</title>
+  <style>
+    :root {
+      --ink: #0f2a4a;
+      --muted: #4b5d73;
+      --line: #dfe6f3;
+      --paper: #fff;
+      --bg: #f6f8fb;
+      --accent: #183a66;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+    }
+    .book { max-width: 860px; margin: 0 auto; padding: 20px 20px 72px; }
+    .topic {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 22px 24px;
+      margin: 16px 0;
+    }
+    h1 { margin: 0 0 8px; font-size: 1.75rem; }
+    .meta { color: var(--muted); font-size: 0.92rem; margin: 0 0 16px; }
+    .meta a { color: var(--accent); font-weight: 700;     }
+  </style>
+  <link rel="stylesheet" href="diagram-economist.css" />
+</head>
+<body>
+  <div class="book">
+    <article class="topic">
+      <h1>Diagram practice</h1>
+      <div id="diagram-practice-root"></div>
+    </article>
+  </div>
+  <script src="micro-diagram-builder.js?v=20261107return"></script>
+  <script>
+    if (window.MicroDiagramBuilder) {
+      var question = "";
+      var answerImage = "";
+      var starterImage = "";
+      var returnUrl = "";
+      try {
+        var params = new URLSearchParams(window.location.search);
+        question = params.get("question") || "";
+        answerImage = params.get("answer") || "";
+        starterImage = params.get("starter") || "";
+        returnUrl = params.get("from") || "";
+      } catch (err) {}
+      if (!returnUrl) {
+        try {
+          if (document.referrer) {
+            var ref = new URL(document.referrer, window.location.href);
+            if (ref.origin === window.location.origin) {
+              returnUrl = ref.pathname + ref.search;
+              if (!/[?&]practice=1(?:&|$)/.test(returnUrl)) {
+                returnUrl += (returnUrl.indexOf("?") >= 0 ? "&" : "?") + "practice=1";
+              }
+            }
+          }
+        } catch (err2) {}
+      }
+      MicroDiagramBuilder.mount(document.getElementById("diagram-practice-root"), {
+        points: true,
+        showAllAxes: true,
+        hideSaveReplay: true,
+        hideMovementButtons: true,
+        question: question,
+        answerImage: answerImage,
+        starterImage: starterImage,
+        returnUrl: returnUrl
+      });
+    }
+  </script>
+</body>
+</html>

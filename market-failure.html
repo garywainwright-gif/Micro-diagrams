@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Market Failure</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #e4d9c8;
+      --paper: #f7f1e8;
+      --card: #fffaf3;
+      --accent: #9a3412;
+      --accent-soft: #f3e2d4;
+      --ok: #166534;
+      --ok-bg: #e7f6ec;
+      --ok-line: #b7e4c7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    a { color: inherit; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 0 22px 64px; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 22px 0 8px;
+    }
+    .mark {
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+      line-height: 1.15;
+    }
+    .mark span { color: var(--accent); }
+    header nav a {
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.92rem;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 1px;
+    }
+    h2 {
+      margin: 36px 0 8px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+    h3 {
+      margin: 20px 0 12px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+    h4 {
+      margin: 0 0 10px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .lede {
+      margin: 0 0 16px;
+      max-width: 70ch;
+      color: var(--muted);
+    }
+    .col-title {
+      margin: 0 0 8px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.05rem;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 16px;
+      align-items: start;
+      margin: 0 0 28px;
+    }
+    .stage-empty {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      min-height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .figure-stack {
+      display: grid;
+      gap: 12px;
+    }
+    .figure-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 8px 8px 10px;
+      min-width: 0;
+    }
+    .figure-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fff;
+    }
+    .figure-label {
+      margin: 8px 0 0;
+      text-align: center;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .figure-explain {
+      margin: 0;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--ok-bg);
+      border: 1px solid var(--ok-line);
+      color: var(--ok);
+      font-size: 0.98rem;
+      line-height: 1.45;
+    }
+    .tray-wrap { position: sticky; top: 16px; }
+    .tray {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+    }
+    .chip {
+      display: block;
+      width: 100%;
+      text-align: left;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+    }
+    .chip:hover { background: var(--accent-soft); }
+    .chip.on {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .chip:focus-visible, .save-diagram:focus-visible, .question:focus-visible, a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .save-row {
+      margin: 10px 0 0;
+    }
+    .save-diagram {
+      font: inherit;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .save-diagram:hover { background: var(--accent-soft); }
+    .save-diagram:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: var(--card);
+    }
+    .practice {
+      max-width: 880px;
+    }
+    .question {
+      display: block;
+      width: 100%;
+      text-align: left;
+      font: inherit;
+      font-weight: 700;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+    }
+    .question + .question { margin-top: 10px; }
+    .question:hover { background: var(--accent-soft); }
+    @media (max-width: 860px) {
+      .board { grid-template-columns: 1fr; }
+      .tray-wrap { position: static; }
+      .tray {
+        max-height: none;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .chip { width: auto; }
+    }
+      .start-practice-row { margin: 8px 0 28px; }
+    .start-practice {
+      font: inherit;
+      font-weight: 700;
+      color: #fffaf3;
+      background: var(--ink);
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      cursor: pointer;
+    }
+    .start-practice:hover { background: #312a22; }
+    .start-practice:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .practice[hidden], .revision-block[hidden], .start-practice-row[hidden] { display: none !important; }
+  </style>
+  <link rel="stylesheet" href="diagram-economist.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="mark" href="Diagram Economist.html">The Diagram <span>Economist</span></a>
+      <nav><a href="Diagram Economist/exam-practice.html">Back</a></nav>
+    </header>
+    <main>
+      <div class="revision-block" id="revisionBlock">
+      <h2>Market Failure</h2>
+      <p class="lede">Revise the market failure diagrams first. Click a use to open its diagram and explanation.</p>
+      <section class="revision" aria-label="Market failure revision">
+        <div class="board">
+          <div>
+            <h3 class="col-title">Diagram</h3>
+            <div id="revStage">
+              <div class="stage-empty">Click a use to show its diagram and explanation.</div>
+            </div>
+            <p class="save-row">
+              <button type="button" class="save-diagram" id="saveDiagram" disabled>Save the diagram</button>
+            </p>
+          </div>
+          <div class="tray-wrap">
+            <h3 class="col-title">Click the correct use</h3>
+            <div class="tray" id="revTray" role="list"></div>
+          </div>
+        </div>
+      </section>
+      </div>
+      <p class="start-practice-row" id="startPracticeRow">
+        <button type="button" class="start-practice" id="startPractice">Start practice questions</button>
+      </p>
+      <div class="practice" id="practiceBlock" hidden>
+        <h2>Practice questions</h2>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-answer="rental-housing-disequilibrium-answer.png">Draw a diagram that shows the market for houses to rent in disequilibrium, where potential tenants who would like to rent a house cannot find a house to rent.</button>
+        <h3>Negative externalities (production + consumption)</h3>
+        <h4>Level 2</h4>
+        <button type="button" class="question" data-answer="negative-externality-overconsumption-answer.png">Draw a diagram, that explains why the free market leads to overconsumption of a good that generates negative externalities, and identify overconsumption at Qe and Q1.</button>
+        <button type="button" class="question" data-answer="negative-production-externality-answer.png">A manufacturing firm releases pollution into a nearby river during production. Using a diagram, explain how this can result in market failure.</button>
+        <h3>Positive externalities (production + consumption)</h3>
+        <h4>Level 2</h4>
+        <button type="button" class="question" data-answer="positive-externality-merit-good-answer.png">Using a labelled diagram, illustrate how positive externalities in the consumption of a merit good lead to under‑consumption in the free market and create a welfare‑loss triangle.</button>
+        <button type="button" class="question" data-answer="positive-externality-welfare-gain-answer.png">Using a labelled diagram, illustrate how positive externalities lead to underconsumption in the free market and show the welfare gain from increasing consumption to the socially optimal level.</button>
+        <h3>Social vs private cost curves (MSC, MPC)</h3>
+        <h3>Social vs private benefit curves (MSB, MPB)</h3>
+        <h3>Welfare loss from externalities</h3>
+        <h3>Public goods (non‑excludable / non‑rival)</h3>
+        <h3>Common resources (overuse)</h3>
+      </div>
+    </main>
+  </div>
+  <script>
+    (function () {
+      var FIGURES = [
+        {
+          id: "negative",
+          label: "Negative externalities",
+          src: "Diagram Economist/negative-externalities.png?v=20261030",
+          explain: "The market equilibrium occurs at B where MPB equals MPC, resulting in output Qe. However, because producers do not take account of external costs, MSC lies above MPC. The socially efficient equilibrium is at C where MSC equals MSB, giving output Q1. Consequently, the market overproduces from Q1 to Qe. The shaded triangle ABC represents the welfare loss (deadweight welfare loss) arising from the negative production externality."
+        },
+        {
+          id: "positive",
+          label: "Positive externalities",
+          src: "Diagram Economist/positive-externalities.png",
+          explain: "A positive externality means social benefit is higher than private benefit, so MSB lies above MPB. The free market settles where MPB equals MPC at Qe, below the social optimum Q1 where MSB equals MSC. The market underproduces or underconsumes the good."
+        },
+        {
+          id: "merit",
+          label: "Merit goods",
+          src: "Diagram Economist/merit-goods.png",
+          explain: "Merit goods, such as education or healthcare, are under-consumed in a free market because people undervalue their private benefits or ignore positive externalities. MSB is above MPB, so the market quantity Qe is below the socially optimal Q1. Subsidies or state provision can raise consumption toward Q1."
+        },
+        {
+          id: "demerit",
+          label: "Demerit goods",
+          src: "Diagram Economist/demerit-goods.png",
+          explain: "Demerit goods, such as cigarettes or alcohol, are over-consumed because consumers undervalue the harm or ignore negative externalities. Social cost exceeds private cost, so the free-market quantity Qe is above the socially optimal Q1. Taxes or regulation can reduce consumption toward Q1."
+        },
+        {
+          id: "welfare-loss",
+          label: "Welfare loss",
+          src: "Diagram Economist/welfare-loss.png",
+          explain: "Welfare loss is the net loss of social surplus when the market quantity differs from the social optimum. On an externality diagram it appears as a triangle between MSC and MSB from Q1 to Qe. Moving quantity toward the social optimum removes that triangle and raises social welfare."
+        },
+        {
+          id: "welfare-gain",
+          label: "Welfare gain",
+          src: "Diagram Economist/welfare-gain.png",
+          explain: "Welfare gain is the increase in social surplus from moving output from the free-market quantity toward the socially optimal quantity. On a positive-externality diagram, raising consumption from Qe to Q1 captures the triangle between MSB and MSC and shows the benefit of correcting underconsumption."
+        }
+      ];
+
+      var stage = document.getElementById("revStage");
+      var tray = document.getElementById("revTray");
+      var saveBtn = document.getElementById("saveDiagram");
+      var current = null;
+      var currentFig = null;
+
+      function esc(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function fileName(src) {
+        return (src.split("/").pop() || "diagram.png").split("?")[0];
+      }
+
+      function renderTray() {
+        tray.innerHTML = FIGURES.map(function (fig) {
+          var cls = "chip" + (current === fig.id ? " on" : "");
+          return '<button type="button" class="' + cls + '" data-id="' + esc(fig.id) + '" role="listitem">' +
+            esc(fig.label) +
+            "</button>";
+        }).join("");
+      }
+
+      function show(fig) {
+        current = fig.id;
+        currentFig = fig;
+        saveBtn.disabled = false;
+        stage.innerHTML =
+          '<div class="figure-stack">' +
+            '<div class="figure-card">' +
+              '<img src="' + esc(fig.src) + '" alt="' + esc(fig.label) + '">' +
+              '<p class="figure-label">' + esc(fig.label) + "</p>" +
+            "</div>" +
+            '<p class="figure-explain">' + esc(fig.explain) + "</p>" +
+          "</div>";
+        renderTray();
+      }
+
+      function saveDiagram() {
+        if (!currentFig) return;
+        var src = currentFig.src;
+        var name = fileName(src);
+        fetch(src)
+          .then(function (res) { return res.blob(); })
+          .then(function (blob) {
+            var url = URL.createObjectURL(blob);
+            var link = document.createElement("a");
+            link.href = url;
+            link.download = name;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+          })
+          .catch(function () {
+            var link = document.createElement("a");
+            link.href = src;
+            link.download = name;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+          });
+      }
+
+      tray.addEventListener("click", function (event) {
+        var btn = event.target.closest("[data-id]");
+        if (!btn) return;
+        var id = btn.getAttribute("data-id");
+        for (var i = 0; i < FIGURES.length; i++) {
+          if (FIGURES[i].id === id) {
+            show(FIGURES[i]);
+            return;
+          }
+        }
+      });
+
+      saveBtn.addEventListener("click", saveDiagram);
+      renderTray();
+    })();
+  </script>
+  <script src="revision-practice.js?v=20261107"></script>
+  <script src="exam-question.js?v=20261107return"></script>
+</body>
+</html>
