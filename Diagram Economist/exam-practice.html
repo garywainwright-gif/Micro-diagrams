@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Practise exam-style questions</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #e4d9c8;
+      --paper: #f7f1e8;
+      --card: #fffaf3;
+      --accent: #9a3412;
+      --accent-soft: #f3e2d4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    a { color: inherit; }
+    .wrap { max-width: 880px; margin: 0 auto; padding: 0 22px 64px; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 22px 0 8px;
+    }
+    .mark {
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+      line-height: 1.15;
+    }
+    .mark span { color: var(--accent); }
+    header nav {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+    }
+    header nav a {
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.92rem;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 1px;
+    }
+    h1 {
+      margin: 28px 0 28px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: clamp(1.8rem, 4.4vw, 2.7rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      max-width: 18em;
+    }
+    .clock {
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: clamp(4.5rem, 14vw, 7.5rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      margin: 0;
+    }
+    .clock-note {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    #start {
+      margin-top: 28px;
+      font: inherit;
+      font-weight: 700;
+      color: #fffaf3;
+      background: var(--ink);
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      cursor: pointer;
+    }
+    #start:hover { background: #312a22; }
+    #start:disabled {
+      background: #8a8175;
+      cursor: default;
+    }
+    #start:focus-visible, a:focus-visible, .topic:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .topics {
+      margin-top: 36px;
+    }
+    .topic-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px 40px;
+    }
+    .topics h2 {
+      margin: 0 0 12px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+    .topics ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 8px;
+    }
+    .topic {
+      display: block;
+      width: 100%;
+      text-align: left;
+      font: inherit;
+      font-weight: 700;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+    }
+    .topic:hover { background: var(--accent-soft); }
+    @media (max-width: 720px) {
+      .topic-grid { grid-template-columns: 1fr; }
+    }
+    .sr {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+  </style>
+  <link rel="stylesheet" href="../diagram-economist.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="mark" href="../Diagram Economist.html">The Diagram <span>Economist</span></a>
+      <nav>
+        <a href="../Past papers multiple choice.html">Multiple choice</a>
+        <a href="../Diagram Economist.html">Back</a>
+      </nav>
+    </header>
+    <main>
+      <h1>Practise exam‑style questions across every subject — build confidence, accuracy, and speed.</h1>
+      <p class="clock" id="clock" role="timer" aria-label="45 minute timer">45:00</p>
+      <p class="clock-note">45 minutes</p>
+      <button type="button" id="start">Start practising</button>
+      <p class="sr" id="status" aria-live="polite"></p>
+      <section class="topics" id="topics">
+        <div class="topic-grid">
+          <section aria-labelledby="micro-heading">
+            <h2 id="micro-heading">Microeconomics Headings</h2>
+            <ul>
+              <li><a class="topic" href="demand-and-supply.html">Demand &amp; Supply</a></li>
+              <li><a class="topic" href="elasticities-questions.html">Elasticities</a></li>
+              <li><a class="topic" href="consumer-and-producer-surplus.html">Consumer &amp; Producer Surplus</a></li>
+              <li><a class="topic" href="costs-and-revenues.html">Costs &amp; Revenues</a></li>
+              <li><a class="topic" href="profit-maximisation.html">Profit Maximisation</a></li>
+              <li><a class="topic" href="../market-structures.html">Market Structures</a></li>
+              <li><a class="topic" href="efficiency-and-welfare.html">Efficiency &amp; Welfare</a></li>
+              <li><a class="topic" href="../market-failure.html">Market Failure</a></li>
+              <li><a class="topic" href="../government-intervention.html">Government Intervention</a></li>
+              <li><a class="topic" href="../labour-markets.html">Labour Markets</a></li>
+              <li><a class="topic" href="ppf-economic-methodology.html">PPF &amp; Economic Methodology</a></li>
+            </ul>
+          </section>
+          <section aria-labelledby="macro-heading">
+            <h2 id="macro-heading">Macroeconomics Headings</h2>
+            <ul>
+              <li><a class="topic" href="economic-growth.html">Economic Growth</a></li>
+              <li><a class="topic" href="../inflation.html">Inflation</a></li>
+              <li><a class="topic" href="../unemployment.html">Unemployment</a></li>
+              <li><a class="topic" href="../balance-of-payments.html">Balance of Payments</a></li>
+              <li><a class="topic" href="aggregate-demand-aggregate-supply.html">Aggregate Demand &amp; Aggregate Supply</a></li>
+              <li><a class="topic" href="../Past%20papers%20multiple%20choice.html">Past papers multiple choice</a></li>
+              <li><a class="topic" href="../fiscal-policy.html">Fiscal Policy</a></li>
+              <li><a class="topic" href="../monetary-policy.html">Monetary Policy</a></li>
+              <li><a class="topic" href="../supply-side-policies.html">Supply‑Side Policies</a></li>
+              <li><a class="topic" href="../exchange-rates.html">Exchange Rates</a></li>
+              <li><a class="topic" href="trade-and-globalisation.html">Trade &amp; Globalisation</a></li>
+              <li><a class="topic" href="../business-cycle.html">Business Cycle</a></li>
+            </ul>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    (function () {
+      var TOTAL = 45 * 60;
+      var CLOCK_KEY = "diagram-exam-end";
+      var remaining = TOTAL;
+      var endAt = 0;
+      var timer = null;
+      var clock = document.getElementById("clock");
+      var startBtn = document.getElementById("start");
+      var statusEl = document.getElementById("status");
+      var topics = document.getElementById("topics");
+
+      function render() {
+        var minutes = Math.floor(remaining / 60);
+        var seconds = remaining % 60;
+        clock.textContent = (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+      }
+
+      function tick() {
+        remaining = Math.max(0, Math.round((endAt - Date.now()) / 1000));
+        render();
+        if (remaining > 0) return;
+        clearInterval(timer);
+        timer = null;
+        statusEl.textContent = "Time is up.";
+      }
+
+      function begin(message) {
+        topics.hidden = false;
+        startBtn.disabled = true;
+        statusEl.textContent = message;
+        if (remaining <= 0) {
+          statusEl.textContent = "Time is up.";
+          render();
+          return;
+        }
+        timer = setInterval(tick, 250);
+      }
+
+      startBtn.addEventListener("click", function () {
+        if (timer || remaining <= 0) return;
+        endAt = Date.now() + remaining * 1000;
+        try { sessionStorage.setItem(CLOCK_KEY, String(endAt)); } catch (err) {}
+        begin("45 minutes started. Choose a heading.");
+      });
+
+      try { endAt = Number(sessionStorage.getItem(CLOCK_KEY)) || 0; } catch (err) {}
+      if (endAt) {
+        remaining = Math.max(0, Math.round((endAt - Date.now()) / 1000));
+        begin("45 minutes started. Choose a heading.");
+      }
+      render();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Costs &amp; Revenues</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #e4d9c8;
+      --paper: #f7f1e8;
+      --card: #fffaf3;
+      --accent: #9a3412;
+      --accent-soft: #f3e2d4;
+      --ok: #166534;
+      --ok-bg: #e7f6ec;
+      --ok-line: #b7e4c7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    a { color: inherit; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 0 22px 64px; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 22px 0 8px;
+    }
+    .mark {
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+      line-height: 1.15;
+    }
+    .mark span { color: var(--accent); }
+    header nav a {
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.92rem;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 1px;
+    }
+    h2 {
+      margin: 36px 0 8px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+    h3 {
+      margin: 20px 0 12px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+    h4 {
+      margin: 0 0 10px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .lede {
+      margin: 0 0 16px;
+      max-width: 70ch;
+      color: var(--muted);
+    }
+    .col-title {
+      margin: 0 0 8px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.05rem;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 16px;
+      align-items: start;
+      margin: 0 0 28px;
+    }
+    .stage-empty {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      min-height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .figure-stack {
+      display: grid;
+      gap: 12px;
+    }
+    .figure-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 8px 8px 10px;
+      min-width: 0;
+    }
+    .figure-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fff;
+    }
+    .figure-label {
+      margin: 8px 0 0;
+      text-align: center;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .figure-explain {
+      margin: 0;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--ok-bg);
+      border: 1px solid var(--ok-line);
+      color: var(--ok);
+      font-size: 0.98rem;
+      line-height: 1.45;
+    }
+    .tray-wrap { position: sticky; top: 16px; }
+    .tray {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+    }
+    .chip {
+      display: block;
+      width: 100%;
+      text-align: left;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+    }
+    .chip:hover { background: var(--accent-soft); }
+    .chip.on {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .chip:focus-visible, .save-diagram:focus-visible, .question:focus-visible, a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .save-row {
+      margin: 10px 0 0;
+    }
+    .save-diagram {
+      font: inherit;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .save-diagram:hover { background: var(--accent-soft); }
+    .save-diagram:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: var(--card);
+    }
+    .practice {
+      max-width: 880px;
+    }
+    .question {
+      display: block;
+      width: 100%;
+      text-align: left;
+      font: inherit;
+      font-weight: 700;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+    }
+    .question + .question { margin-top: 10px; }
+    .question:hover { background: var(--accent-soft); }
+    @media (max-width: 860px) {
+      .board { grid-template-columns: 1fr; }
+      .tray-wrap { position: static; }
+      .tray {
+        max-height: none;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .chip { width: auto; }
+    }
+      .start-practice-row { margin: 8px 0 28px; }
+    .start-practice {
+      font: inherit;
+      font-weight: 700;
+      color: #fffaf3;
+      background: var(--ink);
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      cursor: pointer;
+    }
+    .start-practice:hover { background: #312a22; }
+    .start-practice:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .practice[hidden], .revision-block[hidden], .start-practice-row[hidden] { display: none !important; }
+  </style>
+  <link rel="stylesheet" href="../diagram-economist.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="mark" href="../Diagram Economist.html">The Diagram <span>Economist</span></a>
+      <nav><a href="exam-practice.html">Back</a></nav>
+    </header>
+    <main>
+      <div class="revision-block" id="revisionBlock">
+      <h2>Costs &amp; Revenues</h2>
+      <p class="lede">Revise the economies of scale diagrams first. Click a use to open its diagram and explanation.</p>
+      <section class="revision" aria-label="Economies of scale revision">
+        <div class="board">
+          <div>
+            <h3 class="col-title">Diagram</h3>
+            <div id="revStage">
+              <div class="stage-empty">Click a use to show its diagram and explanation.</div>
+            </div>
+            <p class="save-row">
+              <button type="button" class="save-diagram" id="saveDiagram" disabled>Save the diagram</button>
+            </p>
+          </div>
+          <div class="tray-wrap">
+            <h3 class="col-title">Click the correct use</h3>
+            <div class="tray" id="revTray" role="list"></div>
+          </div>
+        </div>
+      </section>
+      </div>
+      <p class="start-practice-row" id="startPracticeRow">
+        <button type="button" class="start-practice" id="startPractice">Start practice questions</button>
+      </p>
+      <div class="practice" id="practiceBlock" hidden>
+        <h2>Practice questions</h2>
+        <h3>Cost curves: MC, AC, AVC, AFC</h3>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-answer="productive-efficiency-ac-answer.png">A firm is productively efficient when it produces at the lowest possible average cost. Show this position using a diagram.</button>
+        <button type="button" class="question" data-answer="srac-increasing-returns-answer.png">Draw a diagram to show increasing marginal returns to labour on a SRAC curve, when output begins to rise.</button>
+        <h3>Short‑run vs long‑run cost curves</h3>
+        <button type="button" class="question" data-answer="monopolistic-competition-long-run-answer.png">Draw a diagram to show the long run position of cost and revenue curves, for a firm in a monopolistically competitive market.</button>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-starter="lrac-skilled-labour-starter.png" data-answer="lrac-skilled-labour-answer.png">Show the effect on this firm's long run average cost curve following an increase in the availability of skilled labour as a result of growth in the industry.</button>
+        <h3>Economies of scale</h3>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-answer="ac-economies-diseconomies-answer.png">Draw an average cost (AC) curve for a firm. Show how average cost falls at low levels of output due to economies of scale, reaches a minimum point at productive efficiency, and then rises due to diseconomies of scale. Label the economies of scale region, the diseconomies of scale region, and the point of minimum average cost.</button>
+        <h4>Level 2</h4>
+        <button type="button" class="question" data-answer="external-economies-of-scale-answer.png">Explain, with the aid of a diagram, how external economies of scale can reduce a firm's long-run average costs.</button>
+        <h3>Diseconomies of scale</h3>
+        <button type="button" class="question" data-answer="productive-efficiency-long-run-answer.png">Using a diagram, illustrate where a firm is productively efficient in the long run.</button>
+        <h3>Revenue curves: AR, MR</h3>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-answer="price-ar-mr-relationship-answer.png">Using a diagram, illustrate the relationship between price, average revenue and marginal revenue for the firm.</button>
+        <button type="button" class="question" data-starter="price-increase-total-revenue-starter.png" data-answer="price-increase-total-revenue-answer.png">Complete this diagram. Add a price increase and show the area of the resulting Total revenue.</button>
+        <button type="button" class="question" data-answer="monopolistic-revenue-maximisation-answer.png">Draw a diagram of a firm in monopolistic competition operating an objective of revenue maximisation.</button>
+        <h3>Profit maximisation (MR = MC)</h3>
+        <button type="button" class="question" data-answer="monopolist-short-run-supernormal-profit-answer.png">Using a diagram, show a monopolist earning supernormal profits in the short run.</button>
+        <h3>Shutdown condition (P &lt; AVC)</h3>
+        <button type="button" class="question" data-answer="shutdown-condition-answer.png">Using a cost curve diagram, show why a competitive firm may continue production whilst making a loss in the short run, but eventually shut down if price falls below a certain level.</button>
+      </div>
+    </main>
+  </div>
+  <script>
+    (function () {
+      var FIGURES = [
+        {
+          id: "lrac",
+          label: "The LRAC curve",
+          src: "lrac-curve.png?v=20261030",
+          explain: "The LRAC curve shows long-run average cost as output changes. At Q1 a small firm has a higher average cost of P1. At Q2 a large firm has a lower average cost of P2. As the firm grows along the falling section of LRAC, average costs fall because of economies of scale."
+        },
+        {
+          id: "internal",
+          label: "Internal economies of scale",
+          src: "lrac-curve.png?v=20261030",
+          explain: "Internal economies of scale arise from growth of the firm itself. As the firm expands output from Q1 to Q2, average costs fall from P1 to P2 because of specialisation, bulk buying, technical efficiency, and managerial or financial advantages. On the LRAC diagram this is the downward-sloping section."
+        },
+        {
+          id: "external",
+          label: "External economies of scale",
+          src: "external-economies-of-scale.png",
+          explain: "The growth of the industry creates external economies of scale such as specialist suppliers and a larger skilled labour force. These factors reduce production costs for firms within the industry. As a result, the firm's long-run average cost curve shifts downwards from LRAC1 to LRAC2, reducing average costs from P1 to P2 at the same level of output."
+        },
+        {
+          id: "eos-deos",
+          label: "Economies and Diseconomies",
+          src: "diseconomies-of-scale.png",
+          explain: "The diagram shows a U-shaped LRAC curve. As output increases, the firm experiences economies of scale, causing average costs to fall. Costs continue to fall until the firm reaches the Minimum Efficient Scale (MES), where average costs are minimised. Beyond the MES, diseconomies of scale occur, causing average costs to rise as the firm grows larger and management becomes more difficult."
+        },
+        {
+          id: "falling-rising",
+          label: "Cost curves",
+          src: "falling-ac-rising-ac.png",
+          explain: "The diagram shows a firm's short-run cost curves. AFC falls continuously as fixed costs are spread over more units of output. AVC and AC are U-shaped because of initially increasing returns and later diminishing marginal returns. MC is also U-shaped and intersects both AVC and AC at their minimum points. The gap between AC and AVC represents AFC and narrows as output increases because average fixed costs fall."
+        },
+        {
+          id: "breakeven-shutdown",
+          label: "Breakeven / Shut down",
+          src: "breakeven-shutdown.png",
+          explain: "In the short run, a firm maximises profit or minimises losses where MC = MR. At P2 the firm breaks even because price equals average cost. At P1 the firm reaches the shutdown point because price equals average variable cost. If price falls below AVC, the firm cannot cover its variable costs and will cease production in the short run."
+        }
+      ];
+
+      var stage = document.getElementById("revStage");
+      var tray = document.getElementById("revTray");
+      var saveBtn = document.getElementById("saveDiagram");
+      var current = null;
+      var currentFig = null;
+
+      function esc(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function fileName(src) {
+        return (src.split("/").pop() || "diagram.png").split("?")[0];
+      }
+
+      function renderTray() {
+        tray.innerHTML = FIGURES.map(function (fig) {
+          var cls = "chip" + (current === fig.id ? " on" : "");
+          return '<button type="button" class="' + cls + '" data-id="' + esc(fig.id) + '" role="listitem">' +
+            esc(fig.label) +
+            "</button>";
+        }).join("");
+      }
+
+      function show(fig) {
+        current = fig.id;
+        currentFig = fig;
+        saveBtn.disabled = false;
+        stage.innerHTML =
+          '<div class="figure-stack">' +
+            '<div class="figure-card">' +
+              '<img src="' + esc(fig.src) + '" alt="' + esc(fig.label) + '">' +
+              '<p class="figure-label">' + esc(fig.label) + "</p>" +
+            "</div>" +
+            '<p class="figure-explain">' + esc(fig.explain) + "</p>" +
+          "</div>";
+        renderTray();
+      }
+
+      function saveDiagram() {
+        if (!currentFig) return;
+        var src = currentFig.src;
+        var name = fileName(src);
+        fetch(src)
+          .then(function (res) { return res.blob(); })
+          .then(function (blob) {
+            var url = URL.createObjectURL(blob);
+            var link = document.createElement("a");
+            link.href = url;
+            link.download = name;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+          })
+          .catch(function () {
+            var link = document.createElement("a");
+            link.href = src;
+            link.download = name;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+          });
+      }
+
+      tray.addEventListener("click", function (event) {
+        var btn = event.target.closest("[data-id]");
+        if (!btn) return;
+        var id = btn.getAttribute("data-id");
+        for (var i = 0; i < FIGURES.length; i++) {
+          if (FIGURES[i].id === id) {
+            show(FIGURES[i]);
+            return;
+          }
+        }
+      });
+
+      saveBtn.addEventListener("click", saveDiagram);
+      renderTray();
+    })();
+  </script>
+  <script src="../revision-practice.js?v=20261107"></script>
+  <script src="../exam-question.js?v=20261107return"></script>
+</body>
+</html>

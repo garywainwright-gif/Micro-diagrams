@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trade and Globalisation</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #e4d9c8;
+      --paper: #f7f1e8;
+      --card: #fffaf3;
+      --accent: #9a3412;
+      --accent-soft: #f3e2d4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    a { color: inherit; }
+    .wrap { max-width: 880px; margin: 0 auto; padding: 0 22px 64px; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 22px 0 8px;
+    }
+    .mark {
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+      line-height: 1.15;
+    }
+    .mark span { color: var(--accent); }
+    header nav a {
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.92rem;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 1px;
+    }
+    h2 {
+      margin: 36px 0 8px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+    h3 {
+      margin: 20px 0 12px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+    .question {
+      display: block;
+      width: 100%;
+      text-align: left;
+      font: inherit;
+      font-weight: 700;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+    }
+    .question + .question { margin-top: 10px; }
+    .question:hover { background: var(--accent-soft); }
+    .question:focus-visible, a:focus-visible, .calc-btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .calc-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .calc-label {
+      margin: 0;
+      font-weight: 700;
+    }
+    .calc-btn {
+      font: inherit;
+      font-weight: 700;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+    .calc-btn:hover { background: var(--accent-soft); }
+    .calc-panel {
+      margin-top: 14px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px 6px;
+    }
+    .calc-panel h4 {
+      margin: 16px 0 8px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.02rem;
+    }
+    .calc-panel h4:first-child { margin-top: 0; }
+    .calc-panel p { margin: 0 0 10px; }
+    .calc-panel ul { margin: 0 0 10px; padding-left: 1.2em; }
+  </style>
+  <link rel="stylesheet" href="diagram-economist.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="mark" href="Diagram Economist.html">The Diagram <span>Economist</span></a>
+      <nav><a href="Diagram Economist/exam-practice.html">Back</a></nav>
+    </header>
+    <main>
+      <h2>Trade and Globalisation</h2>
+      <h3>Level 1</h3>
+      <button type="button" class="question" data-answer="lorenz-curve-income-inequality-answer.png">How can we use a Lorenz curve to illustrate income inequality in a population? Draw one using this data: The lowest earning 20% of the population earn only 5% of the country's total income.</button>
+      <h3>Level 2</h3>
+      <button type="button" class="question" data-answer="country-x-absolute-comparative-advantage-answer.png">Draw a PPF diagram demonstrating that country X has an absolute and a comparative advantage over country Y.</button>
+      <div class="calc-row">
+        <p class="calc-label">(calculation for country X and Country Y)</p>
+        <button type="button" class="calc-btn" id="show-calc">Press</button>
+        <button type="button" class="calc-btn" id="hide-calc" hidden>Hide</button>
+      </div>
+      <div class="calc-panel" id="calc-panel" hidden>
+        <h4>Absolute advantage</h4>
+        <p>Good B</p>
+        <p>Country X max 80</p>
+        <p>Country Y max 60</p>
+        <h4>Comparative advantage</h4>
+        <p>Good B</p>
+        <p>Country X: 110 Good A divided by 80 Good B = 1.375 Good A</p>
+        <p>Country Y: 150 Good A divided by 60 Good B = 2.5 Good A</p>
+        <p>1.375 is less than 2.5. Country X gives up fewer Good A per 1 Good B. Country X has a comparative advantage in Good B.</p>
+      </div>
+    </main>
+  </div>
+  <script src="exam-question.js?v=20261009starter"></script>
+  <script>
+    (function () {
+      var panel = document.getElementById("calc-panel");
+      var showBtn = document.getElementById("show-calc");
+      var hideBtn = document.getElementById("hide-calc");
+      showBtn.addEventListener("click", function () {
+        panel.hidden = false;
+        hideBtn.hidden = false;
+      });
+      hideBtn.addEventListener("click", function () {
+        panel.hidden = true;
+        hideBtn.hidden = true;
+      });
+    })();
+  </script>
+</body>
+</html>

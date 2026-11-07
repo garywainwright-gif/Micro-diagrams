@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demand &amp; Supply</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c5348;
+      --line: #e4d9c8;
+      --paper: #f7f1e8;
+      --card: #fffaf3;
+      --accent: #9a3412;
+      --accent-soft: #f3e2d4;
+      --ok: #166534;
+      --ok-bg: #e7f6ec;
+      --ok-line: #b7e4c7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    a { color: inherit; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 0 22px 64px; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 22px 0 8px;
+    }
+    .mark {
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+      line-height: 1.15;
+    }
+    .mark span { color: var(--accent); }
+    header nav a {
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.92rem;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 1px;
+    }
+    h2 {
+      margin: 36px 0 8px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+    h3 {
+      margin: 20px 0 12px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+    h4 {
+      margin: 0 0 10px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .lede {
+      margin: 0 0 16px;
+      max-width: 70ch;
+      color: var(--muted);
+    }
+    .col-title {
+      margin: 0 0 8px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1.05rem;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 16px;
+      align-items: start;
+      margin: 0 0 28px;
+    }
+    .stage-empty {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      min-height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .figure-stack {
+      display: grid;
+      gap: 12px;
+    }
+    .figure-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 8px 8px 10px;
+      min-width: 0;
+    }
+    .figure-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fff;
+    }
+    .figure-label {
+      margin: 8px 0 0;
+      text-align: center;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .figure-explain {
+      margin: 0;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--ok-bg);
+      border: 1px solid var(--ok-line);
+      color: var(--ok);
+      font-size: 0.98rem;
+      line-height: 1.45;
+    }
+    .tray-wrap { position: sticky; top: 16px; }
+    .tray {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+    }
+    .chip {
+      display: block;
+      width: 100%;
+      text-align: left;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+    }
+    .chip:hover { background: var(--accent-soft); }
+    .chip.on {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .chip:focus-visible, .save-diagram:focus-visible, .question:focus-visible, a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .save-row {
+      margin: 10px 0 0;
+    }
+    .save-diagram {
+      font: inherit;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .save-diagram:hover { background: var(--accent-soft); }
+    .save-diagram:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: var(--card);
+    }
+    .practice {
+      max-width: 880px;
+    }
+    .question + h4 { margin-top: 16px; }
+    .question {
+      display: block;
+      width: 100%;
+      text-align: left;
+      font: inherit;
+      font-weight: 700;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+    }
+    .question:hover { background: var(--accent-soft); }
+    .question + .question { margin-top: 10px; }
+    @media (max-width: 860px) {
+      .board { grid-template-columns: 1fr; }
+      .tray-wrap { position: static; }
+      .tray {
+        max-height: none;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .chip { width: auto; }
+    }
+      .start-practice-row { margin: 8px 0 28px; }
+    .start-practice {
+      font: inherit;
+      font-weight: 700;
+      color: #fffaf3;
+      background: var(--ink);
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      cursor: pointer;
+    }
+    .start-practice:hover { background: #312a22; }
+    .start-practice:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .practice[hidden], .revision-block[hidden], .start-practice-row[hidden] { display: none !important; }
+  </style>
+  <link rel="stylesheet" href="../diagram-economist.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="mark" href="../Diagram Economist.html">The Diagram <span>Economist</span></a>
+      <nav><a href="exam-practice.html">Back</a></nav>
+    </header>
+    <main>
+      <div class="revision-block" id="revisionBlock">
+      <h2>Revise Demand &amp; Supply</h2>
+      <p class="lede">Revise the market diagrams.</p>
+      <section class="revision" aria-label="Market diagrams revision">
+        <div class="board">
+          <div>
+            <h3 class="col-title">Diagram</h3>
+            <div id="revStage">
+              <div class="stage-empty">Click a use to show its diagram and explanation.</div>
+            </div>
+            <p class="save-row">
+              <button type="button" class="save-diagram" id="saveDiagram" disabled>Save the diagram</button>
+            </p>
+          </div>
+          <div class="tray-wrap">
+            <h3 class="col-title">Click the correct use</h3>
+            <div class="tray" id="revTray" role="list"></div>
+          </div>
+        </div>
+      </section>
+      </div>
+      <p class="start-practice-row" id="startPracticeRow">
+        <button type="button" class="start-practice" id="startPractice">Start practice questions</button>
+      </p>
+      <div class="practice" id="practiceBlock" hidden>
+        <h2>Practice questions</h2>
+        <h3>Demand curve (shifts + movements)</h3>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-starter="joint-supply-good-x-starter.png" data-answer="joint-supply-answer.png">Draw the diagram to show the effect on good Y following the movement on good X if they are goods in joint supply.</button>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-answer="electric-bikes-demand-answer.png">The popularity of electric bikes increases sharply. Using a supply and demand diagram, show how this rise in demand affects the equilibrium price and quantity.</button>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-answer="phone-cases-complements-demand-answer.png">The price of smartphones falls. Show how this affects the demand for phone cases, assuming the two goods are complements.</button>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-answer="timber-derived-demand-answer.png">Draw a diagram showing how a fall in demand for wooden furniture leads to a fall in demand for timber through derived demand.</button>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-answer="apples-record-harvest-demand-answer.png">Draw a diagram that shows the likely effect of a record harvest for apples, on the market price of apples and the quantity demanded.</button>
+        <h3>Supply curve (shifts + movements)</h3>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-answer="production-costs-increase-s-to-s1-answer.png">Draw a labelled supply and demand diagram to show the effect on a firm's supply curve when the costs of production increase.</button>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-answer="barley-wheat-competitive-supply-answer.png">Wheat and barley are in competitive supply, draw a demand and supply diagram to show what happens to the supply curve for barley if more land is given over to growing wheat.</button>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-answer="technology-efficiency-supply-answer.png">Improved technology makes production more efficient. Show how this changes the supply using a supply and demand diagram.</button>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-answer="wool-joint-supply-fewer-sheep-answer.png">Farmers are keeping fewer sheep for meat. Show how this change in joint supply affects the supply curve for wool.</button>
+        <h3>Disequilibrium (shortage / surplus)</h3>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-answer="excess-supply-answer.png">Using a demand and supply diagram, show what happens when a market experiences excess supply.</button>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-answer="price-floor-excess-supply-answer.png">Draw a fully labelled supply and demand diagram showing a price floor set above the equilibrium price, and illustrate the resulting excess supply.</button>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-answer="excess-demand-below-equilibrium-answer.png">Draw a supply and demand diagram to show excess demand when the market price is set below the equilibrium price.</button>
+        <h3>Price mechanism (rationing, signalling, incentive)</h3>
+        <h4>Level 1</h4>
+        <button type="button" class="question" data-answer="price-mechanism-rationing-answer.png">Using a demand and supply diagram, show how the price mechanism performs a rationing function when there is excess demand in a market.</button>
+        <button type="button" class="question" data-answer="price-mechanism-signalling-answer.png">Using a demand and supply diagram, show how the price mechanism performs a signalling function in a market when consumer demand increases.</button>
+      </div>
+    </main>
+  </div>
+  <script>
+    (function () {
+      var FIGURES = [
+        {
+          id: "supply-demand",
+          label: "Supply & Demand",
+          src: "supply-and-demand.png",
+          explain: "A basic market diagram shows demand sloping down and supply sloping up, with price on the vertical axis and quantity on the horizontal axis. Demand shows how much buyers want at each price; supply shows how much sellers offer. Their interaction determines the market outcome."
+        },
+        {
+          id: "equilibrium",
+          label: "Market equilibrium",
+          src: "market-equilibrium.png",
+          explain: "Market equilibrium is where demand equals supply. At the equilibrium price Pe, quantity demanded equals quantity supplied at Qe. There is no shortage and no surplus, so there is no pressure for price to change unless a curve shifts."
+        },
+        {
+          id: "shifts-supply",
+          label: "Shifts in supply",
+          src: "shifts-in-supply.png",
+          explain: "A change in a non-price determinant of supply shifts the whole supply curve. When the cost of production increases, supply shifts left from S to S1. Equilibrium price rises and quantity falls. Lower costs, better technology, or subsidies would shift supply right. A change in the good’s own price causes a movement along the curve, not a shift."
+        },
+        {
+          id: "shifts-demand",
+          label: "Shifts in demand",
+          src: "shifts-in-demand.png",
+          explain: "A change in a non-price determinant of demand shifts the whole demand curve. An increase in demand moves the curve right from D to D1, raising equilibrium price from P to P1 and quantity from Q to Q1. A fall in demand would shift the curve left. A change in the good’s own price causes a movement along the demand curve, not a shift."
+        },
+        {
+          id: "joint-demand",
+          label: "Joint demand",
+          src: "joint-demand.png",
+          explain: "Joint demand is demand for goods used together, such as cars and petrol. If demand for cars falls, demand for petrol falls as well because fewer cars are bought and used. Both demand curves shift left from D to D1, so equilibrium price and quantity fall in each market."
+        },
+        {
+          id: "competitive-supply",
+          label: "Competitive supply",
+          src: "joint-supply.png",
+          explain: "Beef and leather are products in competitive supply because they are produced from the same resource, cattle. A decrease in demand for beef causes the price of beef to fall. Producers reduce cattle production, which decreases the supply of leather. As a result, the supply curve for leather shifts left from S to S1."
+        },
+        {
+          id: "composite-demand",
+          label: "Composite demand",
+          src: "composite-demand.png",
+          explain: "Crude oil is subject to composite demand because it has many uses. An increase in demand for one use of crude oil, such as transport fuels, shifts the demand curve for crude oil to the right. The resulting increase in the price of crude oil raises production costs for plastic manufacturers, causing the supply of plastics to fall from S to S1 and leading to a higher price and lower quantity of plastics."
+        },
+        {
+          id: "derived-demand",
+          label: "Derived demand",
+          src: "derived-demand.png",
+          explain: "Derived demand is demand for an input that comes from demand for the final good. Steel is demanded because it is used to make cars. When demand for cars falls, firms need less steel, so demand for steel also falls. Price and quantity fall in both markets."
+        },
+        {
+          id: "signalling",
+          label: "Signalling",
+          src: "price-signalling.png",
+          explain: "The increase in demand shifts the demand curve from D to D1, causing the equilibrium price to rise from P to P1. The higher price acts as a signal to producers that demand has increased and that greater profits may be available, encouraging an expansion of supply. The higher price also signals to consumers that the product has become relatively scarcer."
+        }
+      ];
+
+      var stage = document.getElementById("revStage");
+      var tray = document.getElementById("revTray");
+      var saveBtn = document.getElementById("saveDiagram");
+      var current = null;
+      var currentFig = null;
+
+      function esc(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function fileName(src) {
+        return (src.split("/").pop() || "diagram.png").split("?")[0];
+      }
+
+      function renderTray() {
+        tray.innerHTML = FIGURES.map(function (fig) {
+          var cls = "chip" + (current === fig.id ? " on" : "");
+          return '<button type="button" class="' + cls + '" data-id="' + esc(fig.id) + '" role="listitem">' +
+            esc(fig.label) +
+            "</button>";
+        }).join("");
+      }
+
+      function show(fig) {
+        current = fig.id;
+        currentFig = fig;
+        saveBtn.disabled = false;
+        stage.innerHTML =
+          '<div class="figure-stack">' +
+            '<div class="figure-card">' +
+              '<img src="' + esc(fig.src) + '" alt="' + esc(fig.label) + '">' +
+              '<p class="figure-label">' + esc(fig.label) + "</p>" +
+            "</div>" +
+            '<p class="figure-explain">' + esc(fig.explain) + "</p>" +
+          "</div>";
+        renderTray();
+      }
+
+      function saveDiagram() {
+        if (!currentFig) return;
+        var src = currentFig.src;
+        var name = fileName(src);
+        fetch(src)
+          .then(function (res) { return res.blob(); })
+          .then(function (blob) {
+            var url = URL.createObjectURL(blob);
+            var link = document.createElement("a");
+            link.href = url;
+            link.download = name;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+          })
+          .catch(function () {
+            var link = document.createElement("a");
+            link.href = src;
+            link.download = name;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+          });
+      }
+
+      tray.addEventListener("click", function (event) {
+        var btn = event.target.closest("[data-id]");
+        if (!btn) return;
+        var id = btn.getAttribute("data-id");
+        for (var i = 0; i < FIGURES.length; i++) {
+          if (FIGURES[i].id === id) {
+            show(FIGURES[i]);
+            return;
+          }
+        }
+      });
+
+      saveBtn.addEventListener("click", saveDiagram);
+      renderTray();
+    })();
+  </script>
+  <script src="../revision-practice.js?v=20261107"></script>
+  <script src="../exam-question.js?v=20261107return"></script>
+</body>
+</html>
