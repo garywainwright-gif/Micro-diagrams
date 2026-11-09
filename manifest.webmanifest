@@ -1,7 +1,7 @@
 {
   "name": "Micro diagrams",
   "short_name": "Micro diagrams",
-  "start_url": "./micro-diagrams.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#f7f1e8",
   "theme_color": "#1c1915",
