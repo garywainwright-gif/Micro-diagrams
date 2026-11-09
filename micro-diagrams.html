@@ -3,7 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Interactive games, where curiosity turns theory into instant understanding.</title>
+  <title>Micro diagrams</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Micro diagrams" />
+  <meta name="application-name" content="Micro diagrams" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#1c1915" />
+  <link rel="icon" type="image/png" href="teacher-blackboard.png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
   <style>
     :root {
       --ink: #1c1915;
@@ -47,6 +56,21 @@
       border-bottom: 1px solid var(--ink);
       padding-bottom: 1px;
     }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      text-decoration: none;
+    }
+    .header-photo {
+      width: 56px;
+      height: 56px;
+      object-fit: cover;
+      object-position: 82% 28%;
+      border-radius: 12px;
+      flex: 0 0 auto;
+    }
     h2 {
       margin: 36px 0 8px;
       font-family: Georgia, "Palatino Linotype", Palatino, serif;
@@ -88,7 +112,10 @@
 <body>
   <div class="wrap">
     <header>
-      <a class="mark" href="Diagram Economist.html">The Diagram <span>Economist</span></a>
+      <a class="brand" href="Diagram Economist.html">
+        <img class="header-photo" src="teacher-blackboard.png" alt="Teacher pointing at economics diagrams on a blackboard." />
+        <span class="mark">The Diagram <span>Economist</span></span>
+      </a>
       <nav><a href="Diagram Economist.html">Back</a></nav>
     </header>
     <main>
@@ -107,7 +134,7 @@
       <a class="topic" href="Amended%20files/Supply%20curve%20shift.html">Supply curve shifts</a>
       <a class="topic" href="Monopoly%20versus%20Monopolistic%20competition%20versus%20perfect%20competition.html">Market power and market structure</a>
       <a class="topic" href="Amended%20files/Natural%20monopolies.html">Natural monopolies</a>
-      <a class="topic" href="Diagram%20Economist/Consumer%20and%20producer%20surplus.html">Consumer and Producer surplus</a>
+      <a class="topic" href="Diagram%20Economist/consumer-and-producer-surplus.html">Consumer and Producer surplus</a>
       <a class="topic" href="Amended%20files/Button%20elasticityy%20diagram%20builder/Cross%20price%20elasticity.html">Cross Price Elasticity of Demand</a>
       <h3>Cost of the Firm</h3>
       <a class="topic" href="Amended%20files/Subsidies.html">Subsidies</a>
