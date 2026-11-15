@@ -45,7 +45,7 @@
       <div id="diagram-practice-root"></div>
     </article>
   </div>
-  <script src="micro-diagram-builder.js?v=20261115save2"></script>
+  <script src="micro-diagram-builder.js?v=20261115save3"></script>
   <script>
     if (window.MicroDiagramBuilder) {
       var question = "";
@@ -83,6 +83,38 @@
         starterImage: starterImage,
         returnUrl: returnUrl
       });
+
+      // Older GitHub JS omits Show answer when Save/Replay is shown. Restore it here.
+      (function () {
+        var box = document.querySelector(".micro-diagram-builder");
+        if (!box || box.querySelector(".db-show-answer")) return;
+        var saveBtn = box.querySelector(".db-btnSave");
+        var row = saveBtn && saveBtn.parentNode;
+        if (!row) return;
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "db-show-answer";
+        btn.textContent = "Show answer";
+        row.appendChild(btn);
+        if (returnUrl && !box.querySelector(".db-return-questions")) {
+          var link = document.createElement("a");
+          link.className = "db-return-questions";
+          link.href = returnUrl;
+          link.textContent = "Return to questions";
+          row.appendChild(link);
+        }
+        var shown = box.querySelector(".db-shown-answer");
+        var statusEl = box.querySelector(".db-status");
+        btn.onclick = function () {
+          if (!shown) {
+            if (statusEl) statusEl.textContent = "There is no finished answer for this question yet.";
+            return;
+          }
+          shown.hidden = false;
+          shown.scrollIntoView({ behavior: "smooth", block: "center" });
+          if (statusEl) statusEl.textContent = "The answer diagram is shown under your board.";
+        };
+      })();
     }
   </script>
 </body>
